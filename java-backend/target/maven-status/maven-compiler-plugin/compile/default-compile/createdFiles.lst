@@ -1,0 +1,5 @@
+com\example\nuxtproject\config\GlobalExceptionHandler.class
+com\example\nuxtproject\entity\Role.class
+com\example\nuxtproject\config\CacheConfig.class
+com\example\nuxtproject\util\JwtUtil.class
+com\example\nuxtproject\NuxtProjectApplication.class

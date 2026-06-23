@@ -1,0 +1,179 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>博客首页预览</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/element-plus/dist/index.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Helvetica Neue', Helvetica, 'PingFang SC', 'Microsoft YaHei', sans-serif; background: #f5f7fa; color: #303133; }
+        .header { background: #fff; border-bottom: 1px solid #e4e7ed; position: sticky; top: 0; z-index: 100; }
+        .header-inner { max-width: 1200px; margin: 0 auto; padding: 0 20px; height: 60px; display: flex; align-items: center; justify-content: space-between; }
+        .logo { font-size: 22px; font-weight: 700; color: #409eff; text-decoration: none; }
+        .nav { display: flex; gap: 24px; }
+        .nav a { color: #606266; text-decoration: none; font-size: 15px; transition: color .2s; }
+        .nav a:hover, .nav a.active { color: #409eff; }
+        .header-actions { display: flex; gap: 12px; align-items: center; }
+        .hero { background: linear-gradient(135deg, #409eff 0%, #337ecc 100%); color: #fff; padding: 60px 20px; text-align: center; }
+        .hero h1 { font-size: 36px; margin-bottom: 12px; font-weight: 600; }
+        .hero p { font-size: 16px; opacity: .9; margin-bottom: 24px; }
+        .main { max-width: 1200px; margin: 0 auto; padding: 32px 20px; display: flex; gap: 32px; }
+        .content { flex: 1; min-width: 0; }
+        .sidebar { width: 300px; flex-shrink: 0; }
+        .toolbar { display: flex; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; }
+        .article-card { background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,.06); margin-bottom: 20px; transition: box-shadow .3s, transform .2s; cursor: pointer; display: flex; }
+        .article-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,.1); transform: translateY(-2px); }
+        .article-card .cover { width: 240px; min-height: 160px; flex-shrink: 0; background: linear-gradient(135deg, #e8f4fd, #d0ecfd); display: flex; align-items: center; justify-content: center; font-size: 40px; color: #a8d4f5; }
+        .article-card .info { padding: 20px; flex: 1; display: flex; flex-direction: column; }
+        .article-card .info h3 { font-size: 18px; margin-bottom: 8px; font-weight: 600; color: #303133; }
+        .article-card .info .meta { font-size: 13px; color: #909399; margin-bottom: 12px; display: flex; gap: 16px; align-items: center; }
+        .article-card .info .meta .tag { display: inline-block; }
+        .article-card .info .summary { font-size: 14px; color: #606266; line-height: 1.6; flex: 1; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .sidebar .panel { background: #fff; border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+        .sidebar .panel h4 { font-size: 16px; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 2px solid #409eff; color: #303133; }
+        .sidebar .panel ul { list-style: none; }
+        .sidebar .panel li { padding: 8px 0; font-size: 14px; color: #606266; cursor: pointer; transition: color .2s; display: flex; justify-content: space-between; }
+        .sidebar .panel li:hover { color: #409eff; }
+        .sidebar .panel li .count { color: #c0c4cc; font-size: 12px; background: #f0f2f5; padding: 1px 8px; border-radius: 10px; }
+        .pagination { display: flex; justify-content: center; padding: 20px 0 40px; }
+        .footer { background: #fff; border-top: 1px solid #e4e7ed; padding: 24px 20px; text-align: center; font-size: 13px; color: #909399; }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-inner">
+            <a href="#" class="logo">📝 MyBlog</a>
+            <nav class="nav">
+                <a href="#" class="active">首页</a>
+                <a href="#">前端</a>
+                <a href="#">后端</a>
+                <a href="#">教程</a>
+            </nav>
+            <div class="header-actions">
+                <el-button size="small" plain>登录</el-button>
+                <el-button size="small" type="primary">注册</el-button>
+            </div>
+        </div>
+    </header>
+
+    <section class="hero">
+        <h1>欢迎来到 MyBlog</h1>
+        <p>分享技术心得，记录成长点滴</p>
+        <el-input style="max-width:480px;display:inline-block" placeholder="搜索文章..." prefix-icon="Search" clearable />
+    </section>
+
+    <div class="main">
+        <div class="content">
+            <div class="toolbar">
+                <el-select placeholder="全部分类" style="width:140px" model-value="">
+                    <el-option label="全部分类" value="" />
+                    <el-option label="前端开发" value="frontend" />
+                    <el-option label="后端开发" value="backend" />
+                    <el-option label="DevOps" value="devops" />
+                </el-select>
+                <el-select placeholder="全部标签" style="width:140px" model-value="">
+                    <el-option label="全部标签" value="" />
+                    <el-option label="Vue" value="vue" />
+                    <el-option label="Spring Boot" value="spring" />
+                    <el-option label="Docker" value="docker" />
+                </el-select>
+                <div style="flex:1"></div>
+                <span style="font-size:13px;color:#909399;line-height:32px">共 12 篇文章</span>
+            </div>
+
+            <div class="article-card">
+                <div class="cover">📄</div>
+                <div class="info">
+                    <h3>Nuxt 4 + Spring Boot 全栈开发实战</h3>
+                    <div class="meta">
+                        <span>📅 2026-06-21</span>
+                        <span class="tag"><el-tag size="small" type="primary">前端</el-tag></span>
+                        <span>👁️ 1,234 次浏览</span>
+                    </div>
+                    <div class="summary">本文详细介绍了如何使用 Nuxt 4 作为前端框架、Spring Boot 3.4 作为后端服务，构建一个完整的全栈应用。涵盖项目初始化、API 对接、JWT 认证等关键环节...</div>
+                </div>
+            </div>
+
+            <div class="article-card">
+                <div class="cover">🛠️</div>
+                <div class="info">
+                    <h3>Element Plus 组件库最佳实践</h3>
+                    <div class="meta">
+                        <span>📅 2026-06-18</span>
+                        <span class="tag"><el-tag size="small" type="success">前端</el-tag></span>
+                        <span>👁️ 856 次浏览</span>
+                    </div>
+                    <div class="summary">Element Plus 是 Vue 3 生态中最流行的 UI 组件库之一。本文总结了一些在实际项目中使用 Element Plus 的经验和技巧，包括表单处理、表格优化、主题定制等。</div>
+                </div>
+            </div>
+
+            <div class="article-card">
+                <div class="cover">⚙️</div>
+                <div class="info">
+                    <h3>Spring Security + JWT 权限管理详解</h3>
+                    <div class="meta">
+                        <span>📅 2026-06-15</span>
+                        <span class="tag"><el-tag size="small" type="warning">后端</el-tag></span>
+                        <span>👁️ 2,156 次浏览</span>
+                    </div>
+                    <div class="summary">Spring Security 是 Java 生态中强大的安全框架。本文将手把手教你如何集成 JWT 实现无状态认证，并配合 @PreAuthorize 注解实现细粒度的角色权限控制。</div>
+                </div>
+            </div>
+
+            <div class="article-card">
+                <div class="cover">🐳</div>
+                <div class="info">
+                    <h3>使用 Docker Compose 部署前后端项目</h3>
+                    <div class="meta">
+                        <span>📅 2026-06-10</span>
+                        <span class="tag"><el-tag size="small" type="info">DevOps</el-tag></span>
+                        <span>👁️ 623 次浏览</span>
+                    </div>
+                    <div class="summary">Docker Compose 可以让你一条命令启动整个应用栈。本文通过一个实际的前后端分离项目，演示如何编写 docker-compose.yml 文件，包括 Nginx 反向代理配置。</div>
+                </div>
+            </div>
+
+            <div class="pagination">
+                <el-pagination background layout="prev, pager, next" :total="12" :page-size="6" />
+            </div>
+        </div>
+
+        <aside class="sidebar">
+            <div class="panel">
+                <h4>📂 分类</h4>
+                <ul>
+                    <li><span>前端开发</span><span class="count">6</span></li>
+                    <li><span>后端开发</span><span class="count">4</span></li>
+                    <li><span>DevOps</span><span class="count">2</span></li>
+                </ul>
+            </div>
+            <div class="panel">
+                <h4>🏷️ 热门标签</h4>
+                <div style="display:flex;flex-wrap:wrap;gap:8px">
+                    <el-tag size="small" type="primary">Vue</el-tag>
+                    <el-tag size="small" type="success">Spring Boot</el-tag>
+                    <el-tag size="small" type="warning">JWT</el-tag>
+                    <el-tag size="small" type="info">Docker</el-tag>
+                    <el-tag size="small">Nuxt</el-tag>
+                    <el-tag size="small" type="danger">Java</el-tag>
+                    <el-tag size="small" type="primary">MySQL</el-tag>
+                </div>
+            </div>
+            <div class="panel">
+                <h4>📋 最新文章</h4>
+                <ul>
+                    <li><span>Nuxt 4 + Spring Boot 全栈开发实战</span></li>
+                    <li><span>Element Plus 组件库最佳实践</span></li>
+                    <li><span>Spring Security + JWT 权限管理详解</span></li>
+                    <li><span>使用 Docker Compose 部署前后端项目</span></li>
+                </ul>
+            </div>
+        </aside>
+    </div>
+
+    <footer class="footer">
+        <p>© 2026 MyBlog. All rights reserved. | ICP备xxxxxxxx号</p>
+    </footer>
+</body>
+</html>

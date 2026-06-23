@@ -1,0 +1,9 @@
+{
+  "pid": 29652,
+  "startedAt": 1782207797259,
+  "command": "dev",
+  "cwd": "D:/projects/nuxtProject/nuxt-test",
+  "port": 3004,
+  "hostname": "::1",
+  "url": "http://[::1]:3004"
+}
