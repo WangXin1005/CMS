@@ -38,3 +38,40 @@
   margin: 0 auto;
 }
 </style>
+
+<style lang="less">
+/* 全局页头样式（用于后台管理页面） */
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.page-header h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+/* 全局卡片样式（用于后台管理页面） */
+.page-card {
+  background: #fff;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+
+/* 分页容器 */
+.pagination-wrapper {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+}
+
+/* 筛选栏 */
+.filter-bar {
+  margin-bottom: 16px;
+}
+</style>

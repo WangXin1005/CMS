@@ -262,7 +262,7 @@ onMounted(async () => {
 
 .tag-cloud { display: flex; flex-wrap: wrap; gap: 8px; }
 
-.tag-item { cursor: pointer; }
+.tag-item { cursor: pointer; transition: all 0.25s ease; }.tag-item:hover { color: #409eff !important; border-color: #409eff !important; }
 
 .empty-hint {
   color: #999;

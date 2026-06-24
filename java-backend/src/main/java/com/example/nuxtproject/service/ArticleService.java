@@ -1,4 +1,4 @@
-﻿package com.example.nuxtproject.service;
+package com.example.nuxtproject.service;
 
 import com.example.nuxtproject.entity.Article;
 import com.example.nuxtproject.entity.Article.ArticleStatus;
@@ -68,11 +68,27 @@ public class ArticleService {
         return articleRepository.findAll(pageable);
     }
 
+    /** 获取指定作者的所有文章（含草稿），支持按状态筛选 */
+    public Page<Article> listByAuthor(Long authorId, Pageable pageable, ArticleStatus status) {
+        if (status != null) {
+            return articleRepository.findByAuthorIdAndStatusOrderByCreatedAtDesc(authorId, status, pageable);
+        }
+        return articleRepository.findByAuthorIdOrderByCreatedAtDesc(authorId, pageable);
+    }
+
     /** 后台管理：通过 ID 获取文章 */
     public Article getById(Long id) {
         return articleRepository.findById(id).orElse(null);
     }
 
+    /** 获取指定文章并校验作者身份 */
+    public Article getByAuthor(Long id, Long authorId) {
+        Article article = articleRepository.findById(id).orElse(null);
+        if (article != null && article.getAuthor() != null && article.getAuthor().getId().equals(authorId)) {
+            return article;
+        }
+        return null;
+    }
     /** 检查 Slug 是否已被使用（不分状态） */
     public boolean isSlugTaken(String slug) {
         return articleRepository.findBySlug(slug).isPresent();
@@ -137,6 +153,15 @@ public class ArticleService {
         return true;
     }
 
+    /** 删除指定文章并校验作者身份 */
+    @Transactional
+    public boolean deleteByAuthor(Long id, Long authorId) {
+        Article article = articleRepository.findById(id).orElse(null);
+        if (article == null) return false;
+        if (article.getAuthor() == null || !article.getAuthor().getId().equals(authorId)) return false;
+        articleRepository.deleteById(id);
+        return true;
+    }
     /** 统计各状态文章数 */
     public Map<String, Long> countByStatus() {
         long published = articleRepository.countByStatus(ArticleStatus.PUBLISHED);

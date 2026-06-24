@@ -2069,7 +2069,7 @@ const _aTkiLTO07o16ia4HGilr21nEjHY8bo4k5yrzj_8ASI = (function(nitro) {
 
 const rootDir = "D:/projects/nuxtProject/nuxt-test";
 
-const appHead = {"meta":[{"name":"viewport","content":"width=device-width, initial-scale=1"},{"charset":"utf-8"}],"link":[],"style":[],"script":[],"noscript":[]};
+const appHead = {"meta":[{"name":"viewport","content":"width=device-width, initial-scale=1"},{"charset":"utf-8"}],"link":[],"style":[],"script":[],"noscript":[],"title":"CMS"};
 
 const appRootTag = "div";
 

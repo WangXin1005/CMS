@@ -1,4 +1,4 @@
-﻿package com.example.nuxtproject.controller;
+package com.example.nuxtproject.controller;
 
 import com.example.nuxtproject.entity.Article;
 import com.example.nuxtproject.entity.Article.ArticleStatus;
@@ -71,6 +71,81 @@ public class ArticleController {
         return ResponseEntity.ok(articleService.listAll(PageRequest.of(page - 1, size), null));
     }
 
+    // ===== 用户个人接口（USER 角色可用） =====
+
+    @GetMapping("/api/articles/my")
+    @PreAuthorize("isAuthenticated()")
+    @Operation(summary = "获取我的文章列表", description = "当前用户自己的文章列表（含草稿），支持按状态筛选")
+    public ResponseEntity<Page<Article>> listMyArticles(
+            @Parameter(hidden = true) @AuthenticationPrincipal UserPrincipal principal,
+            @Parameter(description = "页码", required = true) @RequestParam(defaultValue = "1") int page,
+            @Parameter(description = "每页条数", required = false) @RequestParam(defaultValue = "20") int size,
+            @Parameter(description = "文章状态：DRAFT / PUBLISHED", required = false) @RequestParam(required = false) ArticleStatus status) {
+        return ResponseEntity.ok(articleService.listByAuthor(principal.userId(), PageRequest.of(page - 1, size), status));
+    }
+
+    @GetMapping("/api/articles/my/{id}")
+    @PreAuthorize("isAuthenticated()")
+    @Operation(summary = "获取我的文章详情", description = "获取当前用户自己的文章详情（含草稿）")
+    public ResponseEntity<?> getMyArticleById(
+            @Parameter(hidden = true) @AuthenticationPrincipal UserPrincipal principal,
+            @Parameter(description = "文章 ID", required = true) @PathVariable Long id) {
+        Article article = articleService.getByAuthor(id, principal.userId());
+        if (article == null) {
+            return ResponseEntity.badRequest().body(Map.of("message", "文章不存在或无权访问"));
+        }
+        return ResponseEntity.ok(article);
+    }
+    @PostMapping("/api/articles/my")
+    @PreAuthorize("isAuthenticated()")
+    @Operation(summary = "创建我的文章", description = "当前用户创建属于自己的文章")
+    public ResponseEntity<?> createMyArticle(
+            @Parameter(hidden = true) @AuthenticationPrincipal UserPrincipal principal,
+            @RequestBody CreateArticleRequest request) {
+        if (articleService.isSlugTaken(request.getSlug())) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Slug 已被使用"));
+        }
+        Article article = articleService.create(
+                request.getTitle(), request.getSlug(), request.getContent(),
+                request.getSummary(), request.getCoverImage(), request.getStatus(),
+                request.getCategoryId(), request.getTagIds(),
+                new com.example.nuxtproject.entity.User() {{ setId(principal.userId()); }});
+        return ResponseEntity.ok(Map.of("message", "文章创建成功", "id", article.getId()));
+    }
+
+    @PutMapping("/api/articles/my/{id}")
+    @PreAuthorize("isAuthenticated()")
+    @Operation(summary = "更新我的文章", description = "更新当前用户自己的文章")
+    public ResponseEntity<?> updateMyArticle(
+            @Parameter(hidden = true) @AuthenticationPrincipal UserPrincipal principal,
+            @Parameter(description = "文章 ID", required = true) @PathVariable Long id,
+            @RequestBody UpdateArticleRequest request) {
+        // 检查文章是否存在且属于当前用户
+        Article existing = articleService.getByAuthor(id, principal.userId());
+        if (existing == null) {
+            return ResponseEntity.badRequest().body(Map.of("message", "文章不存在或无权操作"));
+        }
+        Article updated = articleService.update(id,
+                request.getTitle(), request.getSlug(), request.getContent(),
+                request.getSummary(), request.getCoverImage(), request.getStatus(),
+                request.getCategoryId(), request.getTagIds());
+        if (updated == null) {
+            return ResponseEntity.badRequest().body(Map.of("message", "文章不存在"));
+        }
+        return ResponseEntity.ok(Map.of("message", "文章更新成功"));
+    }
+
+    @DeleteMapping("/api/articles/my/{id}")
+    @PreAuthorize("isAuthenticated()")
+    @Operation(summary = "删除我的文章", description = "删除当前用户自己的文章")
+    public ResponseEntity<?> deleteMyArticle(
+            @Parameter(hidden = true) @AuthenticationPrincipal UserPrincipal principal,
+            @Parameter(description = "文章 ID", required = true) @PathVariable Long id) {
+        if (articleService.deleteByAuthor(id, principal.userId())) {
+            return ResponseEntity.ok(Map.of("message", "文章删除成功"));
+        }
+        return ResponseEntity.badRequest().body(Map.of("message", "文章不存在或无权操作"));
+    }
     // ===== 管理接口 =====
 
     @GetMapping("/api/admin/articles")

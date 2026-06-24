@@ -1,9 +1,13 @@
-﻿<script lang="ts" setup>
+<script lang="ts" setup>
 definePageMeta({ middleware: 'auth' })
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { ElMessage } from 'element-plus'
 
-const { getById, update } = useArticle()
+const { getById, getMyArticleById, update, updateMyArticle } = useArticle()
+const { role } = useAuth()
+
+const isAdmin = computed(() => role.value === 'ADMIN' || role.value === 'SUPERADMIN')
+
 const { getList: getCategories } = useCategory()
 const { getList: getTags } = useTag()
 
@@ -22,11 +26,16 @@ const form = ref({
 
 onMounted(async () => {
   try {
-    const [article, catRes, tagRes] = await Promise.all([
-      getById(id), getCategories(), getTags()
-    ])
-    categories.value = catRes ?? []
-    tags.value = tagRes ?? []
+    let article
+    if (isAdmin.value) {
+      [article, categories.value, tags.value] = await Promise.all([
+        getById(id), getCategories(), getTags()
+      ])
+    } else {
+      [article, categories.value, tags.value] = await Promise.all([
+        getMyArticleById(id), getCategories(), getTags()
+      ])
+    }
     form.value = {
       title: article.title ?? '',
       slug: article.slug ?? '',
@@ -53,7 +62,11 @@ async function handleSubmit(status) {
   }
   submitting.value = true
   try {
-    await update(id, form.value)
+    if (isAdmin.value) {
+      await update(id, form.value)
+    } else {
+      await updateMyArticle(id, form.value)
+    }
     ElMessage.success(status === 'PUBLISHED' ? '文章已发布' : '草稿已保存')
     navigateTo('/articles')
   } catch (e) {

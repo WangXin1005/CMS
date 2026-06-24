@@ -1,9 +1,13 @@
-﻿<script lang="ts" setup>
+<script lang="ts" setup>
 definePageMeta({ middleware: 'auth' })
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { ElMessage } from 'element-plus'
 
-const { create } = useArticle()
+const { create, createMyArticle } = useArticle()
+const { role } = useAuth()
+
+const isAdmin = computed(() => role.value === 'ADMIN' || role.value === 'SUPERADMIN')
+
 const { getList: getCategories } = useCategory()
 const { getList: getTags } = useTag()
 
@@ -33,7 +37,11 @@ async function handleSubmit(status) {
   }
   submitting.value = true
   try {
-    await create(form.value)
+    if (isAdmin.value) {
+      await create(form.value)
+    } else {
+      await createMyArticle(form.value)
+    }
     ElMessage.success(status === 'PUBLISHED' ? '文章已发布' : '草稿已保存')
     navigateTo('/articles')
   } catch (e) {

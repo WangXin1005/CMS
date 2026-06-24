@@ -1,4 +1,4 @@
-﻿import request from "~/utils/request"
+import request from "~/utils/request"
 
 /**
  * 认证管理组合式函数
@@ -125,5 +125,5 @@ export const useAuth = () => {
         return res.data
     }
 
-    return { token, username, isLoggedIn, hasSuperAdmin, checking, checkSuperAdmin, initSuperAdmin, login, registerGuest, logout, getUserList, createUser, updateUser, deleteUser }
+    return { token, username, role, isLoggedIn, hasSuperAdmin, checking, checkSuperAdmin, initSuperAdmin, login, registerGuest, logout, getUserList, createUser, updateUser, deleteUser }
 }

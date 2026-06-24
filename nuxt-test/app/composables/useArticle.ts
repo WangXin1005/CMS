@@ -1,4 +1,4 @@
-﻿/**
+/**
  * useArticle — 文章操作组合式函数
  *
  * 封装文章相关的所有 API 请求，按接口类型分为两组：
@@ -58,6 +58,44 @@ export const useArticle = () => {
     return res.data
   }
 
+  // ===== 个人文章接口（USER 角色可用） =====
+
+  /** 获取我的文章列表（所有已登录用户可用） */
+  const getMyArticles = async (page: number = 1, size: number = 20, status?: string) => {
+    const params: Record<string, any> = { page, size }
+    if (status) params.status = status
+    const res = await request.get('/articles/my', { params })
+    return res.data
+  }
+
+  /** 获取我的文章详情 */
+  const getMyArticleById = async (id: number) => {
+    const res = await request.get(`/articles/my/${id}`)
+    return res.data
+  }
+  /** 创建我的文章 */
+  const createMyArticle = async (data: {
+    title: string; slug: string; content?: string; summary?: string
+    coverImage?: string; status?: string; categoryId?: number; tagIds?: number[]
+  }) => {
+    const res = await request.post('/articles/my', data)
+    return res.data
+  }
+
+  /** 更新我的文章 */
+  const updateMyArticle = async (id: number, data: {
+    title?: string; slug?: string; content?: string; summary?: string
+    coverImage?: string; status?: string; categoryId?: number; tagIds?: number[]
+  }) => {
+    const res = await request.put(`/articles/my/${id}`, data)
+    return res.data
+  }
+
+  /** 删除我的文章 */
+  const removeMyArticle = async (id: number) => {
+    const res = await request.delete(`/articles/my/${id}`)
+    return res.data
+  }
   // ===== 管理接口 =====
 
   const getAdminList = async (page: number = 1, size: number = 20, status?: string) => {
@@ -93,5 +131,5 @@ export const useArticle = () => {
     return res.data
   }
 
-  return { getPublished, getBySlug, getStats, getRecent, getAdminList, getById, create, update, remove }
+  return { getPublished, getBySlug, getStats, getRecent, getMyArticles, getMyArticleById, createMyArticle, updateMyArticle, removeMyArticle, getAdminList, getById, create, update, remove }
 }

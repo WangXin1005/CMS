@@ -1,11 +1,16 @@
-// https://nuxt.com/docs/api/configuration/nuxt-config
+﻿// https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
 
   modules: ['@element-plus/nuxt'],
 
+  app: {
+    head: {
+      title: 'CMS',
+    },
+  },
+
   routeRules: {
-    // '/': { redirect: '/home' },
     '/api/**': { proxy: 'http://localhost:8080' },
   },
 
@@ -17,15 +22,6 @@ export default defineNuxtConfig({
       apiBase: '/api',
     },
   },
-
-  // nitro: {
-  //   devProxy: {
-  //     '/api': {
-  //       target: 'http://localhost:8080',
-  //       changeOrigin: true,
-  //     },
-  //   },
-  // }
 
   vite: {
     server: {

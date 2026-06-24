@@ -20,10 +20,16 @@ const loginLoading = ref(false)
 const registerLoading = ref(false)
 const initLoading = ref(false)
 const showRegister = ref(false)
+const rememberMe = ref(false)
 
 onMounted(async () => {
   await checkSuperAdmin()
   mode.value = hasSuperAdmin.value ? 'login' : 'init'
+  const saved = localStorage.getItem('remembered_username')
+  if (saved) {
+    loginForm.value.username = saved
+    rememberMe.value = true
+  }
 })
 
 async function handleLogin() {
@@ -33,6 +39,7 @@ async function handleLogin() {
   }
   loginLoading.value = true
   try {
+    if (rememberMe.value) { localStorage.setItem('remembered_username', loginForm.value.username) } else { localStorage.removeItem('remembered_username') }
     await login(loginForm.value)
     ElMessage.success('登录成功')
     navigateTo('/home')
@@ -138,6 +145,9 @@ async function handleInit() {
           <el-form-item label="密码">
             <el-input v-model="loginForm.password" type="password" placeholder="请输入密码" :prefix-icon="Lock" show-password />
           </el-form-item>
+          <el-form-item>
+            <el-checkbox v-model="rememberMe" class="remember-checkbox">记住账号</el-checkbox>
+          </el-form-item>
           <el-button type="primary" size="large" class="login-btn" :loading="loginLoading" native-type="submit" block>
             登录
           </el-button>
@@ -219,5 +229,6 @@ export default { components: { User, Lock, Message, Loading } }
   border-radius: 8px;
   margin-top: 8px;
 }
+.remember-checkbox { margin-bottom: -8px; }
 .form-footer { text-align: center; margin-top: 16px; }
 </style>

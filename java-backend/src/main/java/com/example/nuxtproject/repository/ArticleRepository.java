@@ -1,4 +1,4 @@
-﻿package com.example.nuxtproject.repository;
+package com.example.nuxtproject.repository;
 
 import com.example.nuxtproject.entity.Article;
 import com.example.nuxtproject.entity.Article.ArticleStatus;
@@ -14,6 +14,9 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
     Page<Article> findByStatusOrderByCreatedAtDesc(ArticleStatus status, Pageable pageable);
     Page<Article> findByCategoryIdAndStatus(Long categoryId, ArticleStatus status, Pageable pageable);
     long countByStatus(ArticleStatus status);
+
+    Page<Article> findByAuthorIdOrderByCreatedAtDesc(Long authorId, Pageable pageable);
+    Page<Article> findByAuthorIdAndStatusOrderByCreatedAtDesc(Long authorId, ArticleStatus status, Pageable pageable);
 
     @Query("SELECT a FROM Article a WHERE a.status = :status AND (:keyword IS NULL OR a.title LIKE %:keyword% OR a.summary LIKE %:keyword%)")
     Page<Article> search(@Param("status") ArticleStatus status, @Param("keyword") String keyword, Pageable pageable);

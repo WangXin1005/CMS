@@ -7,8 +7,6 @@
           <span class="logo-text">CodeBlog</span>
         </NuxtLink>
         <nav class="nav-links">
-          <!-- SSR 时始终显示登录按钮，客户端水合后根据 auth 状态切换 -->
-          <NuxtLink to="/login" class="nav-item login-btn">登录后台</NuxtLink>
           <ClientOnly>
             <template v-if="isLoggedIn">
               <span class="nav-item logged-in-hint">{{ username }}</span>
@@ -98,6 +96,17 @@ const { username, isLoggedIn } = useAuth()
   color: #fff !important;
 }
 .admin-btn:hover { opacity: 0.9; background: #52c41a; }
+.login-btn-placeholder {
+  text-decoration: none;
+  color: #fff;
+  font-size: 14px;
+  padding: 8px 18px;
+  border-radius: 6px;
+  font-weight: 500;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  opacity: 0.7;
+  cursor: default;
+}
 .login-btn {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: #fff !important;

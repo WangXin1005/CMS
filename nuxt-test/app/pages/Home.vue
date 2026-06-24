@@ -174,12 +174,14 @@ onMounted(async () => {
 }
 
 .quick-actions {
+  width: 100%;
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
 .quick-action-item {
+  width: 100%;
   display: flex;
   align-items: center;
   gap: 12px;
