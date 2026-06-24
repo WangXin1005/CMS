@@ -8,12 +8,15 @@
  * 使用 blank 布局（居中卡片）
  */
 definePageMeta({ layout: 'blank' })
-import { ref, onMounted } from 'vue'
+import { ref, watch, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
+import { validatePassword } from '~/utils/password'
+import { validateUsername } from '~/utils/username'
+import { validateEmail } from '~/utils/email'
 
-const { login, registerGuest, checkSuperAdmin, initSuperAdmin, hasSuperAdmin, checking } = useAuth()
+const { login, registerGuest, checkSuperAdmin, initSuperAdmin, hasSuperAdmin, checking, checkUsername } = useAuth()
 
-const mode = ref('checking') // 'checking' | 'init' | 'login'
+const mode = ref('checking')
 const loginForm = ref({ username: '', password: '' })
 const registerForm = ref({ username: '', email: '', password: '', confirmPassword: '' })
 const loginLoading = ref(false)
@@ -21,6 +24,24 @@ const registerLoading = ref(false)
 const initLoading = ref(false)
 const showRegister = ref(false)
 const rememberMe = ref(false)
+
+// 校验错误
+const initUsernameError = ref('')
+const initEmailError = ref('')
+const initPasswordError = ref('')
+const initConfirmError = ref('')
+const regUsernameError = ref('')
+const regEmailError = ref('')
+const regPasswordError = ref('')
+const regConfirmError = ref('')
+
+// 用户名变更时取消记住账号
+watch(() => loginForm.value.username, (newVal) => {
+  if (rememberMe.value && newVal !== localStorage.getItem('remembered_username')) {
+    rememberMe.value = false
+    localStorage.removeItem('remembered_username')
+  }
+})
 
 onMounted(async () => {
   await checkSuperAdmin()
@@ -31,6 +52,82 @@ onMounted(async () => {
     rememberMe.value = true
   }
 })
+
+// ===== 初始化表单校验 =====
+
+async function onInitUsernameBlur() {
+  const err = validateUsername(registerForm.value.username)
+  initUsernameError.value = err || ''
+  if (!err && registerForm.value.username) {
+    const taken = await checkUsername(registerForm.value.username)
+    if (taken) initUsernameError.value = '用户名已被使用'
+  }
+}
+
+function onInitEmailBlur() {
+  initEmailError.value = validateEmail(registerForm.value.email) || ''
+}
+
+function onInitPasswordBlur() {
+  initPasswordError.value = validatePassword(registerForm.value.password) || ''
+  if (registerForm.value.confirmPassword) {
+    if (registerForm.value.password !== registerForm.value.confirmPassword) {
+      initPasswordError.value = '两次输入的密码不一致'
+      initConfirmError.value = '两次输入的密码不一致'
+    } else {
+      initConfirmError.value = ''
+    }
+  }
+}
+
+function onInitConfirmBlur() {
+  if (registerForm.value.confirmPassword && registerForm.value.password !== registerForm.value.confirmPassword) {
+    initConfirmError.value = '两次输入的密码不一致'
+    initPasswordError.value = '两次输入的密码不一致'
+  } else {
+    initConfirmError.value = ''
+    initPasswordError.value = registerForm.value.password ? (validatePassword(registerForm.value.password) || '') : ''
+  }
+}
+
+// ===== 注册表单校验 =====
+
+async function onRegUsernameBlur() {
+  const err = validateUsername(registerForm.value.username)
+  regUsernameError.value = err || ''
+  if (!err && registerForm.value.username) {
+    const taken = await checkUsername(registerForm.value.username)
+    if (taken) regUsernameError.value = '用户名已被使用'
+  }
+}
+
+function onRegEmailBlur() {
+  regEmailError.value = validateEmail(registerForm.value.email) || ''
+}
+
+function onRegPasswordBlur() {
+  regPasswordError.value = validatePassword(registerForm.value.password) || ''
+  if (registerForm.value.confirmPassword) {
+    if (registerForm.value.password !== registerForm.value.confirmPassword) {
+      regPasswordError.value = '两次输入的密码不一致'
+      regConfirmError.value = '两次输入的密码不一致'
+    } else {
+      regConfirmError.value = ''
+    }
+  }
+}
+
+function onRegConfirmBlur() {
+  if (registerForm.value.confirmPassword && registerForm.value.password !== registerForm.value.confirmPassword) {
+    regConfirmError.value = '两次输入的密码不一致'
+    regPasswordError.value = '两次输入的密码不一致'
+  } else {
+    regConfirmError.value = ''
+    regPasswordError.value = registerForm.value.password ? (validatePassword(registerForm.value.password) || '') : ''
+  }
+}
+
+// ===== 操作 =====
 
 async function handleLogin() {
   if (!loginForm.value.username || !loginForm.value.password) {
@@ -51,10 +148,20 @@ async function handleLogin() {
 }
 
 async function handleRegister() {
-  if (!registerForm.value.username || !registerForm.value.email || !registerForm.value.password) {
-    ElMessage.warning('请填写完整信息')
+  const ue = validateUsername(registerForm.value.username)
+  const ee = validateEmail(registerForm.value.email)
+  const pe = validatePassword(registerForm.value.password)
+  regUsernameError.value = ue || ''
+  regEmailError.value = ee || ''
+  regPasswordError.value = pe || ''
+  if (ue || ee || pe) return
+
+  const taken = await checkUsername(registerForm.value.username)
+  if (taken) {
+    regUsernameError.value = '用户名已被使用'
     return
   }
+
   if (registerForm.value.password !== registerForm.value.confirmPassword) {
     ElMessage.warning('两次输入的密码不一致')
     return
@@ -62,7 +169,7 @@ async function handleRegister() {
   registerLoading.value = true
   try {
     await registerGuest(registerForm.value)
-    ElMessage.success('注册成功，请等待管理员审核')
+    ElMessage.success('注册成功')
     showRegister.value = false
   } catch (e) {
     ElMessage.error(e.response?.data?.message || '注册失败')
@@ -72,10 +179,20 @@ async function handleRegister() {
 }
 
 async function handleInit() {
-  if (!registerForm.value.username || !registerForm.value.email || !registerForm.value.password) {
-    ElMessage.warning('请填写完整信息')
+  const ue = validateUsername(registerForm.value.username)
+  const ee = validateEmail(registerForm.value.email)
+  const pe = validatePassword(registerForm.value.password)
+  initUsernameError.value = ue || ''
+  initEmailError.value = ee || ''
+  initPasswordError.value = pe || ''
+  if (ue || ee || pe) return
+
+  const taken = await checkUsername(registerForm.value.username)
+  if (taken) {
+    initUsernameError.value = '用户名已被使用'
     return
   }
+
   if (registerForm.value.password !== registerForm.value.confirmPassword) {
     ElMessage.warning('两次输入的密码不一致')
     return
@@ -113,17 +230,17 @@ async function handleInit() {
         <p class="brand-desc">首次使用，请创建超级管理员账号</p>
       </div>
       <el-form label-position="top" @submit.prevent="handleInit">
-        <el-form-item label="用户名">
-          <el-input v-model="registerForm.username" placeholder="请输入用户名" :prefix-icon="User" />
+        <el-form-item label="用户名" :error="initUsernameError">
+          <el-input v-model="registerForm.username" placeholder="请输入用户名" :prefix-icon="User" @blur="onInitUsernameBlur" />
         </el-form-item>
-        <el-form-item label="邮箱">
-          <el-input v-model="registerForm.email" placeholder="请输入邮箱" :prefix-icon="Message" />
+        <el-form-item label="邮箱" :error="initEmailError">
+          <el-input v-model="registerForm.email" placeholder="请输入邮箱" :prefix-icon="Message" @blur="onInitEmailBlur" />
         </el-form-item>
-        <el-form-item label="密码">
-          <el-input v-model="registerForm.password" type="password" placeholder="请输入密码" :prefix-icon="Lock" show-password />
+        <el-form-item label="密码" :error="initPasswordError">
+          <el-input v-model="registerForm.password" type="password" placeholder="请输入密码" :prefix-icon="Lock" show-password @blur="onInitPasswordBlur" />
         </el-form-item>
-        <el-form-item label="确认密码">
-          <el-input v-model="registerForm.confirmPassword" type="password" placeholder="请再次输入密码" :prefix-icon="Lock" show-password />
+        <el-form-item label="确认密码" :error="initConfirmError">
+          <el-input v-model="registerForm.confirmPassword" type="password" placeholder="请再次输入密码" :prefix-icon="Lock" show-password @blur="onInitConfirmBlur" />
         </el-form-item>
         <el-button type="primary" size="large" class="login-btn" :loading="initLoading" native-type="submit" block>
           创建超级管理员
@@ -153,29 +270,29 @@ async function handleInit() {
           </el-button>
         </el-form>
         <div class="form-footer">
-          <el-button link type="primary" @click="showRegister = true">没有账号？立即注册</el-button>
+          <el-button link type="primary" @click="showRegister = true">游客注册</el-button>
         </div>
       </div>
       <div v-else>
         <el-form label-position="top" @submit.prevent="handleRegister">
-          <el-form-item label="用户名">
-            <el-input v-model="registerForm.username" placeholder="请输入用户名" :prefix-icon="User" />
+          <el-form-item label="用户名" :error="regUsernameError">
+            <el-input v-model="registerForm.username" placeholder="请输入用户名" :prefix-icon="User" @blur="onRegUsernameBlur" />
           </el-form-item>
-          <el-form-item label="邮箱">
-            <el-input v-model="registerForm.email" placeholder="请输入邮箱" :prefix-icon="Message" />
+          <el-form-item label="邮箱" :error="regEmailError">
+            <el-input v-model="registerForm.email" placeholder="请输入邮箱" :prefix-icon="Message" @blur="onRegEmailBlur" />
           </el-form-item>
-          <el-form-item label="密码">
-            <el-input v-model="registerForm.password" type="password" placeholder="请输入密码" :prefix-icon="Lock" show-password />
+          <el-form-item label="密码" :error="regPasswordError">
+            <el-input v-model="registerForm.password" type="password" placeholder="请输入密码" :prefix-icon="Lock" show-password @blur="onRegPasswordBlur" />
           </el-form-item>
-          <el-form-item label="确认密码">
-            <el-input v-model="registerForm.confirmPassword" type="password" placeholder="请再次输入密码" :prefix-icon="Lock" show-password />
+          <el-form-item label="确认密码" :error="regConfirmError">
+            <el-input v-model="registerForm.confirmPassword" type="password" placeholder="请再次输入密码" :prefix-icon="Lock" show-password @blur="onRegConfirmBlur" />
           </el-form-item>
           <el-button type="primary" size="large" class="login-btn" :loading="registerLoading" native-type="submit" block>
             注册
           </el-button>
         </el-form>
         <div class="form-footer">
-          <el-button link type="primary" @click="showRegister = false">已有账号？返回登录</el-button>
+          <el-button link type="primary" @click="showRegister = false">返回登录</el-button>
         </div>
       </div>
     </div>
@@ -232,3 +349,7 @@ export default { components: { User, Lock, Message, Loading } }
 .remember-checkbox { margin-bottom: -8px; }
 .form-footer { text-align: center; margin-top: 16px; }
 </style>
+
+
+
+

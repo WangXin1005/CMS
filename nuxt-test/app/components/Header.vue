@@ -1,7 +1,9 @@
-<script lang="ts" setup>
+﻿<script lang="ts" setup>
 import { ArrowDown } from '@element-plus/icons-vue'
+import { ref } from 'vue'
+import { ElMessage } from 'element-plus'
 
-const { username, logout } = useAuth()
+const { username, role, logout, changePassword } = useAuth()
 const route = useRoute()
 
 const pageTitleMap: Record<string, string> = {
@@ -18,12 +20,51 @@ const pageTitleMap: Record<string, string> = {
 
 const currentTitle = computed(() => {
   const path = route.path
-  // Check exact match first
   if (pageTitleMap[path]) return pageTitleMap[path]
-  // Check prefix match for edit pages
   if (path.startsWith('/articles/edit/')) return '编辑文章'
   return '系统管理'
 })
+
+// 修改密码弹窗
+const dialogVisible = ref(false)
+const passwordForm = ref({ oldPassword: '', newPassword: '', confirmPassword: '' })
+const passwordLoading = ref(false)
+
+function openDialog() {
+  passwordForm.value = { oldPassword: '', newPassword: '', confirmPassword: '' }
+  dialogVisible.value = true
+}
+
+async function handleChangePassword() {
+  if (!passwordForm.value.oldPassword || !passwordForm.value.newPassword) {
+    ElMessage.warning('请填写完整信息')
+    return
+  }
+  if (passwordForm.value.newPassword !== passwordForm.value.confirmPassword) {
+    ElMessage.warning('两次输入的密码不一致')
+    return
+  }
+  passwordLoading.value = true
+  try {
+    await changePassword({ oldPassword: passwordForm.value.oldPassword, newPassword: passwordForm.value.newPassword })
+    ElMessage.success('密码修改成功')
+    dialogVisible.value = false
+  } catch (e) {
+    ElMessage.error(e.response?.data?.message || '密码修改失败')
+  } finally {
+    passwordLoading.value = false
+  }
+}
+
+function handleCommand(command: string) {
+  // 清除下拉菜单项残留的 focus 状态
+  ;(document.activeElement as HTMLElement)?.blur?.()
+  if (command === 'setting') {
+    openDialog()
+  } else if (command === 'logout') {
+    logout()
+  }
+}
 </script>
 
 <template>
@@ -32,18 +73,45 @@ const currentTitle = computed(() => {
       <span class="header-title">{{ currentTitle }}</span>
     </div>
     <div class="header-right">
-      <el-dropdown trigger="click" @command="logout">
+      <el-dropdown trigger="click" @command="handleCommand">
         <span class="user-info">
           <el-avatar :size="32" class="user-avatar">{{ username?.charAt(0)?.toUpperCase() }}</el-avatar>
           <span class="username">{{ username }}</span>
           <el-icon><ArrowDown /></el-icon>
         </span>
         <template #dropdown>
+          <el-dropdown-item command="setting">个人设置</el-dropdown-item>
           <el-dropdown-item command="logout">退出登录</el-dropdown-item>
         </template>
       </el-dropdown>
     </div>
   </el-header>
+
+  <!-- 修改密码弹窗 -->
+  <el-dialog v-model="dialogVisible" title="个人设置" width="420px">
+    <el-form label-position="top" @submit.prevent="handleChangePassword">
+      <el-form-item label="用户名">
+        <el-input :model-value="username" disabled />
+      </el-form-item>
+      <el-form-item label="角色">
+        <el-tag>{{ role }}</el-tag>
+      </el-form-item>
+      <el-divider />
+      <el-form-item label="原密码">
+        <el-input v-model="passwordForm.oldPassword" type="password" placeholder="请输入原密码" show-password />
+      </el-form-item>
+      <el-form-item label="新密码">
+        <el-input v-model="passwordForm.newPassword" type="password" placeholder="请输入新密码" show-password />
+      </el-form-item>
+      <el-form-item label="确认密码">
+        <el-input v-model="passwordForm.confirmPassword" type="password" placeholder="请再次输入新密码" show-password />
+      </el-form-item>
+    </el-form>
+    <template #footer>
+      <el-button @click="dialogVisible = false">取消</el-button>
+      <el-button type="primary" :loading="passwordLoading" @click="handleChangePassword">确认修改</el-button>
+    </template>
+  </el-dialog>
 </template>
 
 <style lang="less" scoped>
@@ -104,3 +172,31 @@ const currentTitle = computed(() => {
   white-space: nowrap;
 }
 </style>
+
+<style>
+.el-dropdown-menu__item {
+  border-radius: 6px !important;
+  margin: 2px 4px;
+}
+</style>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

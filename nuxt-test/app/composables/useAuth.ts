@@ -10,10 +10,10 @@ export const useAuth = () => {
     const username = useCookie("username", { default: () => "" })
     const role = useCookie("user_role", { default: () => "" })
 
-    /** 是否已登录（Token 存在即视为已登录） */
+    /** 是否已登录（Token 存在即视为已登录）*/
     const isLoggedIn = computed(() => !!token.value)
 
-    /** 是否存在超级管理员（需调用 checkSuperAdmin 确认） */
+    /** 是否存在超级管理员（需调用 checkSuperAdmin 确认）*/
     const hasSuperAdmin = ref(false)
     /** 是否正在检查超级管理员（防止重复请求、显示加载状态） */
     const checking = ref(true)
@@ -93,6 +93,12 @@ export const useAuth = () => {
         const router = useRouter(); router.push("/")
     }
 
+    /** 检查用户名是否已被使用 */
+    const checkUsername = async (username: string) => {
+        const res = await request.get("/users/check-username", { params: { username } })
+        return res.data.taken
+    }
+
     /**
      * 获取用户列表（分页）
      * @param page - 页码，从 1 开始，默认 1
@@ -103,7 +109,7 @@ export const useAuth = () => {
         return res.data
     }
 
-    /** 创建用户（需 ADMIN/SUPERADMIN） */
+    /** 创建用户（需 ADMIN/SUPERADMIN）*/
     const createUser = async (data: {
         username: string; email: string; password: string; role: string
     }) => {
@@ -111,7 +117,7 @@ export const useAuth = () => {
         return res.data
     }
 
-    /** 更新用户信息（需 ADMIN/SUPERADMIN） */
+    /** 更新用户信息（需 ADMIN/SUPERADMIN）*/
     const updateUser = async (id: number, data: {
         username?: string; email?: string; role?: string
     }) => {
@@ -119,11 +125,17 @@ export const useAuth = () => {
         return res.data
     }
 
-    /** 删除用户（仅 SUPERADMIN） */
-    const deleteUser = async (id: number) => {
+    /** 删除用户（仅 SUPERADMIN）*/
+    /** 修改当前用户密码 */
+    const changePassword = async (data: { oldPassword: string; newPassword: string }) => {
+        const res = await request.put("/users/me/password", data)
+        return res.data
+    }
+
+        const deleteUser = async (id: number) => {
         const res = await request.delete(`/users/${id}`)
         return res.data
     }
 
-    return { token, username, role, isLoggedIn, hasSuperAdmin, checking, checkSuperAdmin, initSuperAdmin, login, registerGuest, logout, getUserList, createUser, updateUser, deleteUser }
+        return { token, username, role, isLoggedIn, hasSuperAdmin, checking, checkSuperAdmin, initSuperAdmin, login, registerGuest, logout, checkUsername, changePassword, getUserList, createUser, updateUser, deleteUser }
 }

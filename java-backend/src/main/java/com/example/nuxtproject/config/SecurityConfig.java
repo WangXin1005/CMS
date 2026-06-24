@@ -81,6 +81,8 @@ public class SecurityConfig {
                 .requestMatchers("/api/users/check").permitAll()
                 // 初始化超级管理员（仅系统首次部署时可用）
                 .requestMatchers("/api/users/init").permitAll()
+                // 检查用户名是否已存在
+                .requestMatchers("/api/users/check-username").permitAll()
                 // 用户登录
                 .requestMatchers("/api/auth/login").permitAll()
                 // 访客自助注册

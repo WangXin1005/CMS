@@ -1,4 +1,4 @@
-<script lang="ts" setup>
+﻿<script lang="ts" setup>
 /**
  * User - 用户管理页面
  * 支持分页列表、搜索、新增用户、编辑用户、删除用户功能。
@@ -7,6 +7,7 @@
 definePageMeta({ middleware: 'auth' })
 import { ref, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { validatePassword } from '~/utils/password'
 import { Search, Plus } from '@element-plus/icons-vue'
 
 const { getUserList, createUser, updateUser, deleteUser, role } = useAuth()
@@ -33,6 +34,12 @@ const dialogTitle = ref('')
 const editingId = ref(null)
 const form = ref({ username: '', email: '', password: '', role: 'USER' })
 const submitting = ref(false)
+const pwdError = ref('')
+function onPwdBlur(val) {
+  if (!val) { pwdError.value = ''; return }
+  const err = validatePassword(val)
+  pwdError.value = err || ''
+}
 
 /** 初始化加载 */
 async function loadData() {
@@ -169,7 +176,8 @@ onMounted(loadData)
           <el-input v-model="form.email" placeholder="请输入邮箱" maxlength="100" />
         </el-form-item>
         <el-form-item v-if="!editingId" label="密码" required>
-          <el-input v-model="form.password" type="password" placeholder="请输入密码，至少6位" show-password />
+          <el-input v-model="form.password" type="password" placeholder="请输入密码，12~16位含大小写字母、数字、特殊符号" show-password @blur="onPwdBlur(form.password)" />
+              <div v-if="pwdError" class="pwd-error">{{ pwdError }}</div>
         </el-form-item>
         <el-form-item label="角色" required>
           <el-select v-model="form.role" placeholder="选择角色" style="width:100%">

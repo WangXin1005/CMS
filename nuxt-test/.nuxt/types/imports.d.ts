@@ -488,6 +488,9 @@ declare global {
   const useTag: typeof import('../../app/composables/useTag').useTag
   const useTemplateRef: typeof import('vue').useTemplateRef
   const useTransitionState: typeof import('vue').useTransitionState
+  const validateEmail: typeof import('../../app/utils/email').validateEmail
+  const validatePassword: typeof import('../../app/utils/password').validatePassword
+  const validateUsername: typeof import('../../app/utils/username').validateUsername
   const watch: typeof import('vue').watch
   const watchEffect: typeof import('vue').watchEffect
   const watchPostEffect: typeof import('vue').watchPostEffect
@@ -999,6 +1002,9 @@ declare module 'vue' {
     readonly useTag: UnwrapRef<typeof import('../../app/composables/useTag')['useTag']>
     readonly useTemplateRef: UnwrapRef<typeof import('vue')['useTemplateRef']>
     readonly useTransitionState: UnwrapRef<typeof import('vue')['useTransitionState']>
+    readonly validateEmail: UnwrapRef<typeof import('../../app/utils/email')['validateEmail']>
+    readonly validatePassword: UnwrapRef<typeof import('../../app/utils/password')['validatePassword']>
+    readonly validateUsername: UnwrapRef<typeof import('../../app/utils/username')['validateUsername']>
     readonly watch: UnwrapRef<typeof import('vue')['watch']>
     readonly watchEffect: UnwrapRef<typeof import('vue')['watchEffect']>
     readonly watchPostEffect: UnwrapRef<typeof import('vue')['watchPostEffect']>

@@ -23,7 +23,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/users")
-@Tag(name = "用户管理", description = "用户的检查、初始化与 CRUD 接口")
+@Tag(name = "鐢ㄦ埛绠＄悊", description = "鐢ㄦ埛鐨勬鏌ャ€佸垵濮嬪寲涓?CRUD 鎺ュ彛")
 public class UserController {
 
     private final UserService userService;
@@ -33,19 +33,27 @@ public class UserController {
     }
 
     @GetMapping("/check")
-    @Operation(summary = "检查超级管理员是否存在", description = "返回系统中是否已有超级管理员")
+    @Operation(summary = "妫€鏌ヨ秴绾х鐞嗗憳鏄惁瀛樺湪", description = "杩斿洖绯荤粺涓槸鍚﹀凡鏈夎秴绾х鐞嗗憳")
     public ResponseEntity<Map<String, Boolean>> checkSuperAdmin() {
         boolean exists = userService.existsSuperAdmin();
         return ResponseEntity.ok(Map.of("exists", exists));
     }
 
+    @GetMapping("/check-username")
+    @Operation(summary = "妫€鏌ョ敤鎴峰悕鏄惁宸插瓨鍦?, description = "鐢ㄤ簬娉ㄥ唽鏃舵牎楠岀敤鎴峰悕鏄惁閲嶅")
+    public ResponseEntity<Map<String, Boolean>> checkUsername(
+            @Parameter(description = "瑕佹鏌ョ殑鐢ㄦ埛鍚?, required = true) @RequestParam String username) {
+        boolean taken = userService.isUsernameTaken(username);
+        return ResponseEntity.ok(Map.of("taken", taken));
+    }
+
     @PostMapping("/init")
-    @Operation(summary = "初始化超级管理员",
-               description = "创建第一个超级管理员账号，仅当系统中尚无超级管理员时有效")
+    @Operation(summary = "鍒濆鍖栬秴绾х鐞嗗憳",
+               description = "鍒涘缓绗竴涓秴绾х鐞嗗憳璐﹀彿锛屼粎褰撶郴缁熶腑灏氭棤瓒呯骇绠＄悊鍛樻椂鏈夋晥")
     public ResponseEntity<?> initSuperAdmin(@RequestBody @Valid InitUserRequest request) {
         Map<String, String> result = userService.initSuperAdmin(
                 request.getUsername(), request.getEmail(), request.getPassword());
-        if (result.containsKey("message") && result.get("message").contains("成功")) {
+        if (result.containsKey("message") && result.get("message").contains("鎴愬姛")) {
             return ResponseEntity.ok(result);
         }
         return ResponseEntity.badRequest().body(result);
@@ -53,29 +61,29 @@ public class UserController {
 
     @GetMapping
     @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN')")
-    @Operation(summary = "获取用户列表", description = "分页返回所有用户（仅超级管理员和管理员可用）")
+    @Operation(summary = "鑾峰彇鐢ㄦ埛鍒楄〃", description = "鍒嗛〉杩斿洖鎵€鏈夌敤鎴凤紙浠呰秴绾х鐞嗗憳鍜岀鐞嗗憳鍙敤锛?)
     public ResponseEntity<Page<User>> listUsers(
-            @Parameter(description = "页码", required = true) @RequestParam(defaultValue = "1") int page,
-            @Parameter(description = "每页条数", required = false) @RequestParam(defaultValue = "20") int size) {
+            @Parameter(description = "椤电爜", required = true) @RequestParam(defaultValue = "1") int page,
+            @Parameter(description = "姣忛〉鏉℃暟", required = false) @RequestParam(defaultValue = "20") int size) {
         Page<User> users = userService.listUsers(PageRequest.of(Math.max(0, page - 1), size));
         return ResponseEntity.ok(users);
     }
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN')")
-    @Operation(summary = "获取用户详情", description = "根据 ID 查询用户信息")
+    @Operation(summary = "鑾峰彇鐢ㄦ埛璇︽儏", description = "鏍规嵁 ID 鏌ヨ鐢ㄦ埛淇℃伅")
     public ResponseEntity<?> getUser(
-            @Parameter(description = "用户 ID", required = true) @PathVariable Long id) {
+            @Parameter(description = "鐢ㄦ埛 ID", required = true) @PathVariable Long id) {
         java.util.Optional<User> user = userService.findById(id);
         if (user.isPresent()) {
             return ResponseEntity.ok(user.get());
         }
-        return ResponseEntity.badRequest().body(Map.of("message", "用户不存在"));
+        return ResponseEntity.badRequest().body(Map.of("message", "鐢ㄦ埛涓嶅瓨鍦?));
     }
 
     @PostMapping
     @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN')")
-    @Operation(summary = "创建用户", description = "由超级管理员或管理员创建新用户")
+    @Operation(summary = "鍒涘缓鐢ㄦ埛", description = "鐢辫秴绾х鐞嗗憳鎴栫鐞嗗憳鍒涘缓鏂扮敤鎴?)
     public ResponseEntity<?> createUser(
             @Parameter(hidden = true) @AuthenticationPrincipal UserPrincipal principal,
             @RequestBody @Valid CreateUserRequest request) {
@@ -85,7 +93,7 @@ public class UserController {
                 operatorRole, request.getUsername(), request.getEmail(),
                 request.getPassword(), request.getRole());
 
-        if (result.containsKey("message") && ((String) result.get("message")).contains("成功")) {
+        if (result.containsKey("message") && ((String) result.get("message")).contains("鎴愬姛")) {
             return ResponseEntity.ok(result);
         }
         return ResponseEntity.badRequest().body(result);
@@ -93,10 +101,10 @@ public class UserController {
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN')")
-    @Operation(summary = "更新用户", description = "更新用户基本信息（用户名、邮箱、角色）")
+    @Operation(summary = "鏇存柊鐢ㄦ埛", description = "鏇存柊鐢ㄦ埛鍩烘湰淇℃伅锛堢敤鎴峰悕銆侀偖绠便€佽鑹诧級")
     public ResponseEntity<?> updateUser(
             @Parameter(hidden = true) @AuthenticationPrincipal UserPrincipal principal,
-            @Parameter(description = "用户 ID", required = true) @PathVariable Long id,
+            @Parameter(description = "鐢ㄦ埛 ID", required = true) @PathVariable Long id,
             @RequestBody @Valid UpdateUserRequest request) {
 
         Role operatorRole = Role.valueOf(principal.role());
@@ -104,7 +112,7 @@ public class UserController {
                 operatorRole, principal.userId(), id, request.getUsername(),
                 request.getEmail(), request.getRole());
 
-        if (result.containsKey("message") && result.get("message").contains("成功")) {
+        if (result.containsKey("message") && result.get("message").contains("鎴愬姛")) {
             return ResponseEntity.ok(result);
         }
         return ResponseEntity.badRequest().body(result);
@@ -112,37 +120,37 @@ public class UserController {
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('SUPERADMIN')")
-    @Operation(summary = "删除用户", description = "仅超级管理员可删除用户，且不能删除自己或最后一个超级管理员")
+    @Operation(summary = "鍒犻櫎鐢ㄦ埛", description = "浠呰秴绾х鐞嗗憳鍙垹闄ょ敤鎴凤紝涓斾笉鑳藉垹闄よ嚜宸辨垨鏈€鍚庝竴涓秴绾х鐞嗗憳")
     public ResponseEntity<?> deleteUser(
             @Parameter(hidden = true) @AuthenticationPrincipal UserPrincipal principal,
-            @Parameter(description = "用户 ID", required = true) @PathVariable Long id) {
+            @Parameter(description = "鐢ㄦ埛 ID", required = true) @PathVariable Long id) {
 
         Role operatorRole = Role.valueOf(principal.role());
         Map<String, String> result = userService.deleteUser(operatorRole, principal.userId(), id);
 
-        if (result.containsKey("message") && result.get("message").contains("成功")) {
+        if (result.containsKey("message") && result.get("message").contains("鎴愬姛")) {
             return ResponseEntity.ok(result);
         }
         return ResponseEntity.badRequest().body(result);
     }
 
-    // ===== 请求体 DTO 类 =====
+    // ===== 璇锋眰浣?DTO 绫?=====
 
     public static class InitUserRequest {
-        @Schema(description = "用户名", requiredMode = Schema.RequiredMode.REQUIRED)
-        @NotBlank(message = "请输入用户名")
-        @Size(min = 2, max = 50, message = "请输入用户名")
+        @Schema(description = "鐢ㄦ埛鍚?, requiredMode = Schema.RequiredMode.REQUIRED)
+        @NotBlank(message = "璇疯緭鍏ョ敤鎴峰悕")
+        @Size(min = 2, max = 50, message = "璇疯緭鍏ョ敤鎴峰悕")
         private String username;
 
-        @Schema(description = "邮箱地址", requiredMode = Schema.RequiredMode.REQUIRED)
-        @NotBlank(message = "请输入邮箱")
-        @Email(message = "请输入正确的邮箱格式")
-        @Size(max = 100, message = "请输入邮箱")
+        @Schema(description = "閭鍦板潃", requiredMode = Schema.RequiredMode.REQUIRED)
+        @NotBlank(message = "璇疯緭鍏ラ偖绠?)
+        @Email(message = "璇疯緭鍏ユ纭殑閭鏍煎紡")
+        @Size(max = 100, message = "璇疯緭鍏ラ偖绠?)
         private String email;
 
-        @Schema(description = "密码", requiredMode = Schema.RequiredMode.REQUIRED)
-        @NotBlank(message = "请输入密码")
-        @Size(min = 6, max = 100, message = "请输入密码")
+        @Schema(description = "瀵嗙爜", requiredMode = Schema.RequiredMode.REQUIRED)
+        @NotBlank(message = "璇疯緭鍏ュ瘑鐮?)
+        @Size(min = 6, max = 100, message = "璇疯緭鍏ュ瘑鐮?)
         private String password;
 
         public String getUsername() { return username; }
@@ -154,23 +162,23 @@ public class UserController {
     }
 
     public static class CreateUserRequest {
-        @Schema(description = "用户名", requiredMode = Schema.RequiredMode.REQUIRED)
-        @NotBlank(message = "用户名不能为空")
-        @Size(min = 2, max = 50, message = "用户名长度应在2-50之间")
+        @Schema(description = "鐢ㄦ埛鍚?, requiredMode = Schema.RequiredMode.REQUIRED)
+        @NotBlank(message = "鐢ㄦ埛鍚嶄笉鑳戒负绌?)
+        @Size(min = 2, max = 50, message = "鐢ㄦ埛鍚嶉暱搴﹀簲鍦?-50涔嬮棿")
         private String username;
 
-        @Schema(description = "邮箱地址", requiredMode = Schema.RequiredMode.REQUIRED)
-        @NotBlank(message = "邮箱不能为空")
-        @Email(message = "邮箱格式不正确")
-        @Size(max = 100, message = "邮箱长度不能超过100")
+        @Schema(description = "閭鍦板潃", requiredMode = Schema.RequiredMode.REQUIRED)
+        @NotBlank(message = "閭涓嶈兘涓虹┖")
+        @Email(message = "閭鏍煎紡涓嶆纭?)
+        @Size(max = 100, message = "閭闀垮害涓嶈兘瓒呰繃100")
         private String email;
 
-        @Schema(description = "密码", requiredMode = Schema.RequiredMode.REQUIRED)
-        @NotBlank(message = "密码不能为空")
-        @Size(min = 6, max = 100, message = "密码长度应在6-100之间")
+        @Schema(description = "瀵嗙爜", requiredMode = Schema.RequiredMode.REQUIRED)
+        @NotBlank(message = "瀵嗙爜涓嶈兘涓虹┖")
+        @Size(min = 6, max = 100, message = "瀵嗙爜闀垮害搴斿湪6-100涔嬮棿")
         private String password;
 
-        @Schema(description = "角色：SUPERADMIN / ADMIN / USER / GUEST", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+        @Schema(description = "瑙掕壊锛歋UPERADMIN / ADMIN / USER / GUEST", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
         private Role role;
 
         public String getUsername() { return username; }
@@ -183,14 +191,28 @@ public class UserController {
         public void setRole(Role role) { this.role = role; }
     }
 
-    public static class UpdateUserRequest {
-        @Schema(description = "用户名", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    
+    @PutMapping("/me/password")
+    @PreAuthorize("isAuthenticated()")
+    @Operation(summary = "修改当前用户密码", description = "所有登录用户均可修改自己的密码")
+    public ResponseEntity<?> changePassword(
+            @AuthenticationPrincipal UserPrincipal principal,
+            @RequestBody @Valid ChangePasswordRequest request) {
+        Map<String, String> result = userService.changePassword(
+                principal.getId(), request.getOldPassword(), request.getNewPassword());
+        if (result.containsKey("message") && result.get("message").contains("成功")) {
+            return ResponseEntity.ok(result);
+        }
+        return ResponseEntity.badRequest().body(result);
+    }
+public static class UpdateUserRequest {
+        @Schema(description = "鐢ㄦ埛鍚?, requiredMode = Schema.RequiredMode.NOT_REQUIRED)
         private String username;
 
-        @Schema(description = "邮箱地址", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+        @Schema(description = "閭鍦板潃", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
         private String email;
 
-        @Schema(description = "角色：SUPERADMIN / ADMIN / USER / GUEST", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+        @Schema(description = "瑙掕壊锛歋UPERADMIN / ADMIN / USER / GUEST", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
         private Role role;
 
         public String getUsername() { return username; }
@@ -199,5 +221,20 @@ public class UserController {
         public void setEmail(String email) { this.email = email; }
         public Role getRole() { return role; }
         public void setRole(Role role) { this.role = role; }
+    }
+    public static class ChangePasswordRequest {
+        @Schema(description = "原密码", requiredMode = Schema.RequiredMode.REQUIRED)
+        @NotBlank(message = "请输入原密码")
+        private String oldPassword;
+
+        @Schema(description = "新密码", requiredMode = Schema.RequiredMode.REQUIRED)
+        @NotBlank(message = "请输入新密码")
+        @Size(min = 6, max = 100, message = "密码长度应在6-100之间")
+        private String newPassword;
+
+        public String getOldPassword() { return oldPassword; }
+        public void setOldPassword(String oldPassword) { this.oldPassword = oldPassword; }
+        public String getNewPassword() { return newPassword; }
+        public void setNewPassword(String newPassword) { this.newPassword = newPassword; }
     }
 }

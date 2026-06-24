@@ -4,9 +4,11 @@
  * 展示统计概览、快捷操作入口、近期文章列表。需 auth 中间件保护。
  */
 definePageMeta({ middleware: 'auth' })
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 
 const { getStats, getRecent } = useArticle()
+const { role } = useAuth()
+const isAdmin = computed(() => role.value === 'ADMIN' || role.value === 'SUPERADMIN')
 
 const stats = ref({ totalArticles: 0, totalCategories: 0, totalTags: 0, totalComments: 0 })
 const recentArticles = ref([])
@@ -86,7 +88,12 @@ onMounted(async () => {
             <el-empty v-if="!articlesLoading && recentArticles.length === 0" description="暂无文章" />
             <div v-for="(item, i) in recentArticles" :key="item.id" class="recent-item">
               <span class="recent-index">{{ i + 1 }}</span>
+              <template v-if="isAdmin">
               <nuxt-link :to="'/articles/edit/' + item.id" class="recent-title">{{ item.title }}</nuxt-link>
+              </template>
+              <template v-else>
+              <span class="recent-title recent-title-readonly">{{ item.title }}</span>
+              </template>
               <span class="recent-status">
                 <el-tag
                   :type="item.status === 'PUBLISHED' ? 'success' : 'warning'"
@@ -166,6 +173,7 @@ onMounted(async () => {
   white-space: nowrap;
 }
 .recent-title:hover { color: #409eff; }
+.recent-title-readonly { cursor: default; color: #333; }
 .recent-status { flex-shrink: 0; }
 .recent-date {
   font-size: 12px;
