@@ -61,9 +61,12 @@ export const useArticle = () => {
   // ===== 个人文章接口（USER 角色可用） =====
 
   /** 获取我的文章列表（所有已登录用户可用） */
-  const getMyArticles = async (page: number = 1, size: number = 20, status?: string) => {
+  const getMyArticles = async (page: number = 1, size: number = 20, status?: string, keyword?: string, categoryId?: number, tagId?: number) => {
     const params: Record<string, any> = { page, size }
     if (status) params.status = status
+    if (keyword) params.keyword = keyword
+    if (categoryId) params.categoryId = categoryId
+    if (tagId) params.tagId = tagId
     const res = await request.get('/articles/my', { params })
     return res.data
   }
@@ -98,9 +101,13 @@ export const useArticle = () => {
   }
   // ===== 管理接口 =====
 
-  const getAdminList = async (page: number = 1, size: number = 20, status?: string) => {
+  const getAdminList = async (page: number = 1, size: number = 20, status?: string, keyword?: string, categoryId?: number, tagId?: number, authorId?: number) => {
     const params: Record<string, any> = { page, size }
     if (status) params.status = status
+    if (keyword) params.keyword = keyword
+    if (categoryId) params.categoryId = categoryId
+    if (tagId) params.tagId = tagId
+    if (authorId) params.authorId = authorId
     const res = await request.get('/admin/articles', { params })
     return res.data
   }

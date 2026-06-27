@@ -1,4 +1,5 @@
 ﻿// https://nuxt.com/docs/api/configuration/nuxt-config
+import zhCn from 'element-plus/dist/locale/zh-cn.mjs'
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
 
@@ -15,6 +16,7 @@ export default defineNuxtConfig({
   },
 
   elementPlus: {
+    locale: zhCn,
   },
   runtimeConfig: {
     apiSecret: '123',

@@ -9,19 +9,13 @@ const visibleComputed = computed({
 })
 </script>
 <template>
-    <el-dialog v-model="visibleComputed" title="Notice" width="500" destroy-on-close center>
-        <span>
-            Notice: before the dialog is opened for the first time, this node and the
-            one below will not be rendered.
-        </span>
-        <div>
-            <strong>Extra content (Not rendered)</strong>
-        </div>
+    <el-dialog v-model="visibleComputed" title="提示" width="500" destroy-on-close center>
+        
         <template #footer>
             <div class="dialog-footer">
-                <el-button @click="visibleComputed = false">Cancel</el-button>
+                <el-button @click="visibleComputed = false">取消</el-button>
                 <el-button type="primary" @click="visibleComputed = false">
-                    Confirm
+                    确定
                 </el-button>
             </div>
         </template>

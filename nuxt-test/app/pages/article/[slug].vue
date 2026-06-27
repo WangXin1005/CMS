@@ -47,7 +47,7 @@ async function loadSidebar() {
 
 const formattedDate = computed(() => {
   if (!article.value?.createdAt) return ''
-  return article.value.createdAt.slice(0, 10)
+  return (article.value.createdAt || "").replace("T", " ").slice(0, 16)
 })
 
 onMounted(async () => {
@@ -59,6 +59,12 @@ onMounted(async () => {
   <div class="article-detail-layout" v-if="!loading && article">
     <!-- 主内容 -->
     <div class="detail-main">
+      <div class="back-bar">
+        <el-button size="small" @click="router.back()" class="back-btn">
+          <svg viewBox="0 0 24 24" width="14" height="14" style="margin-right:2px"><path fill="currentColor" d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+          返回
+        </el-button>
+      </div>
       <div class="article-header">
         <h1 class="article-title">{{ article.title }}</h1>
         <div class="article-meta">
@@ -345,6 +351,10 @@ onMounted(async () => {
 }
 
 // ===== 响应式 =====
+.back-bar { margin-bottom: 20px; }
+.back-bar .el-button { font-size: 13px; color: #666; padding: 6px 14px; border-radius: 6px; display: inline-flex; align-items: center; }
+.back-bar .el-button:hover { color: #409eff; background: #f0f7ff; border-color: #409eff; }
+
 @media (max-width: 768px) {
   .article-detail-layout { flex-direction: column; padding: 16px; }
   .detail-sidebar { width: 100%; }

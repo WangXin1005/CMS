@@ -40,7 +40,7 @@ function beforeUpload(file: File) {
 }
 
 async function handleDelete(id: number) {
-  try { await ElMessageBox.confirm('确定删除此文件？', '确认'); await remove(id); ElMessage.success('删除成功'); await loadData() }
+  try { await ElMessageBox.confirm('确定删除此文件？', '确认', { confirmButtonText: '确定', cancelButtonText: '取消', type: 'warning' }); await remove(id); ElMessage.success('删除成功'); await loadData() }
   catch { /* cancelled */ }
 }
 
@@ -66,7 +66,7 @@ onMounted(loadData)
         <el-table-column prop="mimeType" label="类型" width="100" />
         <el-table-column label="大小" width="90"><template #default="{ row }">{{ formatSize(row.size) }}</template></el-table-column>
         <el-table-column prop="uploadedBy.username" label="上传者" width="100" />
-        <el-table-column prop="createdAt" label="时间" width="170"><template #default="{ row }">{{ row.createdAt?.slice(0, 16) }}</template></el-table-column>
+        <el-table-column prop="createdAt" label="时间" width="170"><template #default="{ row }">{{ (row.createdAt || "").replace("T", " ").slice(0, 16) }}</template></el-table-column>
         <el-table-column label="操作" width="100" fixed="right">
           <template #default="{ row }"><el-button link type="danger" size="small" @click="handleDelete(row.id)">删除</el-button></template>
         </el-table-column>

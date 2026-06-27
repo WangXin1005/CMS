@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="public-layout">
     <header class="public-header">
       <div class="header-inner">

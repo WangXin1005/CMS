@@ -50,6 +50,12 @@ async function handleSubmit(status) {
     submitting.value = false
   }
 }
+function insertTabInTextarea(e, field) {
+  const ta = e.target;
+  const start = ta.selectionStart, end = ta.selectionEnd;
+  form.value[field] = form.value[field].substring(0, start) + "\t" + form.value[field].substring(end);
+  setTimeout(() => { ta.selectionStart = ta.selectionEnd = start + 1; }, 0);
+}
 </script>
 
 <template>
@@ -90,7 +96,7 @@ async function handleSubmit(status) {
           </el-col>
         </el-row>
         <el-form-item label="摘要">
-          <el-input v-model="form.summary" type="textarea" :rows="3" placeholder="文章摘要（可选）" />
+          <el-input v-model="form.summary" type="textarea" :rows="3" placeholder="文章摘要（可选）" @keydown.tab.prevent="insertTabInTextarea($event, 'summary')" />
         </el-form-item>
         <el-form-item label="内容">
           <RichTextEditor v-model="form.content" />

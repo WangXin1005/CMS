@@ -1,4 +1,4 @@
-﻿<script lang="ts" setup>
+<script lang="ts" setup>
 import { ArrowDown } from '@element-plus/icons-vue'
 import { ref } from 'vue'
 import { ElMessage } from 'element-plus'
@@ -16,6 +16,7 @@ const pageTitleMap: Record<string, string> = {
   '/media': '媒体管理',
   '/user': '用户管理',
   '/setting': '站点设置',
+  '/logs': '操作日志',
 }
 
 const currentTitle = computed(() => {

@@ -21,7 +21,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{ click: [] }>()
 const imageError = ref(false)
-const formattedDate = computed(() => props.article.createdAt?.slice(0, 10) ?? '')
+const formattedDate = computed(() => (props.article.createdAt || "").replace("T", " ").slice(0, 16) ?? '')
 const displaySummary = computed(() => {
   if (props.article.summary) return props.article.summary
   if (props.article.content) {

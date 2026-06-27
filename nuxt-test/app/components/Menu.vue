@@ -44,6 +44,10 @@
         <el-icon><Setting /></el-icon>
         <span>站点设置</span>
       </el-menu-item>
+      <el-menu-item index="/logs">
+        <el-icon><List /></el-icon>
+        <span>操作日志</span>
+      </el-menu-item>
 
       <!-- 返回博客首页 -->
       <div class="menu-footer">
@@ -60,7 +64,7 @@
 <script lang="ts" setup>
 import {
   HomeFilled, Document, Folder, PriceTag,
-  ChatDotRound, Picture, User, Setting, View
+  ChatDotRound, Picture, User, Setting, View, List
 } from '@element-plus/icons-vue'
 const route = useRoute()
 </script>

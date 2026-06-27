@@ -24,6 +24,15 @@ const emit = defineEmits<{
 }>()
 
 const editor = useEditor({
+  editorProps: {
+    handleKeyDown: (view, event) => {
+      if (event.key === "Tab" && !event.shiftKey) {
+        view.dispatch(view.state.tr.insertText("    "));
+        return true;
+      }
+      return false;
+    }
+  },
   content: props.modelValue,
   extensions: [
     StarterKit.configure({

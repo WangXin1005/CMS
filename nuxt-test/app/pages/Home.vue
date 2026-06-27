@@ -9,6 +9,10 @@ import { ref, onMounted, computed } from 'vue'
 const { getStats, getRecent } = useArticle()
 const { role } = useAuth()
 const isAdmin = computed(() => role.value === 'ADMIN' || role.value === 'SUPERADMIN')
+const canClick = computed(() => role.value !== 'GUEST')
+
+const dialogVisible = ref(false)
+const dialogArticle = ref<any>(null)
 
 const stats = ref({ totalArticles: 0, totalCategories: 0, totalTags: 0, totalComments: 0 })
 const recentArticles = ref([])
@@ -18,6 +22,11 @@ const articlesLoading = ref(true)
 function goCreate() { return navigateTo('/articles/create') }
 function goArticleList() { return navigateTo('/articles') }
 function goComments() { return navigateTo('/comments') }
+
+function viewArticle(item: any) {
+  dialogArticle.value = item
+  dialogVisible.value = true
+}
 
 onMounted(async () => {
   // 加载统计信息
@@ -86,14 +95,9 @@ onMounted(async () => {
           </template>
           <div v-loading="articlesLoading">
             <el-empty v-if="!articlesLoading && recentArticles.length === 0" description="暂无文章" />
-            <div v-for="(item, i) in recentArticles" :key="item.id" class="recent-item">
+            <div v-for="(item, i) in recentArticles" :key="item.id" class="recent-item" :class="{ clickable: canClick }" @click="canClick && viewArticle(item)">
               <span class="recent-index">{{ i + 1 }}</span>
-              <template v-if="isAdmin">
-              <nuxt-link :to="'/articles/edit/' + item.id" class="recent-title">{{ item.title }}</nuxt-link>
-              </template>
-              <template v-else>
-              <span class="recent-title recent-title-readonly">{{ item.title }}</span>
-              </template>
+              <span class="recent-title" :class="{ clickable: canClick }">{{ item.title }}</span>
               <span class="recent-status">
                 <el-tag
                   :type="item.status === 'PUBLISHED' ? 'success' : 'warning'"
@@ -103,7 +107,7 @@ onMounted(async () => {
                   {{ item.status === 'PUBLISHED' ? '已发布' : '草稿' }}
                 </el-tag>
               </span>
-              <span class="recent-date">{{ item.createdAt?.slice(0, 10) }}</span>
+              <span class="recent-date">{{ (item.createdAt || "").replace("T", " ").slice(0, 16) }}</span>
             </div>
           </div>
         </el-card>
@@ -131,6 +135,27 @@ onMounted(async () => {
       </el-col>
     </el-row>
   </div>
+
+    <!-- 文章预览对话框 -->
+    <el-dialog v-model="dialogVisible" title="文章预览" width="700px" :close-on-click-modal="false">
+      <template v-if="dialogArticle">
+        <h2 style="font-size:20px;margin:0 0 12px;color:#1a1a1a">{{ dialogArticle.title }}</h2>
+        <div style="font-size:13px;color:#999;margin-bottom:16px">
+          <span>✍ {{ dialogArticle.author?.username }}</span>
+          <span style="margin-left:16px">{{ (dialogArticle.createdAt || "").replace("T", " ").slice(0, 16) }}</span>
+          <el-tag v-if="dialogArticle.category" size="small" style="margin-left:12px">{{ dialogArticle.category.name }}</el-tag>
+        </div>
+        <div v-if="dialogArticle.tags?.length" style="margin-bottom:12px">
+          <el-tag v-for="tag in dialogArticle.tags" :key="tag.id" size="small" style="margin-right:6px">{{ tag.name }}</el-tag>
+        </div>
+        <el-divider style="margin:12px 0" />
+        <div style="max-height:400px;overflow-y:auto;font-size:15px;line-height:1.8;color:#333;white-space:pre-wrap">{{ dialogArticle.content }}</div>
+      </template>
+      <template #footer>
+        <el-button @click="dialogVisible = false">关闭</el-button>
+        <el-button v-if="isAdmin" type="primary" @click="dialogVisible = false; navigateTo('/articles/edit/' + dialogArticle.id)">编辑</el-button>
+      </template>
+    </el-dialog>
 </template>
 
 <style scoped>
@@ -147,6 +172,8 @@ onMounted(async () => {
   display: flex;
   align-items: center;
   gap: 12px;
+  min-height: 64px;
+  box-sizing: border-box;
   padding: 10px 0;
   border-bottom: 1px solid #f0f0f0;
 }
@@ -172,7 +199,11 @@ onMounted(async () => {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.recent-title:hover { color: #409eff; }
+a.recent-title:hover { color: #409eff; }
+.recent-item.clickable { cursor: pointer; }
+.recent-item.clickable:hover .recent-title { color: #409eff; }
+.recent-item.clickable { cursor: pointer; }
+.recent-item.clickable:hover .recent-title { color: #409eff; }
 .recent-title-readonly { cursor: default; color: #333; }
 .recent-status { flex-shrink: 0; }
 .recent-date {
@@ -213,7 +244,7 @@ onMounted(async () => {
 }
 
 .qa-icon {
-  font-size: 20px;
+  font-size: 22px;
   width: 36px;
   height: 36px;
   display: flex;

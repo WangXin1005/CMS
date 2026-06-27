@@ -13,7 +13,7 @@ const tags = ref<any[]>([])
 const loading = ref(false)
 const dialogVisible = ref(false)
 const editingId = ref<number | null>(null)
-const form = ref({ name: '', slug: '' })
+const form = ref({ name: '' })
 
 async function loadData() {
   loading.value = true
@@ -22,20 +22,20 @@ async function loadData() {
   finally { loading.value = false }
 }
 
-function openCreate() { editingId.value = null; form.value = { name: '', slug: '' }; dialogVisible.value = true }
-function openEdit(tag: any) { editingId.value = tag.id; form.value = { name: tag.name, slug: tag.slug }; dialogVisible.value = true }
+function openCreate() { editingId.value = null; form.value = { name: '' }; dialogVisible.value = true }
+function openEdit(tag: any) { editingId.value = tag.id; form.value = { name: tag.name }; dialogVisible.value = true }
 
 async function handleSave() {
-  if (!form.value.name || !form.value.slug) { ElMessage.warning('名称和 Slug 不能为空'); return }
+  if (!form.value.name) { ElMessage.warning('名称不能为空'); return }
   try {
     if (editingId.value) { await update(editingId.value, form.value); ElMessage.success('更新成功') }
-    else { await create(form.value); ElMessage.success('创建成功') }
+    else { const slug = form.value.name.toLowerCase().replace(/\s+/g, '-'); await create({ name: form.value.name, slug }); ElMessage.success('创建成功') }
     dialogVisible.value = false; await loadData()
   } catch (e: any) { ElMessage.error(e.response?.data?.message || '操作失败') }
 }
 
 async function handleDelete(id: number) {
-  try { await ElMessageBox.confirm('确定删除此标签？', '确认'); await remove(id); ElMessage.success('删除成功'); await loadData() }
+  try { await ElMessageBox.confirm('确定删除此标签？', '确认', { confirmButtonText: '确定', cancelButtonText: '取消', type: 'warning' }); await remove(id); ElMessage.success('删除成功'); await loadData() }
   catch { /* cancelled */ }
 }
 
@@ -50,11 +50,10 @@ onMounted(loadData)
     </div>
     <div class="page-card">
       <el-table :data="tags" v-loading="loading" stripe>
-        <el-table-column prop="id" label="ID" width="60" />
-        <el-table-column prop="name" label="名称" width="200" />
-        <el-table-column prop="slug" label="Slug" width="200" />
-        <el-table-column prop="createdAt" label="创建时间" width="170"><template #default="{ row }">{{ row.createdAt?.slice(0, 16) }}</template></el-table-column>
-        <el-table-column label="操作" width="150" fixed="right">
+        <el-table-column prop="id" label="ID" width="64" align="center" />
+        <el-table-column prop="name" label="名称" min-width="180" />
+        <el-table-column prop="createdAt" label="创建时间" width="160"><template #default="{ row }">{{ (row.createdAt || "").replace("T", " ").slice(0, 16) }}</template></el-table-column>
+        <el-table-column label="操作" width="130" fixed="right">
           <template #default="{ row }">
             <el-button link type="primary" size="small" @click="openEdit(row)">编辑</el-button>
             <el-button link type="danger" size="small" @click="handleDelete(row.id)">删除</el-button>
@@ -66,7 +65,6 @@ onMounted(loadData)
     <el-dialog v-model="dialogVisible" :title="editingId ? '编辑标签' : '新增标签'" width="480" destroy-on-close>
       <el-form :model="form" label-width="80px">
         <el-form-item label="名称" required><el-input v-model="form.name" placeholder="标签名称" /></el-form-item>
-        <el-form-item label="Slug" required><el-input v-model="form.slug" placeholder="标签标识（唯一）" /></el-form-item>
       </el-form>
       <template #footer>
         <el-button @click="dialogVisible = false">取消</el-button>

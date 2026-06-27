@@ -5,12 +5,14 @@
  * 新增/编辑使用弹窗表单，删除需确认。需 auth 中间件保护。
  */
 definePageMeta({ middleware: 'auth' })
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { validatePassword } from '~/utils/password'
+import { validateUsername } from '~/utils/username'
+import { validateEmail } from '~/utils/email'
 import { Search, Plus } from '@element-plus/icons-vue'
 
-const { getUserList, createUser, updateUser, deleteUser, role } = useAuth()
+const { getUserList, createUser, updateUser, deleteUser, role, checkUsername } = useAuth()
 
 const tableData = ref([])
 const total = ref(0)
@@ -34,11 +36,33 @@ const dialogTitle = ref('')
 const editingId = ref(null)
 const form = ref({ username: '', email: '', password: '', role: 'USER' })
 const submitting = ref(false)
+const formValid = computed(() => {
+  if (!form.value.username || !form.value.email) return false
+  if (nameError.value || mailError.value) return false
+  if (!editingId.value && (!form.value.password || pwdError.value)) return false
+  return true
+})
 const pwdError = ref('')
+const nameError = ref('')
+const mailError = ref('')
+async function onNameBlur(val) {
+  if (!val) { nameError.value = ''; return }
+  const err = validateUsername(val)
+  if (err) { nameError.value = err; return }
+  // 编辑时不校验重复
+  if (!editingId.value) {
+    const taken = await checkUsername(val)
+    if (taken) { nameError.value = '用户名已被使用'; return }
+  }
+  nameError.value = ''
+}
+function onMailBlur(val) {
+  if (!val) { mailError.value = ''; return }
+  mailError.value = validateEmail(val) || ''
+}
 function onPwdBlur(val) {
   if (!val) { pwdError.value = ''; return }
-  const err = validatePassword(val)
-  pwdError.value = err || ''
+  pwdError.value = validatePassword(val) || ''
 }
 
 /** 初始化加载 */
@@ -75,9 +99,16 @@ function openEdit(row) {
 
 /** 提交表单（新增/编辑） */
 async function handleSubmit() {
-  if (!form.value.username || !form.value.email) {
-    ElMessage.warning('用户名和邮箱不能为空')
-    return
+  // 字段级校验
+  const nameErr = validateUsername(form.value.username)
+  const mailErr = validateEmail(form.value.email)
+  nameError.value = nameErr || ''
+  mailError.value = mailErr || ''
+  if (nameErr || mailErr) return
+  if (!editingId.value) {
+    const pwdErr = validatePassword(form.value.password)
+    pwdError.value = pwdErr || ''
+    if (pwdErr) return
   }
   submitting.value = true
   try {
@@ -86,10 +117,6 @@ async function handleSubmit() {
       await updateUser(editingId.value, payload)
       ElMessage.success('用户更新成功')
     } else {
-      if (!form.value.password || form.value.password.length < 6) {
-        ElMessage.warning('密码不能为空且至少6位')
-        return
-      }
       await createUser(form.value)
       ElMessage.success('用户创建成功')
     }
@@ -143,7 +170,7 @@ onMounted(loadData)
           </template>
         </el-table-column>
         <el-table-column prop="createdAt" label="创建时间" width="170">
-          <template #default="{ row }">{{ row.createdAt?.slice(0, 16) }}</template>
+          <template #default="{ row }">{{ (row.createdAt || "").replace("T", " ").slice(0, 16) }}</template>
         </el-table-column>
         <el-table-column label="操作" min-width="150" fixed="right">
           <template #default="{ row }">
@@ -169,15 +196,14 @@ onMounted(loadData)
     <!-- 新增/编辑弹窗 -->
     <el-dialog v-model="dialogVisible" :title="dialogTitle" width="480px" :close-on-click-modal="false">
       <el-form label-position="top">
-        <el-form-item label="用户名" required>
-          <el-input v-model="form.username" placeholder="请输入用户名" maxlength="50" />
+        <el-form-item label="用户名" required :error="nameError">
+          <el-input v-model="form.username" placeholder="4~15位，字母和数字" maxlength="15" @blur="onNameBlur(form.username)" />
         </el-form-item>
-        <el-form-item label="邮箱" required>
-          <el-input v-model="form.email" placeholder="请输入邮箱" maxlength="100" />
+        <el-form-item label="邮箱" required :error="mailError">
+          <el-input v-model="form.email" placeholder="请输入邮箱地址" maxlength="100" @blur="onMailBlur(form.email)" />
         </el-form-item>
-        <el-form-item v-if="!editingId" label="密码" required>
+        <el-form-item v-if="!editingId" label="密码" required :error="pwdError">
           <el-input v-model="form.password" type="password" placeholder="请输入密码，12~16位含大小写字母、数字、特殊符号" show-password @blur="onPwdBlur(form.password)" />
-              <div v-if="pwdError" class="pwd-error">{{ pwdError }}</div>
         </el-form-item>
         <el-form-item label="角色" required>
           <el-select v-model="form.role" placeholder="选择角色" style="width:100%">
@@ -187,7 +213,7 @@ onMounted(loadData)
       </el-form>
       <template #footer>
         <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" :loading="submitting" @click="handleSubmit()">
+        <el-button type="primary" :loading="submitting" :disabled="!formValid" @click="handleSubmit()">
           {{ editingId ? '保存修改' : '创建用户' }}
         </el-button>
       </template>

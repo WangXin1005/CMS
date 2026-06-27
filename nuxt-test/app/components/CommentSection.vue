@@ -91,7 +91,7 @@ onMounted(loadComments)
       <div v-for="comment in comments" :key="comment.id" class="comment-item">
         <div class="comment-header">
           <strong>{{ comment.author?.username || '匿名' }}</strong>
-          <span class="comment-date">{{ comment.createdAt?.slice(0, 10) }}</span>
+          <span class="comment-date">{{ (comment.createdAt || "").replace("T", " ").slice(0, 16) }}</span>
         </div>
         <p class="comment-content">{{ comment.content }}</p>
       </div>

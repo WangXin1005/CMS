@@ -28,7 +28,7 @@ async function loadData() {
 async function loadStats() { try { const res = await getStats(); stats.value = res } catch { /* ignore */ } }
 async function handleApprove(id: number) { try { await approve(id); ElMessage.success('已通过'); await loadData(); await loadStats() } catch { ElMessage.error('操作失败') } }
 async function handleReject(id: number) { try { await reject(id); ElMessage.success('已驳回'); await loadData(); await loadStats() } catch { ElMessage.error('操作失败') } }
-async function handleDelete(id: number) { try { await ElMessageBox.confirm('确定删除此评论？', '确认'); await remove(id); ElMessage.success('删除成功'); await loadData(); await loadStats() } catch { /* cancelled */ } }
+async function handleDelete(id: number) { try { await ElMessageBox.confirm('确定删除此评论？', '确认', { confirmButtonText: '确定', cancelButtonText: '取消', type: 'warning' }); await remove(id); ElMessage.success('删除成功'); await loadData(); await loadStats() } catch { /* cancelled */ } }
 function onStatusChange(val: string | undefined) { statusFilter.value = val === '__all__' ? undefined : val; currentPage.value = 1; loadData() }
 
 onMounted(() => { loadData(); loadStats() })
@@ -59,7 +59,7 @@ onMounted(() => { loadData(); loadStats() })
         <el-table-column label="状态" width="100">
           <template #default="{ row }"><el-tag :type="statusType[row.status] || 'info'" size="small" effect="dark">{{ statusLabel[row.status] || row.status }}</el-tag></template>
         </el-table-column>
-        <el-table-column prop="createdAt" label="时间" width="170"><template #default="{ row }">{{ row.createdAt?.slice(0, 16) }}</template></el-table-column>
+        <el-table-column prop="createdAt" label="时间" width="170"><template #default="{ row }">{{ (row.createdAt || "").replace("T", " ").slice(0, 16) }}</template></el-table-column>
         <el-table-column label="操作" width="200" fixed="right">
           <template #default="{ row }">
             <el-button v-if="row.status === 'PENDING'" link type="success" size="small" @click="handleApprove(row.id)">通过</el-button>

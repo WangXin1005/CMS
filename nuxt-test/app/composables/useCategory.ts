@@ -27,9 +27,13 @@ export const useCategory = () => {
     const res = await request.put(`/admin/categories/${id}`, data)
     return res.data
   }
+  const reorder = async (orders) => {
+    const res = await request.put("/admin/categories/reorder", orders)
+    return res.data
+  }
   const remove = async (id: number) => {
     const res = await request.delete(`/admin/categories/${id}`)
     return res.data
   }
-  return { getList, getBySlug, create, update, remove }
+  return { getList, getBySlug, create, update, remove, reorder }
 }
