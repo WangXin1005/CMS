@@ -33,7 +33,7 @@ public class ArticleService {
         this.commentRepository = commentRepository;
     }
 
-    /** 获取已发布的公开文章列表 */
+    /** 鑾峰彇宸插彂甯冪殑鍏紑鏂囩珷鍒楄〃 */
     public Page<Article> listPublished(Pageable pageable, Long categoryId, Long tagId) {
         if (categoryId != null) {
             return articleRepository.findByCategoryIdAndStatus(categoryId, ArticleStatus.PUBLISHED, pageable);
@@ -44,12 +44,12 @@ public class ArticleService {
         return articleRepository.findByStatusOrderByCreatedAtDesc(ArticleStatus.PUBLISHED, pageable);
     }
 
-    /** 公开搜索已发布文章 */
+    /** 鍏紑鎼滅储宸插彂甯冩枃绔?*/
     public Page<Article> searchPublished(String keyword, Pageable pageable) {
         return articleRepository.search(ArticleStatus.PUBLISHED, keyword, pageable);
     }
 
-    /** 通过 Slug 获取已发布文章（公开访问），并增加浏览次数 */
+    /** 閫氳繃 Slug 鑾峰彇宸插彂甯冩枃绔狅紙鍏紑璁块棶锛夛紝骞跺鍔犳祻瑙堟鏁?*/
     @Transactional
     public Article getPublishedBySlug(String slug) {
         Article article = articleRepository.findBySlug(slug).orElse(null);
@@ -60,28 +60,42 @@ public class ArticleService {
         return article;
     }
 
-    /** 后台管理：获取所有文章（含草稿） */
-    public Page<Article> listAll(Pageable pageable, ArticleStatus status) {
+    /** 鍚庡彴绠＄悊锛氳幏鍙栨墍鏈夋枃绔狅紙鍚崏绋匡級 */
+    public Page<Article> listAll(Pageable pageable, ArticleStatus status, String keyword, Long categoryId, Long tagId, Long authorId) {
+        if (tagId != null) {
+            return articleRepository.searchAllByTag(status, keyword, tagId, authorId, pageable);
+        }
+        if (keyword != null && !keyword.isBlank() || categoryId != null || authorId != null) {
+            return articleRepository.searchAll(status, keyword, categoryId, authorId, pageable);
+        }
         if (status != null) {
             return articleRepository.findByStatusOrderByCreatedAtDesc(status, pageable);
         }
         return articleRepository.findAll(pageable);
     }
 
-    /** 获取指定作者的所有文章（含草稿），支持按状态筛选 */
-    public Page<Article> listByAuthor(Long authorId, Pageable pageable, ArticleStatus status) {
+    /** 鑾峰彇鎸囧畾浣滆€呯殑鎵€鏈夋枃绔狅紙鍚崏绋匡級锛屾敮鎸佹寜鐘舵€佺瓫閫?*/
+    public Page<Article> listByAuthor(Long authorId, Pageable pageable, ArticleStatus status, String keyword, Long categoryId, Long tagId) {
+        if (tagId != null) {
+            return articleRepository.searchByAuthorAndTag(authorId, status, keyword, tagId, pageable);
+        }
+        if (keyword != null && !keyword.isBlank() || categoryId != null) {
+            return articleRepository.searchByAuthor(authorId, status, keyword, categoryId, pageable);
+        }
         if (status != null) {
             return articleRepository.findByAuthorIdAndStatusOrderByCreatedAtDesc(authorId, status, pageable);
         }
         return articleRepository.findByAuthorIdOrderByCreatedAtDesc(authorId, pageable);
     }
 
-    /** 后台管理：通过 ID 获取文章 */
+    /** 鍚庡彴绠＄悊锛氶€氳繃 ID 鑾峰彇鏂囩珷 */
+    @Transactional(readOnly = true)
     public Article getById(Long id) {
         return articleRepository.findById(id).orElse(null);
     }
 
-    /** 获取指定文章并校验作者身份 */
+    /** 鑾峰彇鎸囧畾鏂囩珷骞舵牎楠屼綔鑰呰韩浠?*/
+    @Transactional(readOnly = true)
     public Article getByAuthor(Long id, Long authorId) {
         Article article = articleRepository.findById(id).orElse(null);
         if (article != null && article.getAuthor() != null && article.getAuthor().getId().equals(authorId)) {
@@ -89,12 +103,12 @@ public class ArticleService {
         }
         return null;
     }
-    /** 检查 Slug 是否已被使用（不分状态） */
+    /** 妫€鏌?Slug 鏄惁宸茶浣跨敤锛堜笉鍒嗙姸鎬侊級 */
     public boolean isSlugTaken(String slug) {
         return articleRepository.findBySlug(slug).isPresent();
     }
 
-    /** 创建文章 */
+    /** 鍒涘缓鏂囩珷 */
     public Article create(String title, String slug, String content, String summary,
                           String coverImage, ArticleStatus status, Long categoryId,
                           Set<Long> tagIds, User author) {
@@ -120,7 +134,7 @@ public class ArticleService {
         return articleRepository.save(article);
     }
 
-    /** 更新文章 */
+    /** 鏇存柊鏂囩珷 */
     public Article update(Long id, String title, String slug, String content, String summary,
                           String coverImage, ArticleStatus status, Long categoryId, Set<Long> tagIds) {
         Article article = articleRepository.findById(id).orElse(null);
@@ -145,7 +159,7 @@ public class ArticleService {
         return articleRepository.save(article);
     }
 
-    /** 删除文章 */
+    /** 鍒犻櫎鏂囩珷 */
     @Transactional
     public boolean delete(Long id) {
         if (!articleRepository.existsById(id)) return false;
@@ -153,7 +167,7 @@ public class ArticleService {
         return true;
     }
 
-    /** 删除指定文章并校验作者身份 */
+    /** 鍒犻櫎鎸囧畾鏂囩珷骞舵牎楠屼綔鑰呰韩浠?*/
     @Transactional
     public boolean deleteByAuthor(Long id, Long authorId) {
         Article article = articleRepository.findById(id).orElse(null);
@@ -162,7 +176,7 @@ public class ArticleService {
         articleRepository.deleteById(id);
         return true;
     }
-    /** 统计各状态文章数 */
+    /** 缁熻鍚勭姸鎬佹枃绔犳暟 */
     public Map<String, Long> countByStatus() {
         long published = articleRepository.countByStatus(ArticleStatus.PUBLISHED);
         long draft = articleRepository.countByStatus(ArticleStatus.DRAFT);

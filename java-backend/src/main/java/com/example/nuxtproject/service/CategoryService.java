@@ -47,6 +47,17 @@ public class CategoryService {
         return categoryRepository.save(category);
     }
 
+    public void reorder(java.util.List<java.util.Map<String, Object>> orders) {
+        for (java.util.Map<String, Object> item : orders) {
+            Long id = ((Number) item.get("id")).longValue();
+            Integer sortOrder = (Integer) item.get("sortOrder");
+            categoryRepository.findById(id).ifPresent(cat -> {
+                cat.setSortOrder(sortOrder);
+                categoryRepository.save(cat);
+            });
+        }
+    }
+
     public boolean delete(Long id) {
         if (!categoryRepository.existsById(id)) return false;
         categoryRepository.deleteById(id);

@@ -1,0 +1,36 @@
+# Java / Maven
+target/
+*.class
+*.jar
+*.war
+*.log
+.mvn/timing.log
+
+# Nuxt / Node
+nuxt-test/.nuxt/
+nuxt-test/.output/
+nuxt-test/node_modules/
+nuxt-test/.cache/
+nuxt-test/dist/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Env
+.env
+.env.local
+
+# Uploads (user media files)
+java-backend/uploads/
+
+# Temp / backup
+*.bak
+*.swp
+*.tmp

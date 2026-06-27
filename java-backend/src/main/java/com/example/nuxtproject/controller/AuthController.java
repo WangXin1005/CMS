@@ -64,7 +64,7 @@ public class AuthController {
         public void setUsername(String username) { this.username = username; }
         public String getPassword() { return password; }
         public void setPassword(String password) { this.password = password; }
-    }
+}
 
     public static class RegisterRequest {
         @Schema(description = "用户名", requiredMode = Schema.RequiredMode.REQUIRED)
@@ -89,5 +89,5 @@ public class AuthController {
         public void setEmail(String email) { this.email = email; }
         public String getPassword() { return password; }
         public void setPassword(String password) { this.password = password; }
-    }
+}
 }

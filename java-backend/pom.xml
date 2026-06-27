@@ -66,6 +66,12 @@
             <scope>runtime</scope>
         </dependency>
 
+        <!-- Spring Boot AOP -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-aop</artifactId>
+        </dependency>
+
         <!-- Bean Validation -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

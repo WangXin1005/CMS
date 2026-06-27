@@ -25,27 +25,27 @@ public class UserService {
     }
 
     /**
-     * 妫€鏌ョ郴缁熶腑鏄惁瀛樺湪瓒呯骇绠＄悊鍛?
+     * 检查系统中是否存在超级管理员
      */
     public boolean existsSuperAdmin() {
         return userRepository.existsByRole(Role.SUPERADMIN);
     }
 
     /**
-     * 鍒濆鍖栬秴绾х鐞嗗憳锛堜粎褰撶郴缁熶腑灏氭棤瓒呯骇绠＄悊鍛樻椂鍙敤锛?
-     * 绯荤粺棣栨閮ㄧ讲鏃跺繀椤诲厛璋冪敤姝ゆ帴鍙ｅ垱寤哄垵濮嬭秴绾х鐞嗗憳
+     * 初始化超级管理员（仅当系统中尚无超级管理员时可用）
+     * 系统首次部署时必须先调用此接口创建初始超级管理员
      */
     public Map<String, String> initSuperAdmin(String username, String email, String password) {
         if (userRepository.existsByRole(Role.SUPERADMIN)) {
-            return Map.of("message", "瓒呯骇绠＄悊鍛樺凡瀛樺湪锛屼笉鑳介噸澶嶅垵濮嬪寲");
+            return Map.of("message", "超级管理员已存在，不能重复初始化");
         }
 
         if (userRepository.findByUsername(username).isPresent()) {
-            return Map.of("message", "鐢ㄦ埛鍚嶅凡琚娇鐢?);
+            return Map.of("message", "用户名已被使用");
         }
 
         if (userRepository.existsByEmail(email)) {
-            return Map.of("message", "閭宸茶浣跨敤");
+            return Map.of("message", "邮箱已被使用");
         }
 
         User user = new User();
@@ -55,51 +55,51 @@ public class UserService {
         user.setRole(Role.SUPERADMIN);
         userRepository.save(user);
 
-        return Map.of("message", "瓒呯骇绠＄悊鍛樺垵濮嬪寲鎴愬姛");
+        return Map.of("message", "超级管理员初始化成功");
     }
 
     /**
-     * 鍒嗛〉鏌ヨ鐢ㄦ埛鍒楄〃
+     * 分页查询用户列表
      */
     public Page<User> listUsers(Pageable pageable) {
         return userRepository.findAll(pageable);
     }
 
     /**
-     * 鏍规嵁 ID 鏌ヨ鐢ㄦ埛
+     * 根据 ID 查询用户
      */
     public Optional<User> findById(Long id) {
         return userRepository.findById(id);
     }
 
     /**
-     * 鍒涘缓鐢ㄦ埛
+     * 创建用户
      *
-     * @param operatorRole 鎿嶄綔鑰呯殑瑙掕壊
-     * @param username     鐢ㄦ埛鍚?
-     * @param email        閭
-     * @param password     瀵嗙爜
-     * @param targetRole   瑕佸垱寤虹殑鐢ㄦ埛瑙掕壊
+     * @param operatorRole 操作者的角色
+     * @param username     用户名
+     * @param email        邮箱
+     * @param password     密码
+     * @param targetRole   要创建的用户角色
      */
     public Map<String, Object> createUser(Role operatorRole, String username,
                                           String email, String password, Role targetRole) {
         if (targetRole == null) {
-            return Map.of("message", "蹇呴』鎸囧畾鐢ㄦ埛瑙掕壊");
+            return Map.of("message", "必须指定用户角色");
         }
 
-        // 瑙掕壊鏉冮檺鏍￠獙锛氬彧鏈?SUPERADMIN 鑳藉垱寤?ADMIN锛屼换浣曚汉閮戒笉鑳藉垱寤?SUPERADMIN
+        // 角色权限校验：只有 SUPERADMIN 能创建 ADMIN，任何人都不能创建 SUPERADMIN
         if (targetRole == Role.SUPERADMIN) {
-            return Map.of("message", "涓嶅厑璁哥洿鎺ュ垱寤鸿秴绾х鐞嗗憳");
+            return Map.of("message", "不允许直接创建超级管理员");
         }
         if (targetRole == Role.ADMIN && operatorRole != Role.SUPERADMIN) {
-            return Map.of("message", "鍙湁瓒呯骇绠＄悊鍛樻墠鑳藉垱寤虹鐞嗗憳璐﹀彿");
+            return Map.of("message", "只有超级管理员才能创建管理员账号");
         }
 
         if (userRepository.findByUsername(username).isPresent()) {
-            return Map.of("message", "鐢ㄦ埛鍚嶅凡琚娇鐢?);
+            return Map.of("message", "用户名已被使用");
         }
         if (userRepository.existsByEmail(email)) {
-            return Map.of("message", "閭宸茶浣跨敤");
+            return Map.of("message", "邮箱已被使用");
         }
 
         User user = new User();
@@ -109,111 +109,111 @@ public class UserService {
         user.setRole(targetRole);
         userRepository.save(user);
 
-        return Map.of("message", "鐢ㄦ埛鍒涘缓鎴愬姛", "userId", user.getId());
+        return Map.of("message", "用户创建成功", "userId", user.getId());
     }
 
     /**
-     * 鏇存柊鐢ㄦ埛淇℃伅
+     * 更新用户信息
      *
-     * @param operatorRole 鎿嶄綔鑰呯殑瑙掕壊
-     * @param operatorId   鎿嶄綔鑰呯殑鐢ㄦ埛 ID锛堢敤浜庤嚜鎿嶄綔鏍￠獙锛?
-     * @param id           鐩爣鐢ㄦ埛 ID
-     * @param username     鏂扮敤鎴峰悕锛坣ull 琛ㄧず涓嶄慨鏀癸級
-     * @param email        鏂伴偖绠憋紙null 琛ㄧず涓嶄慨鏀癸級
-     * @param role         鏂拌鑹诧紙null 琛ㄧず涓嶄慨鏀癸級
+     * @param operatorRole 操作者的角色
+     * @param operatorId   操作者的用户 ID（用于自操作校验）
+     * @param id           目标用户 ID
+     * @param username     新用户名（null 表示不修改）
+     * @param email        新邮箱（null 表示不修改）
+     * @param role         新角色（null 表示不修改）
      */
     public Map<String, String> updateUser(Role operatorRole, Long operatorId,
                                           Long id, String username, String email, Role role) {
         User target = userRepository.findById(id).orElse(null);
         if (target == null) {
-            return Map.of("message", "鐢ㄦ埛涓嶅瓨鍦?);
+            return Map.of("message", "用户不存在");
         }
 
-        // 鏍￠獙鎿嶄綔鑰呮槸鍚︽湁鏉冪鐞嗙洰鏍囩敤鎴凤紙鍩轰簬鐩爣褰撳墠瑙掕壊锛?
+        // 校验操作者是否有权管理目标用户（基于目标当前角色）
         String error = validateOperation(operatorRole, target.getRole());
         if (error != null) {
             return Map.of("message", error);
         }
 
-        // 鏍￠獙瑙掕壊鍙樻洿鏉冮檺
+        // 校验角色变更权限
         if (role != null && role != target.getRole()) {
             if (role == Role.SUPERADMIN && operatorRole != Role.SUPERADMIN) {
-                return Map.of("message", "鏃犳潈灏嗙敤鎴锋彁鍗囦负瓒呯骇绠＄悊鍛?);
+                return Map.of("message", "无权将用户提升为超级管理员");
             }
             if (role == Role.ADMIN && operatorRole != Role.SUPERADMIN) {
-                return Map.of("message", "鍙湁瓒呯骇绠＄悊鍛樻墠鑳藉皢鐢ㄦ埛璁句负绠＄悊鍛?);
+                return Map.of("message", "只有超级管理员才能将用户设为管理员");
             }
             target.setRole(role);
         }
 
         if (username != null && !username.equals(target.getUsername())) {
             if (userRepository.findByUsername(username).isPresent()) {
-                return Map.of("message", "鐢ㄦ埛鍚嶅凡琚娇鐢?);
+                return Map.of("message", "用户名已被使用");
             }
             target.setUsername(username);
         }
 
         if (email != null && !email.equals(target.getEmail())) {
             if (userRepository.existsByEmail(email)) {
-                return Map.of("message", "閭宸茶浣跨敤");
+                return Map.of("message", "邮箱已被使用");
             }
             target.setEmail(email);
         }
 
         userRepository.save(target);
-        return Map.of("message", "鐢ㄦ埛淇℃伅鏇存柊鎴愬姛");
+        return Map.of("message", "用户信息更新成功");
     }
 
     /**
-     * 鍒犻櫎鐢ㄦ埛
+     * 删除用户
      *
-     * @param operatorRole 鎿嶄綔鑰呯殑瑙掕壊
-     * @param operatorId   鎿嶄綔鑰呯殑鐢ㄦ埛 ID锛堢敤浜庤嚜鎿嶄綔鏍￠獙锛?
-     * @param id           鐩爣鐢ㄦ埛 ID
+     * @param operatorRole 操作者的角色
+     * @param operatorId   操作者的用户 ID（用于自操作校验）
+     * @param id           目标用户 ID
      */
     @Transactional
     public Map<String, String> deleteUser(Role operatorRole, Long operatorId, Long id) {
-        // 绂佹鍒犻櫎鑷繁
+        // 禁止删除自己
         if (operatorId.equals(id)) {
-            return Map.of("message", "涓嶈兘鍒犻櫎鑷繁鐨勮处鍙?);
+            return Map.of("message", "不能删除自己的账号");
         }
 
         User target = userRepository.findById(id).orElse(null);
         if (target == null) {
-            return Map.of("message", "鐢ㄦ埛涓嶅瓨鍦?);
+            return Map.of("message", "用户不存在");
         }
 
-        // 鏍￠獙鎿嶄綔鑰呮槸鍚︽湁鏉冪鐞嗙洰鏍囩敤鎴?
+        // 校验操作者是否有权管理目标用户
         String error = validateOperation(operatorRole, target.getRole());
         if (error != null) {
             return Map.of("message", error);
         }
 
-        // 绂佹鍒犻櫎鏈€鍚庝竴涓秴绾х鐞嗗憳
+        // 禁止删除最后一个超级管理员
         if (target.getRole() == Role.SUPERADMIN && userRepository.countByRole(Role.SUPERADMIN) <= 1) {
-            return Map.of("message", "绯荤粺蹇呴』鑷冲皯淇濈暀涓€涓秴绾х鐞嗗憳");
+            return Map.of("message", "系统必须至少保留一个超级管理员");
         }
 
         userRepository.delete(target);
-        return Map.of("message", "鐢ㄦ埛鍒犻櫎鎴愬姛");
+        return Map.of("message", "用户删除成功");
     }
 
     /**
-     * 璁垮鑷姪娉ㄥ唽
-     * 娉ㄥ唽鍚庤嚜鍔ㄨ幏寰?GUEST 瑙掕壊锛屾嫢鏈夊彧璇绘潈闄?
+     * 访客自助注册
+     * 注册后自动获得 GUEST 角色，拥有只读权限
      */
     public Map<String, String> registerGuest(String username, String email, String password) {
-        // 璁垮娉ㄥ唽闇€瑕佺郴缁熷凡鏈夎秴绾х鐞嗗憳
+        // 访客注册需要系统已有超级管理员
         if (!userRepository.existsByRole(Role.SUPERADMIN)) {
-            return Map.of("message", "绯荤粺灏氭湭鍒濆鍖栵紝鏃犳硶娉ㄥ唽");
+            return Map.of("message", "系统尚未初始化，无法注册");
         }
 
         if (userRepository.findByUsername(username).isPresent()) {
-            return Map.of("message", "鐢ㄦ埛鍚嶅凡琚娇鐢?);
+            return Map.of("message", "用户名已被使用");
         }
 
         if (userRepository.existsByEmail(email)) {
-            return Map.of("message", "閭宸茶浣跨敤");
+            return Map.of("message", "邮箱已被使用");
         }
 
         User user = new User();
@@ -223,38 +223,34 @@ public class UserService {
         user.setRole(Role.GUEST);
         userRepository.save(user);
 
-        return Map.of("message", "璁垮娉ㄥ唽鎴愬姛锛岃鐧诲綍");
+        return Map.of("message", "访客注册成功，请登录");
     }
 
     /**
-     * 鏍￠獙鎿嶄綔鑰呮槸鍚︽湁鏉冩搷浣滅洰鏍囩敤鎴?
-     * 瑙勫垯锛歋UPERADMIN > ADMIN > USER > GUEST
+     * 校验操作者是否有权操作目标用户
+     * 规则：SUPERADMIN > ADMIN > USER > GUEST
      *
-     * @param operatorRole 鎿嶄綔鑰呰鑹?
-     * @param targetRole   鐩爣鐢ㄦ埛褰撳墠瑙掕壊
-     * @return 濡傛灉鏃犳潈鎿嶄綔杩斿洖閿欒淇℃伅锛屽惁鍒欒繑鍥?null
+     * @param operatorRole 操作者角色
+     * @param targetRole   目标用户当前角色
+     * @return 如果无权操作返回错误信息，否则返回 null
      */
     private String validateOperation(Role operatorRole, Role targetRole) {
         if (operatorRole == Role.SUPERADMIN) {
-            return null; // 瓒呯骇绠＄悊鍛樺彲浠ユ搷浣滀换浣曚汉
+            return null; // 超级管理员可以操作任何人
         }
         if (operatorRole == Role.ADMIN) {
-            // 绠＄悊鍛樹笉鑳芥搷浣滆秴绾х鐞嗗憳鍜屽叾浠栫鐞嗗憳
+            // 管理员不能操作超级管理员和其他管理员
             if (targetRole == Role.SUPERADMIN || targetRole == Role.ADMIN) {
-                return "鏃犳潈鎿嶄綔瓒呯骇绠＄悊鍛樻垨鍏朵粬绠＄悊鍛?;
+                return "无权操作超级管理员或其他管理员";
             }
             return null;
         }
-        // 鏅€氱敤鎴峰拰璁垮鏃犳潈绠＄悊
-        return "鏃犳搷浣滄潈闄?;
+        // 普通用户和访客无权管理
+        return "无操作权限";
     }
 
     /**
      * 修改当前用户密码
-     * @param userId      用户 ID
-     * @param oldPassword 原密码
-     * @param newPassword 新密码
-     * @return 成功或错误信息
      */
     public Map<String, String> changePassword(Long userId, String oldPassword, String newPassword) {
         User user = userRepository.findById(userId).orElse(null);
@@ -270,9 +266,7 @@ public class UserService {
     }
 
     /**
-     * 妫€鏌ョ敤鎴峰悕鏄惁宸茶浣跨敤
-     * @param username 瑕佹鏌ョ殑鐢ㄦ埛鍚?
-     * @return true 琛ㄧず宸茶浣跨敤锛宖alse 琛ㄧず鍙敤
+     * 检查用户名是否已被使用
      */
     public boolean isUsernameTaken(String username) {
         return userRepository.findByUsername(username).isPresent();

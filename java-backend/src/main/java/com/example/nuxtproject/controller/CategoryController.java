@@ -68,6 +68,14 @@ public class CategoryController {
         return ResponseEntity.ok(Map.of("message", "分类更新成功"));
     }
 
+    @PutMapping("/api/admin/categories/reorder")
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN')")
+    @Operation(summary = "批量更新分类排序")
+    public ResponseEntity<?> reorder(@RequestBody List<Map<String, Object>> orders) {
+        categoryService.reorder(orders);
+        return ResponseEntity.ok(Map.of("message", "排序更新成功"));
+    }
+
     @DeleteMapping("/api/admin/categories/{id}")
     @PreAuthorize("hasRole('SUPERADMIN')")
     @Operation(summary = "删除分类", description = "仅超级管理员可删除分类")
@@ -104,5 +112,5 @@ public class CategoryController {
         public void setDescription(String description) { this.description = description; }
         public Integer getSortOrder() { return sortOrder; }
         public void setSortOrder(Integer sortOrder) { this.sortOrder = sortOrder; }
-    }
+}
 }

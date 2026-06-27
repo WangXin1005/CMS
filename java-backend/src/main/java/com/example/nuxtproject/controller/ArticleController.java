@@ -68,7 +68,7 @@ public class ArticleController {
     public ResponseEntity<Page<Article>> listRecent(
             @Parameter(description = "页码", required = true) @RequestParam(defaultValue = "1") int page,
             @Parameter(description = "每页条数", required = false) @RequestParam(defaultValue = "5") int size) {
-        return ResponseEntity.ok(articleService.listAll(PageRequest.of(page - 1, size), null));
+        return ResponseEntity.ok(articleService.listAll(PageRequest.of(page - 1, size), null, null, null, null, null));
     }
 
     // ===== 用户个人接口（USER 角色可用） =====
@@ -80,8 +80,11 @@ public class ArticleController {
             @Parameter(hidden = true) @AuthenticationPrincipal UserPrincipal principal,
             @Parameter(description = "页码", required = true) @RequestParam(defaultValue = "1") int page,
             @Parameter(description = "每页条数", required = false) @RequestParam(defaultValue = "20") int size,
-            @Parameter(description = "文章状态：DRAFT / PUBLISHED", required = false) @RequestParam(required = false) ArticleStatus status) {
-        return ResponseEntity.ok(articleService.listByAuthor(principal.userId(), PageRequest.of(page - 1, size), status));
+            @Parameter(description = "文章状态：DRAFT / PUBLISHED", required = false) @RequestParam(required = false) ArticleStatus status,
+      @Parameter(description = "标题关键词搜索") @RequestParam(required = false) String keyword,
+      @Parameter(description = "分类 ID") @RequestParam(required = false) Long categoryId,
+      @Parameter(description = "标签 ID") @RequestParam(required = false) Long tagId) {
+        return ResponseEntity.ok(articleService.listByAuthor(principal.userId(), PageRequest.of(page - 1, size), status, keyword, categoryId, tagId));
     }
 
     @GetMapping("/api/articles/my/{id}")
@@ -154,8 +157,12 @@ public class ArticleController {
     public ResponseEntity<Page<Article>> listAdmin(
             @Parameter(description = "页码", required = true) @RequestParam(defaultValue = "1") int page,
             @Parameter(description = "每页条数", required = false) @RequestParam(defaultValue = "20") int size,
-            @Parameter(description = "文章状态：DRAFT / PUBLISHED", required = false) @RequestParam(required = false) ArticleStatus status) {
-        return ResponseEntity.ok(articleService.listAll(PageRequest.of(page - 1, size), status));
+            @Parameter(description = "文章状态：DRAFT / PUBLISHED", required = false) @RequestParam(required = false) ArticleStatus status,
+      @Parameter(description = "标题关键词搜索") @RequestParam(required = false) String keyword,
+      @Parameter(description = "分类 ID") @RequestParam(required = false) Long categoryId,
+      @Parameter(description = "标签 ID") @RequestParam(required = false) Long tagId,
+      @Parameter(description = "作者 ID") @RequestParam(required = false) Long authorId) {
+        return ResponseEntity.ok(articleService.listAll(PageRequest.of(page - 1, size), status, keyword, categoryId, tagId, authorId));
     }
 
     @GetMapping("/api/admin/articles/{id}")
@@ -261,7 +268,7 @@ public class ArticleController {
         public void setCategoryId(Long categoryId) { this.categoryId = categoryId; }
         public Set<Long> getTagIds() { return tagIds; }
         public void setTagIds(Set<Long> tagIds) { this.tagIds = tagIds; }
-    }
+}
 
     public static class UpdateArticleRequest {
         @Schema(description = "文章标题", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
@@ -304,5 +311,5 @@ public class ArticleController {
         public void setCategoryId(Long categoryId) { this.categoryId = categoryId; }
         public Set<Long> getTagIds() { return tagIds; }
         public void setTagIds(Set<Long> tagIds) { this.tagIds = tagIds; }
-    }
+}
 }
