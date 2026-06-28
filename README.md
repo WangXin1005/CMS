@@ -82,7 +82,7 @@ cd nuxt-test
 npm install
 npm run dev
 ```
-前端运行在 http://localhost:3001
+前端运行在 http://localhost:3000
 
 ### 4. 初始化系统
 首次访问会自动跳转到初始化页面，创建超级管理员账号后即可登录使用。
@@ -136,4 +136,4 @@ spring:
 
 前端 `nuxt.config.ts`：
 - API 代理至 http://localhost:8080
-- 默认端口 3001
+- 默认端口 3000

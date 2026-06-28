@@ -4,7 +4,7 @@
 全栈博客 CMS 系统
 > ⚠️ **重要：禁止自动启动服务 + 简体中文** — 任何时候都不要自动执行 `npm run dev`、`mvn.cmd spring-boot:run` 或其他启动命令。仅在用户明确要求且确认后方可启动。
 
-，前端 Nuxt 4 + Vue 3 + Element Plus（端口 3001），后端 Spring Boot 3 + Java 21 + MySQL（端口 8080）。
+，前端 Nuxt 4 + Vue 3 + Element Plus（端口 3000），后端 Spring Boot 3 + Java 21 + MySQL（端口 8080）。
 
 ## 目录结构
 - `nuxt-test/` — 前端项目

@@ -12,7 +12,7 @@ export default defineNuxtConfig({
   },
 
   routeRules: {
-    '/api/**': { proxy: 'http://localhost:8080' },
+    '/api/**': { proxy: process.env.NUXT_API_PROXY_TARGET || 'http://localhost:8080' },
   },
 
   elementPlus: {
@@ -29,7 +29,7 @@ export default defineNuxtConfig({
     server: {
       proxy: {
         '/api': {
-          target: 'http://localhost:8080',
+          target: process.env.NUXT_API_PROXY_TARGET || 'http://localhost:8080',
           changeOrigin: true,
         },
       },

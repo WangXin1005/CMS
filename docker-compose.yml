@@ -1,0 +1,60 @@
+﻿services:
+  # ===== MySQL 数据库 =====
+  mysql:
+    image: mysql:8.0
+    container_name: codeblog-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: nuxt_test_db
+      MYSQL_CHARACTER_SET_SERVER: utf8mb4
+      MYSQL_COLLATION_SERVER: utf8mb4_unicode_ci
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # ===== Spring Boot 后端 =====
+  backend:
+    build:
+      context: ./java-backend
+      dockerfile: Dockerfile
+    container_name: codeblog-backend
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+    volumes:
+      - backend-uploads:/app/uploads
+
+  # ===== Nuxt 前端（SSR 模式） =====
+  frontend:
+    build:
+      context: ./nuxt-test
+      dockerfile: Dockerfile
+    container_name: codeblog-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    environment:
+      NUXT_PUBLIC_API_BASE: /api
+
+  # ===== Nginx 反向代理（生产环境入口） =====
+  nginx:
+    image: nginx:alpine
+    container_name: codeblog-nginx
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - frontend
+      - backend
+
+volumes:
+  mysql-data:
+  backend-uploads:
