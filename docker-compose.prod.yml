@@ -1,7 +1,7 @@
 services:
   mysql:
     environment:
-      MYSQL_ROOT_PASSWORD: \
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
     ports:
       - "127.0.0.1:3306:3306"
     restart: always
@@ -9,14 +9,12 @@ services:
   backend:
     environment:
       SPRING_PROFILES_ACTIVE: prod
-      MYSQL_PASSWORD: \
-      JWT_SECRET: \
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
     restart: always
-    # 生产环境不直接暴露后端端口，由 Nginx 反向代理
 
   frontend:
     restart: always
-    # 生产环境不直接暴露前端端口，由 Nginx 反向代理
 
   nginx:
     ports:
