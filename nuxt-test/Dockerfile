@@ -1,4 +1,4 @@
-﻿# ===== 构建阶段 =====
+# ===== 构建阶段 =====
 FROM node:20-alpine AS builder
 WORKDIR /app
 COPY package*.json ./

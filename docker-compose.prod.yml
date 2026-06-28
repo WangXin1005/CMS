@@ -1,4 +1,4 @@
-﻿services:
+services:
   mysql:
     environment:
       MYSQL_ROOT_PASSWORD: \

@@ -1,4 +1,4 @@
-﻿services:
+services:
   mysql:
     ports:
       - "13306:3306"
