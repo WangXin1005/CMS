@@ -1,7 +1,12 @@
 # ===== 构建阶段 =====
 FROM maven:3.9-eclipse-temurin-21-alpine AS builder
 WORKDIR /app
+
+# 利用 Docker 缓存：先复制 pom.xml 下载依赖，只有 pom.xml 变化时才重新下载
 COPY pom.xml .
+RUN mvn dependency:go-offline -B
+
+# 再复制源码并打包
 COPY src ./src
 RUN mvn clean package -DskipTests -B
 
