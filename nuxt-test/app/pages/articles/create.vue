@@ -38,9 +38,9 @@ async function handleSubmit(status) {
   submitting.value = true
   try {
     if (isAdmin.value) {
-      await create(form.value)
+      await create({ ...form.value })
     } else {
-      await createMyArticle(form.value)
+      await createMyArticle({ ...form.value })
     }
     ElMessage.success(status === 'PUBLISHED' ? '文章已发布' : '草稿已保存')
     navigateTo('/articles')
@@ -79,6 +79,12 @@ function insertTabInTextarea(e, field) {
         <el-form-item label="封面图">
           <el-input v-model="form.coverImage" placeholder="图片 URL（可选）" />
         </el-form-item>
+        <el-form-item label="可见性">
+          <el-radio-group v-model="form.visibility">
+            <el-radio value="PUBLIC">公开</el-radio>
+            <el-radio value="PRIVATE">私密</el-radio>
+          </el-radio-group>
+        </el-form-item>
         <el-row :gutter="16">
           <el-col :span="12">
             <el-form-item label="分类">
@@ -98,10 +104,14 @@ function insertTabInTextarea(e, field) {
         <el-form-item label="摘要">
           <el-input v-model="form.summary" type="textarea" :rows="3" placeholder="文章摘要（可选）" @keydown.tab.prevent="insertTabInTextarea($event, 'summary')" />
         </el-form-item>
-        <el-form-item label="内容">
+        <el-form-item label="内容" style="width:100%">
           <RichTextEditor v-model="form.content" />
         </el-form-item>
       </el-form>
     </div>
   </div>
 </template>
+
+<style scoped>
+.el-form-item:has(.rich-editor) { width: 100% !important; }
+</style>

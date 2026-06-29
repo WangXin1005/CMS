@@ -6,7 +6,7 @@
 definePageMeta({ middleware: 'auth' })
 import { ref, onMounted, computed } from 'vue'
 
-const { getStats, getRecent } = useArticle()
+const { getStats, getRecent, getById } = useArticle()
 const { role } = useAuth()
 const isAdmin = computed(() => role.value === 'ADMIN' || role.value === 'SUPERADMIN')
 const canClick = computed(() => role.value !== 'GUEST')
@@ -23,8 +23,13 @@ function goCreate() { return navigateTo('/articles/create') }
 function goArticleList() { return navigateTo('/articles') }
 function goComments() { return navigateTo('/comments') }
 
-function viewArticle(item: any) {
-  dialogArticle.value = item
+async function viewArticle(item: any) {
+  try {
+    const full = await getById(item.id)
+    dialogArticle.value = full
+  } catch {
+    dialogArticle.value = item
+  }
   dialogVisible.value = true
 }
 
@@ -149,7 +154,7 @@ onMounted(async () => {
           <el-tag v-for="tag in dialogArticle.tags" :key="tag.id" size="small" style="margin-right:6px">{{ tag.name }}</el-tag>
         </div>
         <el-divider style="margin:12px 0" />
-        <div style="max-height:400px;overflow-y:auto;font-size:15px;line-height:1.8;color:#333;white-space:pre-wrap">{{ dialogArticle.content }}</div>
+        <div class="article-content-render" style="max-height:400px;overflow-y:auto" v-html="dialogArticle.content"></div>
       </template>
       <template #footer>
         <el-button @click="dialogVisible = false">关闭</el-button>

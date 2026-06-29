@@ -67,8 +67,9 @@ public class ArticleController {
     @Operation(summary = "获取最近文章", description = "登录用户均可访问，返回最近的文章（含草稿），用于仪表盘展示")
     public ResponseEntity<Page<Article>> listRecent(
             @Parameter(description = "页码", required = true) @RequestParam(defaultValue = "1") int page,
-            @Parameter(description = "每页条数", required = false) @RequestParam(defaultValue = "5") int size) {
-        return ResponseEntity.ok(articleService.listAll(PageRequest.of(page - 1, size), null, null, null, null, null));
+            @Parameter(description = "每页条数", required = false) @RequestParam(defaultValue = "5") int size,
+            @AuthenticationPrincipal UserPrincipal principal) {
+        return ResponseEntity.ok(articleService.listAll(PageRequest.of(page - 1, size), null, null, null, null, null, principal == null ? null : principal.userId(), principal == null ? null : principal.role()));
     }
 
     // ===== 用户个人接口（USER 角色可用） =====
@@ -155,14 +156,14 @@ public class ArticleController {
     @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN')")
     @Operation(summary = "管理后台文章列表", description = "返回所有文章（含草稿），支持按状态筛选")
     public ResponseEntity<Page<Article>> listAdmin(
-            @Parameter(description = "页码", required = true) @RequestParam(defaultValue = "1") int page,
+            @Parameter(hidden = true) @AuthenticationPrincipal UserPrincipal principal,            @Parameter(description = "页码", required = true) @RequestParam(defaultValue = "1") int page,
             @Parameter(description = "每页条数", required = false) @RequestParam(defaultValue = "20") int size,
             @Parameter(description = "文章状态：DRAFT / PUBLISHED", required = false) @RequestParam(required = false) ArticleStatus status,
       @Parameter(description = "标题关键词搜索") @RequestParam(required = false) String keyword,
       @Parameter(description = "分类 ID") @RequestParam(required = false) Long categoryId,
       @Parameter(description = "标签 ID") @RequestParam(required = false) Long tagId,
       @Parameter(description = "作者 ID") @RequestParam(required = false) Long authorId) {
-        return ResponseEntity.ok(articleService.listAll(PageRequest.of(page - 1, size), status, keyword, categoryId, tagId, authorId));
+        return ResponseEntity.ok(articleService.listAll(PageRequest.of(page - 1, size), status, keyword, categoryId, tagId, authorId, principal == null ? null : principal.userId(), principal == null ? null : principal.role()));
     }
 
     @GetMapping("/api/admin/articles/{id}")
@@ -246,6 +247,12 @@ public class ArticleController {
         @Schema(description = "文章状态：DRAFT / PUBLISHED", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
         private ArticleStatus status;
 
+        @Schema(description = "可见性：PUBLIC / PRIVATE", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+        private Article.ArticleVisibility visibility;
+
+        @Schema(description = "可见性：PUBLIC / PRIVATE", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+        private Article.ArticleVisibility visibility;
+
         @Schema(description = "分类 ID", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
         private Long categoryId;
 
@@ -254,6 +261,8 @@ public class ArticleController {
 
         public String getTitle() { return title; }
         public void setTitle(String title) { this.title = title; }
+        public Article.ArticleVisibility getVisibility() { return visibility; }
+        public void setVisibility(Article.ArticleVisibility visibility) { this.visibility = visibility; }
         public String getSlug() { return slug; }
         public void setSlug(String slug) { this.slug = slug; }
         public String getContent() { return content; }
@@ -264,6 +273,8 @@ public class ArticleController {
         public void setCoverImage(String coverImage) { this.coverImage = coverImage; }
         public ArticleStatus getStatus() { return status; }
         public void setStatus(ArticleStatus status) { this.status = status; }
+        public Article.ArticleVisibility getVisibility() { return visibility; }
+        public void setVisibility(Article.ArticleVisibility visibility) { this.visibility = visibility; }
         public Long getCategoryId() { return categoryId; }
         public void setCategoryId(Long categoryId) { this.categoryId = categoryId; }
         public Set<Long> getTagIds() { return tagIds; }

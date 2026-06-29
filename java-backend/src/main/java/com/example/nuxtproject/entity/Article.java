@@ -47,6 +47,11 @@ public class Article {
     @Column(nullable = false, length = 20)
     private ArticleStatus status = ArticleStatus.DRAFT;
 
+    @Schema(description = "可见性：PUBLIC / PRIVATE")
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private ArticleVisibility visibility = ArticleVisibility.PUBLIC;
+
     @Schema(description = "浏览次数")
     @Column(nullable = false)
     private Long viewCount = 0L;
@@ -80,6 +85,11 @@ public class Article {
         PUBLISHED
     }
 
+    public enum ArticleVisibility {
+        PUBLIC,
+        PRIVATE
+    }
+
     @PreUpdate
     public void preUpdate() {
         this.updatedAt = LocalDateTime.now();
@@ -108,6 +118,8 @@ public class Article {
     public void setSlug(String slug) { this.slug = slug; }
     public ArticleStatus getStatus() { return status; }
     public void setStatus(ArticleStatus status) { this.status = status; }
+    public ArticleVisibility getVisibility() { return visibility; }
+    public void setVisibility(ArticleVisibility visibility) { this.visibility = visibility; }
     public Long getViewCount() { return viewCount; }
     public void setViewCount(Long viewCount) { this.viewCount = viewCount; }
     public User getAuthor() { return author; }

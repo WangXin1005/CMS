@@ -35,4 +35,7 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
 
     @Query("SELECT a FROM Article a JOIN a.tags t WHERE t.id = :tagId AND a.status = :status")
     Page<Article> findByTagId(@Param("tagId") Long tagId, @Param("status") ArticleStatus status, Pageable pageable);
+
+    @Query("SELECT DISTINCT a FROM Article a LEFT JOIN a.tags t WHERE (:status IS NULL OR a.status = :status) AND (:keyword IS NULL OR a.title LIKE %:keyword%) AND (:categoryId IS NULL OR a.category.id = :categoryId) AND (:tagId IS NULL OR t.id = :tagId) AND (:authorId IS NULL OR a.author.id = :authorId) ORDER BY a.createdAt DESC")
+    Page<Article> searchAllFilters(@Param("status") ArticleStatus status, @Param("keyword") String keyword, @Param("categoryId") Long categoryId, @Param("tagId") Long tagId, @Param("authorId") Long authorId, Pageable pageable);
 }

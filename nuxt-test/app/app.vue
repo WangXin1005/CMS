@@ -121,4 +121,105 @@ body {
     margin-top: 10px;
   }
 }
+
+// ===== 文章内容渲染样式（v-html 输出） =====
+.article-content-render {
+  font-size: 15px;
+  line-height: 1.8;
+  color: #333;
+  word-wrap: break-word;
+}
+
+.article-content-render p { margin: 0 0 12px; }
+
+.article-content-render h1,
+.article-content-render h2,
+.article-content-render h3,
+.article-content-render h4,
+.article-content-render h5 { margin: 20px 0 10px; font-weight: 600; color: #1a1a1a; }
+
+.article-content-render h1 { font-size: 24px; }
+.article-content-render h2 { font-size: 20px; }
+.article-content-render h3 { font-size: 17px; }
+.article-content-render h4 { font-size: 15px; }
+.article-content-render h5 { font-size: 14px; }
+
+.article-content-render ul,
+.article-content-render ol { padding-left: 24px; margin: 8px 0; }
+.article-content-render li { margin: 4px 0; }
+
+.article-content-render blockquote {
+  border-left: 3px solid var(--el-color-primary, #409eff);
+  margin: 12px 0;
+  padding: 8px 16px;
+  background: #f5f7fa;
+  color: #666;
+  border-radius: 0 4px 4px 0;
+}
+
+.article-content-render pre {
+  background: #282c34;
+  color: #abb2bf;
+  padding: 16px;
+  border-radius: 6px;
+  overflow-x: auto;
+  font-size: 13px;
+  line-height: 1.6;
+  margin: 12px 0;
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+}
+
+.article-content-render code {
+  background: #f0f0f0;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 13px;
+  color: #d63384;
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+}
+
+.article-content-render pre code {
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
+  color: inherit;
+  font-size: inherit;
+}
+
+.article-content-render img {
+  max-width: 100%;
+  border-radius: 6px;
+  margin: 12px 0;
+  display: block;
+}
+
+.article-content-render a {
+  color: var(--el-color-primary, #409eff);
+  text-decoration: underline;
+}
+
+.article-content-render hr {
+  margin: 20px 0;
+  border: none;
+  border-top: 1px solid #dcdfe6;
+}
+
+.article-content-render table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 12px 0;
+}
+
+.article-content-render th,
+.article-content-render td {
+  border: 1px solid #dcdfe6;
+  padding: 8px 12px;
+  text-align: left;
+}
+
+.article-content-render th {
+  background: #f7f8fa;
+  font-weight: 600;
+}
+
 </style>

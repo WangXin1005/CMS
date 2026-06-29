@@ -28,23 +28,23 @@
         <el-icon><PriceTag /></el-icon>
         <span>标签管理</span>
       </el-menu-item>
-      <el-menu-item index="/comments">
+      <el-menu-item index="/comments" v-if="isAdmin">
         <el-icon><ChatDotRound /></el-icon>
         <span>评论管理</span>
       </el-menu-item>
-      <el-menu-item index="/media">
+      <el-menu-item index="/media" v-if="isNotGuest">
         <el-icon><Picture /></el-icon>
         <span>媒体管理</span>
       </el-menu-item>
-      <el-menu-item index="/user">
+      <el-menu-item index="/user" v-if="isAdmin">
         <el-icon><User /></el-icon>
         <span>用户管理</span>
       </el-menu-item>
-      <el-menu-item index="/setting">
+      <el-menu-item index="/setting" v-if="isSuperAdmin">
         <el-icon><Setting /></el-icon>
         <span>站点设置</span>
       </el-menu-item>
-      <el-menu-item index="/logs">
+      <el-menu-item index="/logs" v-if="isAdmin">
         <el-icon><List /></el-icon>
         <span>操作日志</span>
       </el-menu-item>
@@ -66,7 +66,12 @@ import {
   HomeFilled, Document, Folder, PriceTag,
   ChatDotRound, Picture, User, Setting, View, List
 } from '@element-plus/icons-vue'
+import { computed } from 'vue'
 const route = useRoute()
+const { role } = useAuth()
+const isAdmin = computed(() => role.value === 'SUPERADMIN' || role.value === 'ADMIN')
+const isNotGuest = computed(() => role.value !== 'GUEST')
+const isSuperAdmin = computed(() => role.value === 'SUPERADMIN')
 </script>
 
 <style lang="less" scoped>

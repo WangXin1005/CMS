@@ -14,6 +14,7 @@ const { getAdminList, getMyArticles, remove, removeMyArticle } = useArticle()
 const { role } = useAuth()
 
 const isAdmin = computed(() => role.value === 'ADMIN' || role.value === 'SUPERADMIN')
+const isGuest = computed(() => role.value === 'GUEST')
 
 const articles = ref([])
 const loading = ref(false)
@@ -171,8 +172,8 @@ onMounted(async () => { await loadFilters(); await loadData() })
         </el-table-column>
         <el-table-column label="操作" width="150" fixed="right">
           <template #default="{ row }">
-            <el-button link type="primary" size="small" @click="goEdit(row.id)">编辑</el-button>
-            <el-button link type="danger" size="small" @click="handleDelete(row.id)">删除</el-button>
+            <el-button link type="primary" size="small" @click="goEdit(row.id)" v-if="!isGuest">编辑</el-button>
+            <el-button link type="danger" size="small" @click="handleDelete(row.id)" v-if="!isGuest">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
