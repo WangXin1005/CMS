@@ -88,7 +88,7 @@ export const useArticle = () => {
   /** 更新我的文章 */
   const updateMyArticle = async (id: number, data: {
     title?: string; slug?: string; content?: string; summary?: string
-    coverImage?: string; status?: string; categoryId?: number; tagIds?: number[]
+    coverImage?: string; status?: string; visibility?: string; categoryId?: number; tagIds?: number[]
   }) => {
     const res = await request.put(`/articles/my/${id}`, data)
     return res.data
@@ -127,7 +127,7 @@ export const useArticle = () => {
 
   const update = async (id: number, data: {
     title?: string; slug?: string; content?: string; summary?: string
-    coverImage?: string; status?: string; categoryId?: number; tagIds?: number[]
+    coverImage?: string; status?: string; visibility?: string; categoryId?: number; tagIds?: number[]
   }) => {
     const res = await request.put(`/admin/articles/${id}`, data)
     return res.data

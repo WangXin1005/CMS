@@ -11,8 +11,10 @@ import java.util.Optional;
 
 public interface ArticleRepository extends JpaRepository<Article, Long> {
     Optional<Article> findBySlug(String slug);
-    Page<Article> findByStatusOrderByCreatedAtDesc(ArticleStatus status, Pageable pageable);
-    Page<Article> findByCategoryIdAndStatus(Long categoryId, ArticleStatus status, Pageable pageable);
+    @Query("SELECT a FROM Article a WHERE a.status = :status AND a.visibility = 'PUBLIC' ORDER BY a.createdAt DESC")
+    Page<Article> findByStatusAndVisibilityOrderByCreatedAtDesc(@Param("status") ArticleStatus status, Pageable pageable);
+    @Query("SELECT a FROM Article a WHERE a.category.id = :categoryId AND a.status = :status AND a.visibility = 'PUBLIC' ORDER BY a.createdAt DESC")
+    Page<Article> findByCategoryIdAndStatusAndVisibility(@Param("categoryId") Long categoryId, @Param("status") ArticleStatus status, Pageable pageable);
     long countByStatus(ArticleStatus status);
 
     Page<Article> findByAuthorIdOrderByCreatedAtDesc(Long authorId, Pageable pageable);
@@ -30,10 +32,10 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
     @Query("SELECT a FROM Article a JOIN a.tags t WHERE a.author.id = :authorId AND (:status IS NULL OR a.status = :status) AND (:keyword IS NULL OR a.title LIKE %:keyword%) AND (:tagId IS NULL OR t.id = :tagId) ORDER BY a.createdAt DESC")
     Page<Article> searchByAuthorAndTag(@Param("authorId") Long authorId, @Param("status") ArticleStatus status, @Param("keyword") String keyword, @Param("tagId") Long tagId, Pageable pageable);
 
-    @Query("SELECT a FROM Article a WHERE a.status = :status AND (:keyword IS NULL OR a.title LIKE %:keyword% OR a.summary LIKE %:keyword%)")
+    @Query("SELECT a FROM Article a WHERE a.status = :status AND a.visibility = 'PUBLIC' AND (:keyword IS NULL OR a.title LIKE %:keyword% OR a.summary LIKE %:keyword%)")
     Page<Article> search(@Param("status") ArticleStatus status, @Param("keyword") String keyword, Pageable pageable);
 
-    @Query("SELECT a FROM Article a JOIN a.tags t WHERE t.id = :tagId AND a.status = :status")
+    @Query("SELECT a FROM Article a JOIN a.tags t WHERE t.id = :tagId AND a.status = :status AND a.visibility = 'PUBLIC'")
     Page<Article> findByTagId(@Param("tagId") Long tagId, @Param("status") ArticleStatus status, Pageable pageable);
 
     @Query("SELECT DISTINCT a FROM Article a LEFT JOIN a.tags t WHERE (:status IS NULL OR a.status = :status) AND (:keyword IS NULL OR a.title LIKE %:keyword%) AND (:categoryId IS NULL OR a.category.id = :categoryId) AND (:tagId IS NULL OR t.id = :tagId) AND (:authorId IS NULL OR a.author.id = :authorId) ORDER BY a.createdAt DESC")

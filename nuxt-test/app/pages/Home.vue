@@ -204,12 +204,8 @@ onMounted(async () => {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-a.recent-title:hover { color: #409eff; }
 .recent-item.clickable { cursor: pointer; }
 .recent-item.clickable:hover .recent-title { color: #409eff; }
-.recent-item.clickable { cursor: pointer; }
-.recent-item.clickable:hover .recent-title { color: #409eff; }
-.recent-title-readonly { cursor: default; color: #333; }
 .recent-status { flex-shrink: 0; }
 .recent-date {
   font-size: 12px;

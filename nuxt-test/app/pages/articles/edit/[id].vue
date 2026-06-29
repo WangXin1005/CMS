@@ -104,12 +104,6 @@ function insertTabInTextarea(e, field) {
         <el-form-item label="封面图">
           <el-input v-model="form.coverImage" placeholder="图片 URL（可选）" />
         </el-form-item>
-        <el-form-item label="可见性">
-          <el-radio-group v-model="form.visibility">
-            <el-radio value="PUBLIC">公开</el-radio>
-            <el-radio value="PRIVATE">私密</el-radio>
-          </el-radio-group>
-        </el-form-item>
         <el-row :gutter="16">
           <el-col :span="12">
             <el-form-item label="分类">

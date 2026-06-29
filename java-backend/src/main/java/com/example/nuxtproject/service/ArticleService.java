@@ -36,16 +36,13 @@ public class ArticleService {
     /** 鑾峰彇宸插彂甯冪殑鍏紑鏂囩珷鍒楄〃 */
     public Page<Article> listPublished(Pageable pageable, Long categoryId, Long tagId, Long currentUserId) {
         if (categoryId != null) {
-            return articleRepository.findByCategoryIdAndStatus(categoryId, ArticleStatus.PUBLISHED, pageable);
+            return articleRepository.findByCategoryIdAndStatusAndVisibility(categoryId, ArticleStatus.PUBLISHED, pageable);
         }
         if (tagId != null) {
             Page<Article> tagResults = articleRepository.findByTagId(tagId, ArticleStatus.PUBLISHED, pageable);
-            tagResults.getContent().removeIf(a -> a.getVisibility() == Article.ArticleVisibility.PRIVATE);
             return tagResults;
         }
-        Page<Article> all = articleRepository.findByStatusOrderByCreatedAtDesc(ArticleStatus.PUBLISHED, pageable);
-        // Show only PUBLIC visibility articles in public listing
-        all.getContent().removeIf(a -> a.getVisibility() == Article.ArticleVisibility.PRIVATE);
+        Page<Article> all = articleRepository.findByStatusAndVisibilityOrderByCreatedAtDesc(ArticleStatus.PUBLISHED, pageable);
         return all;
     }
 
@@ -126,7 +123,7 @@ public class ArticleService {
         article.setSummary(summary);
         article.setCoverImage(coverImage);
         article.setStatus(status != null ? status : ArticleStatus.DRAFT);
-        article.setVisibility(visibility != null ? visibility : Article.ArticleVisibility.PUBLIC);
+        article.setVisibility(Article.ArticleVisibility.PUBLIC);
         article.setAuthor(author);
 
         if (categoryId != null) {
@@ -144,7 +141,7 @@ public class ArticleService {
 
     /** 鏇存柊鏂囩珷 */
     public Article update(Long id, String title, String slug, String content, String summary,
-                          String coverImage, ArticleStatus status, Long categoryId, Set<Long> tagIds) {
+                          String coverImage, ArticleStatus status, Article.ArticleVisibility visibility, Long categoryId, Set<Long> tagIds) {
         Article article = articleRepository.findById(id).orElse(null);
         if (article == null) return null;
 

@@ -42,7 +42,7 @@ public class ArticleController {
         if (keyword != null && !keyword.isBlank()) {
             return ResponseEntity.ok(articleService.searchPublished(keyword, PageRequest.of(page - 1, size)));
         }
-        return ResponseEntity.ok(articleService.listPublished(PageRequest.of(page - 1, size), categoryId, tagId));
+        return ResponseEntity.ok(articleService.listPublished(PageRequest.of(page - 1, size), categoryId, tagId, null));
     }
 
     @GetMapping("/api/articles/{slug}")
@@ -85,7 +85,7 @@ public class ArticleController {
       @Parameter(description = "标题关键词搜索") @RequestParam(required = false) String keyword,
       @Parameter(description = "分类 ID") @RequestParam(required = false) Long categoryId,
       @Parameter(description = "标签 ID") @RequestParam(required = false) Long tagId) {
-        return ResponseEntity.ok(articleService.listByAuthor(principal.userId(), PageRequest.of(page - 1, size), status, keyword, categoryId, tagId));
+        return ResponseEntity.ok(articleService.listByAuthor(principal.userId(), PageRequest.of(page - 1, size), status, keyword, categoryId, tagId, principal == null ? null : principal.userId()));
     }
 
     @GetMapping("/api/articles/my/{id}")
@@ -132,7 +132,7 @@ public class ArticleController {
         Article updated = articleService.update(id,
                 request.getTitle(), request.getSlug(), request.getContent(),
                 request.getSummary(), request.getCoverImage(), request.getStatus(),
-                request.getCategoryId(), request.getTagIds());
+                request.getVisibility(), request.getCategoryId(), request.getTagIds());
         if (updated == null) {
             return ResponseEntity.badRequest().body(Map.of("message", "文章不存在"));
         }
@@ -204,7 +204,7 @@ public class ArticleController {
         Article updated = articleService.update(id,
                 request.getTitle(), request.getSlug(), request.getContent(),
                 request.getSummary(), request.getCoverImage(), request.getStatus(),
-                request.getCategoryId(), request.getTagIds());
+                request.getVisibility(), request.getCategoryId(), request.getTagIds());
         if (updated == null) {
             return ResponseEntity.badRequest().body(Map.of("message", "文章不存在"));
         }
@@ -250,9 +250,6 @@ public class ArticleController {
         @Schema(description = "可见性：PUBLIC / PRIVATE", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
         private Article.ArticleVisibility visibility;
 
-        @Schema(description = "可见性：PUBLIC / PRIVATE", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
-        private Article.ArticleVisibility visibility;
-
         @Schema(description = "分类 ID", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
         private Long categoryId;
 
@@ -261,8 +258,6 @@ public class ArticleController {
 
         public String getTitle() { return title; }
         public void setTitle(String title) { this.title = title; }
-        public Article.ArticleVisibility getVisibility() { return visibility; }
-        public void setVisibility(Article.ArticleVisibility visibility) { this.visibility = visibility; }
         public String getSlug() { return slug; }
         public void setSlug(String slug) { this.slug = slug; }
         public String getContent() { return content; }
@@ -273,6 +268,7 @@ public class ArticleController {
         public void setCoverImage(String coverImage) { this.coverImage = coverImage; }
         public ArticleStatus getStatus() { return status; }
         public void setStatus(ArticleStatus status) { this.status = status; }
+        
         public Article.ArticleVisibility getVisibility() { return visibility; }
         public void setVisibility(Article.ArticleVisibility visibility) { this.visibility = visibility; }
         public Long getCategoryId() { return categoryId; }
@@ -300,6 +296,9 @@ public class ArticleController {
         @Schema(description = "文章状态：DRAFT / PUBLISHED", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
         private ArticleStatus status;
 
+        @Schema(description = "可见性：PUBLIC / PRIVATE", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+        private Article.ArticleVisibility visibility;
+
         @Schema(description = "分类 ID", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
         private Long categoryId;
 
@@ -318,6 +317,9 @@ public class ArticleController {
         public void setCoverImage(String coverImage) { this.coverImage = coverImage; }
         public ArticleStatus getStatus() { return status; }
         public void setStatus(ArticleStatus status) { this.status = status; }
+
+        public Article.ArticleVisibility getVisibility() { return visibility; }
+        public void setVisibility(Article.ArticleVisibility visibility) { this.visibility = visibility; }
         public Long getCategoryId() { return categoryId; }
         public void setCategoryId(Long categoryId) { this.categoryId = categoryId; }
         public Set<Long> getTagIds() { return tagIds; }

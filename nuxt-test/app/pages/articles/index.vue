@@ -10,7 +10,7 @@ import { ref, onMounted, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
 
-const { getAdminList, getMyArticles, remove, removeMyArticle } = useArticle()
+const { getAdminList, getMyArticles, update, updateMyArticle, remove, removeMyArticle } = useArticle()
 const { role } = useAuth()
 
 const isAdmin = computed(() => role.value === 'ADMIN' || role.value === 'SUPERADMIN')
@@ -102,6 +102,20 @@ async function handleDelete(id) {
   } catch { /* cancelled */ }
 }
 
+async function handleVisibilityChange(row) {
+  try {
+    const targetVis = row.visibility;
+    if (isAdmin.value) {
+      await update(row.id, { visibility: targetVis })
+    } else {
+      await updateMyArticle(row.id, { visibility: targetVis })
+    }
+    ElMessage.success(targetVis === 'PRIVATE' ? '已设为私密' : '已设为公开')
+  } catch (e) {
+    ElMessage.error(e.response?.data?.message || '操作失败')
+  }
+}
+
 function goCreate() { navigateTo('/articles/create') }
 function goEdit(id) { navigateTo('/articles/edit/' + id) }
 
@@ -166,6 +180,20 @@ onMounted(async () => { await loadFilters(); await loadData() })
           </template>
         </el-table-column>
         <el-table-column v-if="isAdmin" prop="author.username" label="作者" width="100" />
+        <el-table-column label="可见性" width="90" align="center">
+          <template #default="{ row }">
+            <el-switch
+              v-model="row.visibility"
+              active-value="PRIVATE"
+              inactive-value="PUBLIC"
+              active-text="私"
+              inactive-text="公"
+              size="small"
+              inline-prompt
+              @change="handleVisibilityChange(row)"
+            />
+          </template>
+        </el-table-column>
         <el-table-column prop="viewCount" label="阅读" width="70" />
         <el-table-column prop="createdAt" label="创建时间" width="170">
           <template #default="{ row }">{{ (row.createdAt || "").replace("T", " ").slice(0, 16) }}</template>

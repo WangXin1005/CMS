@@ -124,18 +124,17 @@ export const useAuth = () => {
         const res = await request.put(`/users/${id}`, data)
         return res.data
     }
-
-    /** 删除用户（仅 SUPERADMIN）*/
     /** 修改当前用户密码 */
     const changePassword = async (data: { oldPassword: string; newPassword: string }) => {
         const res = await request.put("/users/me/password", data)
         return res.data
     }
 
-        const deleteUser = async (id: number) => {
+    /** 删除用户（仅 SUPERADMIN）*/
+    const deleteUser = async (id: number) => {
         const res = await request.delete(`/users/${id}`)
         return res.data
     }
 
-        return { token, username, role, isLoggedIn, hasSuperAdmin, checking, checkSuperAdmin, initSuperAdmin, login, registerGuest, logout, checkUsername, changePassword, getUserList, createUser, updateUser, deleteUser }
+    return { token, username, role, isLoggedIn, hasSuperAdmin, checking, checkSuperAdmin, initSuperAdmin, login, registerGuest, logout, checkUsername, changePassword, getUserList, createUser, updateUser, deleteUser }
 }
