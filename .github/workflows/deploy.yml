@@ -28,10 +28,6 @@ jobs:
             cd /opt/CMS
             git pull origin main
 
-            echo "===== 确保 SonarQube 运行 ====="
-            docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d sonarqube
-            sleep 30
-
             SONAR_URL=http://sonarqube:9000
 
             echo "===== SonarQube 后端审计 ====="
