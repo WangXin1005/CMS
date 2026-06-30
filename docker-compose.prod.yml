@@ -6,11 +6,6 @@ services:
       - "127.0.0.1:3306:3306"
     restart: always
 
-  sonarqube:
-    ports:
-      - "9000:9000"
-    restart: always
-
   backend:
     environment:
       SPRING_PROFILES_ACTIVE: prod
