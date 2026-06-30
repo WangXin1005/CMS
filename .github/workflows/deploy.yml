@@ -21,9 +21,11 @@ jobs:
           key: ${{ secrets.DEPLOY_SSH_KEY }}
           port: ${{ secrets.DEPLOY_PORT || '22' }}
           timeout: 1800s
-          command_timeout: 1800s
+          command_timeout: 600s
           envs: SONARQUBE_TOKEN
           script: |
+            set -e
+
             echo "===== 拉取代码 ====="
             cd /opt/CMS
             git pull origin main
@@ -32,6 +34,7 @@ jobs:
 
             echo "===== SonarQube 后端审计 ====="
             docker run --rm --network cms_default \
+              --memory=1500m --cpus=1.5 \
               -v ./java-backend:/app -w /app \
               -e SONAR_TOKEN=$SONARQUBE_TOKEN \
               maven:3.9-eclipse-temurin-21-alpine \
@@ -44,6 +47,7 @@ jobs:
 
             echo "===== SonarQube 前端审计 ====="
             docker run --rm --network cms_default \
+              --memory=1000m --cpus=1 \
               -v ./nuxt-test:/app -w /app \
               -e SONAR_HOST_URL=$SONAR_URL \
               -e SONAR_TOKEN=$SONARQUBE_TOKEN \
@@ -54,8 +58,11 @@ jobs:
                 -Dsonar.exclusions="node_modules/**,dist/**,.output/**,.nuxt/**" \
                 -Dsonar.qualitygate.wait=true
 
-            echo "===== 审计通过，开始部署 ====="
-            docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+            echo "===== 审计通过，串行构建容器 ====="
+            docker compose -f docker-compose.yml -f docker-compose.prod.yml build backend
+            docker compose -f docker-compose.yml -f docker-compose.prod.yml build frontend
+            docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
             docker image prune -f
+
             echo "===== 部署完成 ====="
             docker compose -f docker-compose.yml -f docker-compose.prod.yml ps
