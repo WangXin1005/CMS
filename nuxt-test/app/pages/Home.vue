@@ -1,10 +1,13 @@
-﻿<script lang="ts" setup>
+<!-- Home — 仪表盘页：统计概览、近期文章、快捷操作入口 -->
+
+<script lang="ts" setup>
 /**
  * Home - 仪表盘页面（管理后台首页）
  * 展示统计概览、快捷操作入口、近期文章列表。需 auth 中间件保护。
  */
-definePageMeta({ middleware: 'auth' })
 import { ref, onMounted, computed } from 'vue'
+import { sanitizeHtml } from '~/utils/sanitize'
+definePageMeta({ middleware: 'auth' })
 
 const { getStats, getRecent, getById } = useArticle()
 const { role } = useAuth()
@@ -12,18 +15,29 @@ const isAdmin = computed(() => role.value === 'ADMIN' || role.value === 'SUPERAD
 const canClick = computed(() => role.value !== 'GUEST')
 
 const dialogVisible = ref(false)
-const dialogArticle = ref<any>(null)
+const dialogArticle = ref<Record<string, unknown> | null>(null)
 
 const stats = ref({ totalArticles: 0, totalCategories: 0, totalTags: 0, totalComments: 0 })
 const recentArticles = ref([])
 const statsLoading = ref(true)
 const articlesLoading = ref(true)
 
-function goCreate() { return navigateTo('/articles/create') }
-function goArticleList() { return navigateTo('/articles') }
-function goComments() { return navigateTo('/comments') }
+function goCreate() {
+  return navigateTo('/articles/create')
+}
+function goArticleList() {
+  return navigateTo('/articles')
+}
+function goComments() {
+  return navigateTo('/comments')
+}
 
-async function viewArticle(item: any) {
+// 预览对话框内点击编辑：关闭弹窗后跳转
+function handlePreviewEdit() {
+  dialogVisible.value = false
+  navigateTo('/articles/edit/' + dialogArticle.value.id)
+}
+async function viewArticle(item: Record<string, unknown>) {
   try {
     const full = await getById(item.id)
     dialogArticle.value = full
@@ -66,101 +80,128 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div>
-    <div class="page-header">
-      <h2>仪表盘</h2>
-    </div>
+  <div class="home-page-wrapper">
+    <div>
+      <div class="page-header">
+        <h2>仪表盘</h2>
+      </div>
 
-    <!-- 统计卡片 -->
-    <div class="stats-grid" v-loading="statsLoading">
-      <el-card class="stat-card" shadow="never">
-        <div class="stat-value" style="color:#409eff">{{ stats.totalArticles }}</div>
-        <div class="stat-label">文章总数</div>
-      </el-card>
-      <el-card class="stat-card" shadow="never">
-        <div class="stat-value" style="color:#67c23a">{{ stats.totalCategories }}</div>
-        <div class="stat-label">分类总数</div>
-      </el-card>
-      <el-card class="stat-card" shadow="never">
-        <div class="stat-value" style="color:#e6a23c">{{ stats.totalTags }}</div>
-        <div class="stat-label">标签总数</div>
-      </el-card>
-      <el-card class="stat-card" shadow="never">
-        <div class="stat-value" style="color:#f56c6c">{{ stats.totalComments }}</div>
-        <div class="stat-label">评论总数</div>
-      </el-card>
-    </div>
+      <!-- 统计卡片 -->
+      <div v-loading="statsLoading" class="stats-grid">
+        <el-card class="stat-card" shadow="never">
+          <div class="stat-value" style="color: #409eff">{{ stats.totalArticles }}</div>
+          <div class="stat-label">文章总数</div>
+        </el-card>
+        <el-card class="stat-card" shadow="never">
+          <div class="stat-value" style="color: #67c23a">{{ stats.totalCategories }}</div>
+          <div class="stat-label">分类总数</div>
+        </el-card>
+        <el-card class="stat-card" shadow="never">
+          <div class="stat-value" style="color: #e6a23c">{{ stats.totalTags }}</div>
+          <div class="stat-label">标签总数</div>
+        </el-card>
+        <el-card class="stat-card" shadow="never">
+          <div class="stat-value" style="color: #f56c6c">{{ stats.totalComments }}</div>
+          <div class="stat-label">评论总数</div>
+        </el-card>
+      </div>
 
-    <!-- 近期文章 + 快捷操作 -->
-    <el-row :gutter="16">
-      <el-col :span="16">
-        <el-card shadow="never">
-          <template #header>
-            <span>近期文章</span>
-          </template>
-          <div v-loading="articlesLoading">
-            <el-empty v-if="!articlesLoading && recentArticles.length === 0" description="暂无文章" />
-            <div v-for="(item, i) in recentArticles" :key="item.id" class="recent-item" :class="{ clickable: canClick }" @click="canClick && viewArticle(item)">
-              <span class="recent-index">{{ i + 1 }}</span>
-              <span class="recent-title" :class="{ clickable: canClick }">{{ item.title }}</span>
-              <span class="recent-status">
-                <el-tag
-                  :type="item.status === 'PUBLISHED' ? 'success' : 'warning'"
-                  size="small"
-                  effect="dark"
-                >
-                  {{ item.status === 'PUBLISHED' ? '已发布' : '草稿' }}
-                </el-tag>
-              </span>
-              <span class="recent-date">{{ (item.createdAt || "").replace("T", " ").slice(0, 16) }}</span>
+      <!-- 近期文章 + 快捷操作 -->
+      <el-row :gutter="16">
+        <el-col :span="16">
+          <el-card shadow="never">
+            <template #header>
+              <span>近期文章</span>
+            </template>
+            <div v-loading="articlesLoading">
+              <el-empty
+                v-if="!articlesLoading && recentArticles.length === 0"
+                description="暂无文章"
+              />
+              <div
+                v-for="(item, i) in recentArticles"
+                :key="item.id"
+                class="recent-item"
+                :class="{ clickable: canClick }"
+                @click="canClick && viewArticle(item)"
+              >
+                <span class="recent-index">{{ i + 1 }}</span>
+                <span class="recent-title" :class="{ clickable: canClick }">{{ item.title }}</span>
+                <span class="recent-status">
+                  <el-tag
+                    :type="item.status === 'PUBLISHED' ? 'success' : 'warning'"
+                    size="small"
+                    effect="dark"
+                  >
+                    {{ item.status === 'PUBLISHED' ? '已发布' : '草稿' }}
+                  </el-tag>
+                </span>
+                <span class="recent-date">{{
+                  (item.createdAt || '').replace('T', ' ').slice(0, 16)
+                }}</span>
+              </div>
             </div>
-          </div>
-        </el-card>
-      </el-col>
-      <el-col :span="8">
-        <el-card shadow="never">
-          <template #header>
-            <span>快捷操作</span>
-          </template>
-          <div class="quick-actions">
-            <div class="quick-action-item" @click="goCreate">
-              <div class="qa-icon">✍️</div>
-              <div class="qa-label">写文章</div>
+          </el-card>
+        </el-col>
+        <el-col :span="8">
+          <el-card shadow="never">
+            <template #header>
+              <span>快捷操作</span>
+            </template>
+            <div class="quick-actions">
+              <div class="quick-action-item" @click="goCreate">
+                <div class="qa-icon">✍️</div>
+                <div class="qa-label">写文章</div>
+              </div>
+              <div class="quick-action-item" @click="goArticleList">
+                <div class="qa-icon">📋</div>
+                <div class="qa-label">文章管理</div>
+              </div>
+              <div class="quick-action-item" @click="goComments">
+                <div class="qa-icon">💬</div>
+                <div class="qa-label">评论管理</div>
+              </div>
             </div>
-            <div class="quick-action-item" @click="goArticleList">
-              <div class="qa-icon">📋</div>
-              <div class="qa-label">文章管理</div>
-            </div>
-            <div class="quick-action-item" @click="goComments">
-              <div class="qa-icon">💬</div>
-              <div class="qa-label">评论管理</div>
-            </div>
-          </div>
-        </el-card>
-      </el-col>
-    </el-row>
-  </div>
+          </el-card>
+        </el-col>
+      </el-row>
+    </div>
 
     <!-- 文章预览对话框 -->
     <el-dialog v-model="dialogVisible" title="文章预览" width="700px" :close-on-click-modal="false">
       <template v-if="dialogArticle">
-        <h2 style="font-size:20px;margin:0 0 12px;color:#1a1a1a">{{ dialogArticle.title }}</h2>
-        <div style="font-size:13px;color:#999;margin-bottom:16px">
+        <h2 style="font-size: 20px; margin: 0 0 12px; color: #1a1a1a">{{ dialogArticle.title }}</h2>
+        <div style="font-size: 13px; color: #999; margin-bottom: 16px">
           <span>✍ {{ dialogArticle.author?.username }}</span>
-          <span style="margin-left:16px">{{ (dialogArticle.createdAt || "").replace("T", " ").slice(0, 16) }}</span>
-          <el-tag v-if="dialogArticle.category" size="small" style="margin-left:12px">{{ dialogArticle.category.name }}</el-tag>
+          <span style="margin-left: 16px">{{
+            (dialogArticle.createdAt || '').replace('T', ' ').slice(0, 16)
+          }}</span>
+          <el-tag v-if="dialogArticle.category" size="small" style="margin-left: 12px">{{
+            dialogArticle.category.name
+          }}</el-tag>
         </div>
-        <div v-if="dialogArticle.tags?.length" style="margin-bottom:12px">
-          <el-tag v-for="tag in dialogArticle.tags" :key="tag.id" size="small" style="margin-right:6px">{{ tag.name }}</el-tag>
+        <div v-if="dialogArticle.tags?.length" style="margin-bottom: 12px">
+          <el-tag
+            v-for="tag in dialogArticle.tags"
+            :key="tag.id"
+            size="small"
+            style="margin-right: 6px"
+            >{{ tag.name }}</el-tag
+          >
         </div>
-        <el-divider style="margin:12px 0" />
-        <div class="article-content-render" style="max-height:400px;overflow-y:auto" v-html="dialogArticle.content"></div>
+        <el-divider style="margin: 12px 0" />
+        <div
+          class="article-content-render"
+          style="max-height: 400px; overflow-y: auto"
+          v-html="sanitizeHtml(dialogArticle.content)"
+        ></div>
       </template>
       <template #footer>
         <el-button @click="dialogVisible = false">关闭</el-button>
-        <el-button v-if="isAdmin" type="primary" @click="dialogVisible = false; navigateTo('/articles/edit/' + dialogArticle.id)">编辑</el-button>
+        <el-button v-if="isAdmin" type="primary" @click="handlePreviewEdit">编辑</el-button>
       </template>
     </el-dialog>
+  </div>
 </template>
 
 <style scoped>
@@ -170,9 +211,19 @@ onMounted(async () => {
   gap: 16px;
   margin-bottom: 16px;
 }
-.stat-card { text-align: center; padding: 20px 0; }
-.stat-value { font-size: 32px; font-weight: 700; }
-.stat-label { font-size: 14px; color: #909399; margin-top: 8px; }
+.stat-card {
+  text-align: center;
+  padding: 20px 0;
+}
+.stat-value {
+  font-size: 32px;
+  font-weight: 700;
+}
+.stat-label {
+  font-size: 14px;
+  color: #909399;
+  margin-top: 8px;
+}
 .recent-item {
   display: flex;
   align-items: center;
@@ -182,7 +233,9 @@ onMounted(async () => {
   padding: 10px 0;
   border-bottom: 1px solid #f0f0f0;
 }
-.recent-item:last-child { border-bottom: none; }
+.recent-item:last-child {
+  border-bottom: none;
+}
 .recent-index {
   width: 24px;
   height: 24px;
@@ -204,9 +257,15 @@ onMounted(async () => {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.recent-item.clickable { cursor: pointer; }
-.recent-item.clickable:hover .recent-title { color: #409eff; }
-.recent-status { flex-shrink: 0; }
+.recent-item.clickable {
+  cursor: pointer;
+}
+.recent-item.clickable:hover .recent-title {
+  color: #409eff;
+}
+.recent-status {
+  flex-shrink: 0;
+}
 .recent-date {
   font-size: 12px;
   color: #999;
@@ -258,7 +317,7 @@ onMounted(async () => {
 }
 
 .quick-action-item:hover .qa-icon {
-  background: rgba(255,255,255,0.2);
+  background: rgba(255, 255, 255, 0.2);
 }
 
 .qa-label {

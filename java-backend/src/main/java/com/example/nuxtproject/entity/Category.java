@@ -1,3 +1,6 @@
+/**
+ * 分类实体 — 文章分类，支持排序。
+ */
 package com.example.nuxtproject.entity;
 
 import io.swagger.v3.oas.annotations.media.Schema;

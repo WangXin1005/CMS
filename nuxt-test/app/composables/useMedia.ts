@@ -13,13 +13,12 @@
 import request from '~/utils/request'
 
 export const useMedia = () => {
-
   /** 上传文件 */
   const upload = async (file: File) => {
     const formData = new FormData()
     formData.append('file', file)
     const res = await request.post('/admin/media/upload', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
+      headers: { 'Content-Type': 'multipart/form-data' },
     })
     return res.data
   }

@@ -1,3 +1,6 @@
+/**
+ * 操作日志控制器 — 分页查询系统操作日志（ADMIN/SUPERADMIN）。
+ */
 package com.example.nuxtproject.controller;
 
 import com.example.nuxtproject.entity.OperationLog;

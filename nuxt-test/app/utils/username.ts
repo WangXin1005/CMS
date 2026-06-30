@@ -5,13 +5,13 @@
  */
 export function validateUsername(username) {
   if (!username) {
-    return "请输入用户名"
+    return '请输入用户名'
   }
   if (username.length < 4 || username.length > 15) {
-    return "用户名长度需为 4~15 位"
+    return '用户名长度需为 4~15 位'
   }
   if (!/^[a-zA-Z0-9]+$/.test(username)) {
-    return "用户名只能包含大小写字母和数字"
+    return '用户名只能包含大小写字母和数字'
   }
   return null // 验证通过
 }

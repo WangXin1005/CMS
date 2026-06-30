@@ -1,3 +1,6 @@
+/**
+ * 评论数据访问层 — 按文章/状态查询，统计各状态数量。
+ */
 package com.example.nuxtproject.repository;
 
 import com.example.nuxtproject.entity.Comment;

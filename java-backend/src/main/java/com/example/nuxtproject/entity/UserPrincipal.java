@@ -1,3 +1,6 @@
+/**
+ * 用户认证主体 — Spring Security 的 Principal 实现，携带 userId/username/role。
+ */
 package com.example.nuxtproject.entity;
 
 import io.swagger.v3.oas.annotations.media.Schema;

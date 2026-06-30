@@ -19,4 +19,4 @@ RUN mkdir -p /app/uploads && chown -R appuser:appgroup /app
 USER appuser
 EXPOSE 8080
 VOLUME /app/uploads
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-Duser.timezone=Asia/Shanghai", "-jar", "app.jar"]

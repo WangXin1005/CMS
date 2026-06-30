@@ -19,16 +19,24 @@ export const useCategory = () => {
     const res = await request.get(`/categories/${slug}`)
     return res.data
   }
-  const create = async (data: { name: string; slug: string; description?: string; sortOrder?: number }) => {
+  const create = async (data: {
+    name: string
+    slug: string
+    description?: string
+    sortOrder?: number
+  }) => {
     const res = await request.post('/admin/categories', data)
     return res.data
   }
-  const update = async (id: number, data: { name?: string; slug?: string; description?: string; sortOrder?: number }) => {
+  const update = async (
+    id: number,
+    data: { name?: string; slug?: string; description?: string; sortOrder?: number },
+  ) => {
     const res = await request.put(`/admin/categories/${id}`, data)
     return res.data
   }
   const reorder = async (orders) => {
-    const res = await request.put("/admin/categories/reorder", orders)
+    const res = await request.put('/admin/categories/reorder', orders)
     return res.data
   }
   const remove = async (id: number) => {

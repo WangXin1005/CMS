@@ -1,3 +1,4 @@
+<!-- article/[slug] — 文章详情页（公开）：内容渲染、作者信息、评论区 -->
 <script lang="ts" setup>
 /**
  * 文章详情页（公开）
@@ -5,6 +6,7 @@
  */
 import { ref, computed, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
+import { sanitizeHtml } from '~/utils/sanitize'
 
 definePageMeta({ layout: 'public' })
 
@@ -15,10 +17,10 @@ const { getBySlug } = useArticle()
 const { getList: getCategories } = useCategory()
 const { getList: getTags } = useTag()
 
-const article = ref<any>(null)
+const article = ref<Record<string, unknown> | null>(null)
 const loading = ref(true)
-const categories = ref<any[]>([])
-const tags = ref<any[]>([])
+const categories = ref<Record<string, unknown>[]>([])
+const tags = ref<Record<string, unknown>[]>([])
 
 const slug = computed(() => route.params.slug as string)
 
@@ -37,7 +39,7 @@ async function loadArticle() {
 
 async function loadSidebar() {
   try {
-    const [catRes, tagRes] = await Promise.all([ getCategories(), getTags() ])
+    const [catRes, tagRes] = await Promise.all([getCategories(), getTags()])
     categories.value = catRes ?? []
     tags.value = tagRes ?? []
   } catch {
@@ -47,21 +49,23 @@ async function loadSidebar() {
 
 const formattedDate = computed(() => {
   if (!article.value?.createdAt) return ''
-  return (article.value.createdAt || "").replace("T", " ").slice(0, 16)
+  return (article.value.createdAt || '').replace('T', ' ').slice(0, 16)
 })
 
 onMounted(async () => {
-  await Promise.all([ loadArticle(), loadSidebar() ])
+  await Promise.all([loadArticle(), loadSidebar()])
 })
 </script>
 
 <template>
-  <div class="article-detail-layout" v-if="!loading && article">
+  <div v-if="!loading && article" class="article-detail-layout">
     <!-- 主内容 -->
     <div class="detail-main">
       <div class="back-bar">
-        <el-button size="small" @click="router.back()" class="back-btn">
-          <svg viewBox="0 0 24 24" width="14" height="14" style="margin-right:2px"><path fill="currentColor" d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+        <el-button size="small" class="back-btn" @click="router.back()">
+          <svg viewBox="0 0 24 24" width="14" height="14" style="margin-right: 2px">
+            <path fill="currentColor" d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
+          </svg>
           返回
         </el-button>
       </div>
@@ -83,11 +87,17 @@ onMounted(async () => {
       </div>
 
       <!-- 文章内容 -->
-      <div class="article-content" v-html="article.content"></div>
+      <div class="article-content" v-html="sanitizeHtml(article.content)"></div>
 
       <!-- 标签 -->
       <div v-if="article.tags?.length" class="article-tags">
-        <el-tag v-for="tag in article.tags" :key="tag.id" size="small" effect="plain" class="tag-item">
+        <el-tag
+          v-for="tag in article.tags"
+          :key="tag.id"
+          size="small"
+          effect="plain"
+          class="tag-item"
+        >
           #{{ tag.name }}
         </el-tag>
       </div>
@@ -112,8 +122,13 @@ onMounted(async () => {
       <div class="widget">
         <h3 class="widget-title">🏷️ 标签</h3>
         <div v-if="tags.length" class="tag-cloud">
-          <NuxtLink v-for="tag in tags" :key="tag.id" :to="`/?tagId=${tag.id}`"
-            class="sidebar-tag-item">{{ tag.name }}</NuxtLink>
+          <NuxtLink
+            v-for="tag in tags"
+            :key="tag.id"
+            :to="`/?tagId=${tag.id}`"
+            class="sidebar-tag-item"
+            >{{ tag.name }}</NuxtLink
+          >
         </div>
         <p v-else class="empty-hint">暂无标签</p>
       </div>
@@ -124,11 +139,11 @@ onMounted(async () => {
   <div v-else-if="loading" class="detail-loading">
     <el-skeleton :count="1">
       <template #template>
-        <el-skeleton-item variant="h1" style="width:60%;height:32px" />
-        <el-skeleton-item variant="text" style="margin-top:16px" />
+        <el-skeleton-item variant="h1" style="width: 60%; height: 32px" />
+        <el-skeleton-item variant="text" style="margin-top: 16px" />
         <el-skeleton-item variant="text" />
-        <el-skeleton-item variant="text" style="width:40%" />
-        <el-skeleton-item variant="image" style="width:100%;height:300px;margin-top:24px" />
+        <el-skeleton-item variant="text" style="width: 40%" />
+        <el-skeleton-item variant="image" style="width: 100%; height: 300px; margin-top: 24px" />
       </template>
     </el-skeleton>
   </div>
@@ -150,7 +165,7 @@ onMounted(async () => {
   background: #fff;
   border-radius: 12px;
   padding: 40px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
 .article-header {
@@ -214,11 +229,14 @@ onMounted(async () => {
     margin: 0 0 16px;
   }
 
-  ul, ol {
+  ul,
+  ol {
     padding-left: 24px;
     margin: 12px 0 16px;
 
-    li { margin: 6px 0; }
+    li {
+      margin: 6px 0;
+    }
   }
 
   code {
@@ -255,7 +273,9 @@ onMounted(async () => {
     border-radius: 0 8px 8px 0;
     color: #555;
 
-    p { margin: 0; }
+    p {
+      margin: 0;
+    }
   }
 
   img {
@@ -265,8 +285,14 @@ onMounted(async () => {
     display: block;
   }
 
-  strong { font-weight: 700; color: #1a1a1a; }
-  a { color: #667eea; text-decoration: underline; }
+  strong {
+    font-weight: 700;
+    color: #1a1a1a;
+  }
+  a {
+    color: #667eea;
+    text-decoration: underline;
+  }
 }
 
 // ===== 标签 =====
@@ -277,17 +303,22 @@ onMounted(async () => {
   flex-wrap: wrap;
 }
 
-.tag-item { cursor: default; }
+.tag-item {
+  cursor: default;
+}
 
 // ===== 侧边栏 =====
-.detail-sidebar { width: 280px; flex-shrink: 0; }
+.detail-sidebar {
+  width: 280px;
+  flex-shrink: 0;
+}
 
 .widget {
   background: #fff;
   border-radius: 10px;
   padding: 20px;
   margin-bottom: 20px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
 .widget-title {
@@ -299,13 +330,19 @@ onMounted(async () => {
   color: #333;
 }
 
-.category-list { list-style: none; padding: 0; margin: 0; }
+.category-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
 
 .category-list li {
   padding: 9px 0;
   border-bottom: 1px solid #f5f5f5;
 
-  &:last-child { border-bottom: none; }
+  &:last-child {
+    border-bottom: none;
+  }
 }
 
 .cat-link {
@@ -321,7 +358,11 @@ onMounted(async () => {
   }
 }
 
-.tag-cloud { display: flex; flex-wrap: wrap; gap: 6px; }
+.tag-cloud {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
 
 .sidebar-tag-item {
   display: inline-block;
@@ -339,7 +380,13 @@ onMounted(async () => {
   }
 }
 
-.empty-hint { color: #999; font-size: 14px; text-align: center; padding: 16px 0; margin: 0; }
+.empty-hint {
+  color: #999;
+  font-size: 14px;
+  text-align: center;
+  padding: 16px 0;
+  margin: 0;
+}
 
 // ===== 加载态 =====
 .detail-loading {
@@ -351,14 +398,36 @@ onMounted(async () => {
 }
 
 // ===== 响应式 =====
-.back-bar { margin-bottom: 20px; }
-.back-bar .el-button { font-size: 13px; color: #666; padding: 6px 14px; border-radius: 6px; display: inline-flex; align-items: center; }
-.back-bar .el-button:hover { color: #409eff; background: #f0f7ff; border-color: #409eff; }
+.back-bar {
+  margin-bottom: 20px;
+}
+.back-bar .el-button {
+  font-size: 13px;
+  color: #666;
+  padding: 6px 14px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+}
+.back-bar .el-button:hover {
+  color: #409eff;
+  background: #f0f7ff;
+  border-color: #409eff;
+}
 
 @media (max-width: 768px) {
-  .article-detail-layout { flex-direction: column; padding: 16px; }
-  .detail-sidebar { width: 100%; }
-  .detail-main { padding: 20px; }
-  .article-title { font-size: 24px; }
+  .article-detail-layout {
+    flex-direction: column;
+    padding: 16px;
+  }
+  .detail-sidebar {
+    width: 100%;
+  }
+  .detail-main {
+    padding: 20px;
+  }
+  .article-title {
+    font-size: 24px;
+  }
 }
 </style>

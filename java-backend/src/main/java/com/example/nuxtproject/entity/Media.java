@@ -1,3 +1,6 @@
+/**
+ * 媒体实体 — 上传文件记录，含 URL、MIME 类型、上传者。
+ */
 package com.example.nuxtproject.entity;
 
 import io.swagger.v3.oas.annotations.media.Schema;

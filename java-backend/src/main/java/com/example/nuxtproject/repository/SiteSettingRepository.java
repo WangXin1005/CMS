@@ -1,3 +1,6 @@
+/**
+ * 站点设置数据访问层 — 按 key 查找配置项。
+ */
 package com.example.nuxtproject.repository;
 
 import com.example.nuxtproject.entity.SiteSetting;

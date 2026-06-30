@@ -12,6 +12,7 @@ import Link from '@tiptap/extension-link'
 import { ref, watch, computed, onBeforeUnmount } from 'vue'
 import TextStyle from '~/extensions/TextStyle'
 import FontSize from '~/extensions/FontSize'
+import { sanitizeHtml } from '~/utils/sanitize'
 import TurndownService from 'turndown'
 import { marked } from 'marked'
 
@@ -27,7 +28,6 @@ const currentSize = ref('16')
 const savedRange = ref(null)
 const mode = ref('rich')
 const markdownContent = ref('')
-const MAX_FONT = 60
 const fontSizes = ['12', '14', '16', '18', '20', '24', '28', '32', '36', '42', '48', '54', '60']
 
 const turndownService = new TurndownService({
@@ -43,23 +43,24 @@ turndownService.addRule('image', {
     const alt = el.getAttribute('alt') || ''
     const src = el.getAttribute('src') || ''
     return '![' + alt + '](' + src + ')'
-  }
+  },
 })
 
 const editor = useEditor({
   editorProps: {
     handleKeyDown: (view, event) => {
-      if (event.key === "Tab" && !event.shiftKey) {
-        view.dispatch(view.state.tr.insertText("    "));
-        return true;
+      if (event.key === 'Tab' && !event.shiftKey) {
+        view.dispatch(view.state.tr.insertText('    '))
+        return true
       }
-      return false;
-    }
+      return false
+    },
   },
   content: props.modelValue,
   extensions: [
     StarterKit.configure({
       heading: { levels: [1, 2, 3, 4, 5] },
+      link: false,
     }),
     Image.configure({ inline: false }),
     Link.configure({ openOnClick: false }),
@@ -74,18 +75,25 @@ const editor = useEditor({
   },
 })
 
-watch(() => props.modelValue, (val) => {
-  if (mode.value !== 'rich' || !editor.value) return
-  if (val !== editor.value.getHTML()) {
-    editor.value.commands.setContent(val, false)
-  }
-})
+watch(
+  () => props.modelValue,
+  (val) => {
+    if (mode.value !== 'rich' || !editor.value) return
+    if (val !== editor.value.getHTML()) {
+      editor.value.commands.setContent(val, false)
+    }
+  },
+)
 
-watch(mode, (val) => {
-  if (val === 'rich' && editor.value) {
-    editor.value.commands.setContent(props.modelValue || '', false)
-  }
-}, { immediate: true })
+watch(
+  mode,
+  (val) => {
+    if (val === 'rich' && editor.value) {
+      editor.value.commands.setContent(props.modelValue || '', false)
+    }
+  },
+  { immediate: true },
+)
 
 function toggleMode() {
   if (mode.value === 'rich') {
@@ -116,7 +124,7 @@ function syncFontSize() {
   currentSize.value = fontSize || '16'
 }
 
-function saveSelection(e) {
+function saveSelection(_e) {
   const domSel = window.getSelection()
   if (!domSel || domSel.rangeCount === 0 || !editor.value) return
   const range = domSel.getRangeAt(0)
@@ -125,6 +133,11 @@ function saveSelection(e) {
   }
 }
 
+// 工具栏：设置为正文段落样式
+function setParagraphStyle() {
+  editor.value?.chain().focus().setParagraph().unsetMark('fontSize').run()
+  currentSize.value = '16'
+}
 function setFontSize(size) {
   if (savedRange.value && editor.value) {
     const domSel = window.getSelection()
@@ -145,11 +158,9 @@ function setFontSize(size) {
   currentSize.value = size
 }
 
-
-
 /** Markdown 包裹选中文本语法 */
 function mdWrap(before, after) {
-  const ta = document.querySelector(".markdown-textarea")
+  const ta = document.querySelector('.markdown-textarea')
   if (!ta) return
   const start = ta.selectionStart
   const end = ta.selectionEnd
@@ -168,7 +179,7 @@ function mdWrap(before, after) {
 
 /** Markdown 行首前缀（标题/列表/引用等） */
 function mdLinePrefix(prefix) {
-  const ta = document.querySelector(".markdown-textarea")
+  const ta = document.querySelector('.markdown-textarea')
   if (!ta) return
   const start = ta.selectionStart
   const text = markdownContent.value
@@ -177,30 +188,39 @@ function mdLinePrefix(prefix) {
   const lineEnd = text.indexOf(nl, start)
   const lineEndIdx = lineEnd === -1 ? text.length : lineEnd
   const line = text.substring(lineStart, lineEndIdx)
-  if (line.startsWith(prefix + " ")) {
-    markdownContent.value = text.substring(0, lineStart) + line.substring(prefix.length + 1) + text.substring(lineEndIdx)
+  if (line.startsWith(prefix + ' ')) {
+    markdownContent.value =
+      text.substring(0, lineStart) + line.substring(prefix.length + 1) + text.substring(lineEndIdx)
   } else if (line.startsWith(prefix)) {
-    markdownContent.value = text.substring(0, lineStart) + line.substring(prefix.length) + text.substring(lineEndIdx)
+    markdownContent.value =
+      text.substring(0, lineStart) + line.substring(prefix.length) + text.substring(lineEndIdx)
   } else {
-    const cleaned = line.replace(/^[#\->*+]+(\s|$)/, "")
-    markdownContent.value = text.substring(0, lineStart) + prefix + " " + cleaned + text.substring(lineEndIdx)
+    const cleaned = line.replace(/^[#\->*+]+(\s|$)/, '')
+    markdownContent.value =
+      text.substring(0, lineStart) + prefix + ' ' + cleaned + text.substring(lineEndIdx)
   }
-  requestAnimationFrame(() => { ta.focus(); ta.setSelectionRange(lineStart, lineStart) })
+  requestAnimationFrame(() => {
+    ta.focus()
+    ta.setSelectionRange(lineStart, lineStart)
+  })
 }
 
 /** Markdown 插入水平线 */
 function mdHr() {
-  const ta = document.querySelector(".markdown-textarea")
+  const ta = document.querySelector('.markdown-textarea')
   if (!ta) return
   const nl = String.fromCharCode(10)
   const text = markdownContent.value
-  markdownContent.value = text + (text.endsWith(nl) ? "" : nl) + "---" + nl
-  requestAnimationFrame(() => { ta.focus(); ta.selectionStart = ta.selectionEnd = markdownContent.value.length })
+  markdownContent.value = text + (text.endsWith(nl) ? '' : nl) + '---' + nl
+  requestAnimationFrame(() => {
+    ta.focus()
+    ta.selectionStart = ta.selectionEnd = markdownContent.value.length
+  })
 }
 
 /** Markdown 插入块级代码 */
 function mdCodeBlock() {
-  const ta = document.querySelector(".markdown-textarea")
+  const ta = document.querySelector('.markdown-textarea')
   if (!ta) return
   const nl = String.fromCharCode(10)
   const bt = String.fromCharCode(96)
@@ -208,29 +228,44 @@ function mdCodeBlock() {
   const end = ta.selectionEnd
   const text = markdownContent.value
   const selected = text.substring(start, end)
-  markdownContent.value = text.substring(0, start) + nl + bt + bt + bt + nl + selected + nl + bt + bt + bt + nl + text.substring(end)
-  requestAnimationFrame(() => { ta.focus(); ta.setSelectionRange(start + 1, start + 1) })
+  markdownContent.value =
+    text.substring(0, start) +
+    nl +
+    bt +
+    bt +
+    bt +
+    nl +
+    selected +
+    nl +
+    bt +
+    bt +
+    bt +
+    nl +
+    text.substring(end)
+  requestAnimationFrame(() => {
+    ta.focus()
+    ta.setSelectionRange(start + 1, start + 1)
+  })
 }
 
 /** Markdown 插入链接 */
 function mdLink() {
-  const ta = document.querySelector(".markdown-textarea")
+  const ta = document.querySelector('.markdown-textarea')
   if (!ta) return
   const start = ta.selectionStart
   const end = ta.selectionEnd
   const selected = markdownContent.value.substring(start, end)
   if (selected) {
-    mdWrap("[", "](url)")
+    mdWrap('[', '](url)')
   } else {
-    mdWrap("[链接文本](", ")")
+    mdWrap('[链接文本](', ')')
   }
 }
 
 /** Markdown 插入图片 */
 function mdImage() {
-  mdWrap("![图片描述](", ")")
+  mdWrap('![图片描述](', ')')
 }
-
 
 onBeforeUnmount(() => {
   editor.value?.destroy()
@@ -248,67 +283,120 @@ const previewHtml = computed(() => {
 
 <template>
   <div class="rich-editor">
-    <div class="editor-toolbar" v-if="mode === 'rich' && editor">
+    <div v-if="mode === 'rich' && editor" class="editor-toolbar">
       <el-tooltip content="字号" placement="top">
-        <el-select v-model="currentSize" @change="setFontSize" @mousedown="saveSelection($event)" style="width:68px;vertical-align:top" size="small">
+        <el-select
+          v-model="currentSize"
+          style="width: 68px; vertical-align: top"
+          size="small"
+          @change="setFontSize"
+          @mousedown="saveSelection($event)"
+        >
           <el-option v-for="s in fontSizes" :key="s" :label="s" :value="s" />
         </el-select>
       </el-tooltip>
 
       <el-button-group size="small">
         <el-tooltip content="正文" placement="top">
-          <el-button :class="{ 'is-active': editor.isActive('paragraph') }"
-            @click="editor.chain().focus().setParagraph().unsetMark('fontSize').run(); currentSize='16'" style="font-size:13px">正文</el-button>
+          <el-button
+            :class="{ 'is-active': editor.isActive('paragraph') }"
+            style="font-size: 13px"
+            @click="setParagraphStyle"
+            >正文</el-button
+          >
         </el-tooltip>
         <el-tooltip content="标题1" placement="top">
-          <el-button :class="{ 'is-active': editor.isActive('heading', { level: 1 }) }"
-            @click="editor.chain().focus().toggleHeading({ level: 1 }).run()">H1</el-button>
+          <el-button
+            :class="{ 'is-active': editor.isActive('heading', { level: 1 }) }"
+            @click="editor.chain().focus().toggleHeading({ level: 1 }).run()"
+            >H1</el-button
+          >
         </el-tooltip>
         <el-tooltip content="标题2" placement="top">
-          <el-button :class="{ 'is-active': editor.isActive('heading', { level: 2 }) }"
-            @click="editor.chain().focus().toggleHeading({ level: 2 }).run()">H2</el-button>
+          <el-button
+            :class="{ 'is-active': editor.isActive('heading', { level: 2 }) }"
+            @click="editor.chain().focus().toggleHeading({ level: 2 }).run()"
+            >H2</el-button
+          >
         </el-tooltip>
         <el-tooltip content="标题3" placement="top">
-          <el-button :class="{ 'is-active': editor.isActive('heading', { level: 3 }) }"
-            @click="editor.chain().focus().toggleHeading({ level: 3 }).run()">H3</el-button>
+          <el-button
+            :class="{ 'is-active': editor.isActive('heading', { level: 3 }) }"
+            @click="editor.chain().focus().toggleHeading({ level: 3 }).run()"
+            >H3</el-button
+          >
         </el-tooltip>
         <el-tooltip content="标题4" placement="top">
-          <el-button :class="{ 'is-active': editor.isActive('heading', { level: 4 }) }"
-            @click="editor.chain().focus().toggleHeading({ level: 4 }).run()">H4</el-button>
+          <el-button
+            :class="{ 'is-active': editor.isActive('heading', { level: 4 }) }"
+            @click="editor.chain().focus().toggleHeading({ level: 4 }).run()"
+            >H4</el-button
+          >
         </el-tooltip>
         <el-tooltip content="标题5" placement="top">
-          <el-button :class="{ 'is-active': editor.isActive('heading', { level: 5 }) }"
-            @click="editor.chain().focus().toggleHeading({ level: 5 }).run()">H5</el-button>
+          <el-button
+            :class="{ 'is-active': editor.isActive('heading', { level: 5 }) }"
+            @click="editor.chain().focus().toggleHeading({ level: 5 }).run()"
+            >H5</el-button
+          >
         </el-tooltip>
       </el-button-group>
 
       <el-button-group size="small">
         <el-tooltip content="加粗" placement="top">
-          <el-button :class="{ 'is-active': editor.isActive('bold') }" @click="editor.chain().focus().toggleBold().run()"><strong>B</strong></el-button>
+          <el-button
+            :class="{ 'is-active': editor.isActive('bold') }"
+            @click="editor.chain().focus().toggleBold().run()"
+            ><strong>B</strong></el-button
+          >
         </el-tooltip>
         <el-tooltip content="斜体" placement="top">
-          <el-button :class="{ 'is-active': editor.isActive('italic') }" @click="editor.chain().focus().toggleItalic().run()"><em>I</em></el-button>
+          <el-button
+            :class="{ 'is-active': editor.isActive('italic') }"
+            @click="editor.chain().focus().toggleItalic().run()"
+            ><em>I</em></el-button
+          >
         </el-tooltip>
         <el-tooltip content="删除线" placement="top">
-          <el-button :class="{ 'is-active': editor.isActive('strike') }" @click="editor.chain().focus().toggleStrike().run()"><span style="text-decoration:line-through">S</span></el-button>
+          <el-button
+            :class="{ 'is-active': editor.isActive('strike') }"
+            @click="editor.chain().focus().toggleStrike().run()"
+            ><span style="text-decoration: line-through">S</span></el-button
+          >
         </el-tooltip>
       </el-button-group>
 
       <el-button-group size="small">
         <el-tooltip content="无序列表" placement="top">
-          <el-button :class="{ 'is-active': editor.isActive('bulletList') }" @click="editor.chain().focus().toggleBulletList().run()">UL</el-button>
+          <el-button
+            :class="{ 'is-active': editor.isActive('bulletList') }"
+            @click="editor.chain().focus().toggleBulletList().run()"
+            >UL</el-button
+          >
         </el-tooltip>
         <el-tooltip content="有序列表" placement="top">
-          <el-button :class="{ 'is-active': editor.isActive('orderedList') }" @click="editor.chain().focus().toggleOrderedList().run()">OL</el-button>
+          <el-button
+            :class="{ 'is-active': editor.isActive('orderedList') }"
+            @click="editor.chain().focus().toggleOrderedList().run()"
+            >OL</el-button
+          >
         </el-tooltip>
       </el-button-group>
 
       <el-button-group size="small">
         <el-tooltip content="引用" placement="top">
-          <el-button :class="{ 'is-active': editor.isActive('blockquote') }" @click="editor.chain().focus().toggleBlockquote().run()">引用</el-button>
+          <el-button
+            :class="{ 'is-active': editor.isActive('blockquote') }"
+            @click="editor.chain().focus().toggleBlockquote().run()"
+            >引用</el-button
+          >
         </el-tooltip>
         <el-tooltip content="代码块" placement="top">
-          <el-button :class="{ 'is-active': editor.isActive('codeBlock') }" @click="editor.chain().focus().toggleCodeBlock().run()">&lt;/&gt;</el-button>
+          <el-button
+            :class="{ 'is-active': editor.isActive('codeBlock') }"
+            @click="editor.chain().focus().toggleCodeBlock().run()"
+            >&lt;/&gt;</el-button
+          >
         </el-tooltip>
         <el-tooltip content="分隔线" placement="top">
           <el-button @click="editor.chain().focus().setHorizontalRule().run()">—</el-button>
@@ -324,14 +412,14 @@ const previewHtml = computed(() => {
         </el-tooltip>
       </el-button-group>
 
-      <el-button-group size="small" style="margin-left:auto">
+      <el-button-group size="small" style="margin-left: auto">
         <el-tooltip content="切换到 Markdown 编辑" placement="top">
-          <el-button @click="toggleMode()" style="font-weight:bold">MD</el-button>
+          <el-button style="font-weight: bold" @click="toggleMode()">MD</el-button>
         </el-tooltip>
       </el-button-group>
     </div>
 
-    <div class="editor-toolbar" v-if="mode === 'markdown'">
+    <div v-if="mode === 'markdown'" class="editor-toolbar">
       <el-button-group size="small">
         <el-tooltip content="加粗" placement="top">
           <el-button @click="mdWrap('**', '**')"><strong>B</strong></el-button>
@@ -340,7 +428,9 @@ const previewHtml = computed(() => {
           <el-button @click="mdWrap('*', '*')"><em>I</em></el-button>
         </el-tooltip>
         <el-tooltip content="删除线" placement="top">
-          <el-button @click="mdWrap('~~', '~~')"><span style="text-decoration:line-through">S</span></el-button>
+          <el-button @click="mdWrap('~~', '~~')"
+            ><span style="text-decoration: line-through">S</span></el-button
+          >
         </el-tooltip>
       </el-button-group>
 
@@ -392,9 +482,9 @@ const previewHtml = computed(() => {
         </el-tooltip>
       </el-button-group>
 
-      <el-button-group size="small" style="margin-left:auto">
+      <el-button-group size="small" style="margin-left: auto">
         <el-tooltip content="切换到富文本编辑" placement="top">
-          <el-button @click="toggleMode()" style="font-weight:bold">富文本</el-button>
+          <el-button style="font-weight: bold" @click="toggleMode()">富文本</el-button>
         </el-tooltip>
       </el-button-group>
     </div>
@@ -410,7 +500,7 @@ const previewHtml = computed(() => {
       ></textarea>
       <div class="markdown-preview">
         <div class="preview-label">预览</div>
-        <div class="preview-content" v-html="previewHtml"></div>
+        <div class="preview-content" v-html="sanitizeHtml(previewHtml)"></div>
       </div>
     </div>
   </div>
@@ -451,16 +541,42 @@ const previewHtml = computed(() => {
     font-size: 15px;
     line-height: 1.8;
 
-    p { margin: 0 0 8px; }
-    h1, h2, h3, h4 { margin: 16px 0 8px; font-weight: 600; }
-    h1 { font-size: 24px; }
-    h2 { font-size: 20px; }
-    h3 { font-size: 17px; }
-    h4 { font-size: 15px; }
-    h5 { font-size: 14px; margin: 14px 0 6px; font-weight: 600; }
+    p {
+      margin: 0 0 8px;
+    }
+    h1,
+    h2,
+    h3,
+    h4 {
+      margin: 16px 0 8px;
+      font-weight: 600;
+    }
+    h1 {
+      font-size: 24px;
+    }
+    h2 {
+      font-size: 20px;
+    }
+    h3 {
+      font-size: 17px;
+    }
+    h4 {
+      font-size: 15px;
+    }
+    h5 {
+      font-size: 14px;
+      margin: 14px 0 6px;
+      font-weight: 600;
+    }
 
-    ul, ol { padding-left: 24px; margin: 8px 0; }
-    li { margin: 4px 0; }
+    ul,
+    ol {
+      padding-left: 24px;
+      margin: 8px 0;
+    }
+    li {
+      margin: 4px 0;
+    }
 
     blockquote {
       border-left: 3px solid var(--el-color-primary);
@@ -492,9 +608,16 @@ const previewHtml = computed(() => {
       margin: 8px 0;
     }
 
-    a { color: var(--el-color-primary); text-decoration: underline; }
+    a {
+      color: var(--el-color-primary);
+      text-decoration: underline;
+    }
 
-    hr { margin: 16px 0; border: none; border-top: 1px solid #dcdfe6; }
+    hr {
+      margin: 16px 0;
+      border: none;
+      border-top: 1px solid #dcdfe6;
+    }
 
     p.is-editor-empty:first-child::before {
       color: #adb5bd;
@@ -553,15 +676,41 @@ const previewHtml = computed(() => {
   font-size: 15px;
   line-height: 1.8;
 
-  :deep(p) { margin: 0 0 8px; }
-  :deep(h1), :deep(h2), :deep(h3), :deep(h4) { margin: 16px 0 8px; font-weight: 600; }
-  :deep(h1) { font-size: 24px; }
-  :deep(h2) { font-size: 20px; }
-  :deep(h3) { font-size: 17px; }
-  :deep(h4) { font-size: 15px; }
-  :deep(h5) { font-size: 14px; margin: 14px 0 6px; font-weight: 600; }
-  :deep(ul), :deep(ol) { padding-left: 24px; margin: 8px 0; }
-  :deep(li) { margin: 4px 0; }
+  :deep(p) {
+    margin: 0 0 8px;
+  }
+  :deep(h1),
+  :deep(h2),
+  :deep(h3),
+  :deep(h4) {
+    margin: 16px 0 8px;
+    font-weight: 600;
+  }
+  :deep(h1) {
+    font-size: 24px;
+  }
+  :deep(h2) {
+    font-size: 20px;
+  }
+  :deep(h3) {
+    font-size: 17px;
+  }
+  :deep(h4) {
+    font-size: 15px;
+  }
+  :deep(h5) {
+    font-size: 14px;
+    margin: 14px 0 6px;
+    font-weight: 600;
+  }
+  :deep(ul),
+  :deep(ol) {
+    padding-left: 24px;
+    margin: 8px 0;
+  }
+  :deep(li) {
+    margin: 4px 0;
+  }
   :deep(blockquote) {
     border-left: 3px solid var(--el-color-primary);
     margin: 8px 0;
@@ -588,7 +737,14 @@ const previewHtml = computed(() => {
     border-radius: 4px;
     margin: 8px 0;
   }
-  :deep(a) { color: var(--el-color-primary); text-decoration: underline; }
-  :deep(hr) { margin: 16px 0; border: none; border-top: 1px solid #dcdfe6; }
+  :deep(a) {
+    color: var(--el-color-primary);
+    text-decoration: underline;
+  }
+  :deep(hr) {
+    margin: 16px 0;
+    border: none;
+    border-top: 1px solid #dcdfe6;
+  }
 }
 </style>

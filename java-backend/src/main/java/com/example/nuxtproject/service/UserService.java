@@ -1,3 +1,6 @@
+/**
+ * 用户服务 — 超管检查/初始化 + 用户 CRUD（含角色权限校验）+ 访客注册 + 密码修改。
+ */
 package com.example.nuxtproject.service;
 
 import com.example.nuxtproject.entity.Role;
@@ -7,6 +10,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Map;
@@ -27,6 +32,7 @@ public class UserService {
     /**
      * 检查系统中是否存在超级管理员
      */
+    @Cacheable("superAdminExists")
     public boolean existsSuperAdmin() {
         return userRepository.existsByRole(Role.SUPERADMIN);
     }
@@ -35,6 +41,7 @@ public class UserService {
      * 初始化超级管理员（仅当系统中尚无超级管理员时可用）
      * 系统首次部署时必须先调用此接口创建初始超级管理员
      */
+    @CacheEvict(value = "superAdminExists", allEntries = true)
     public Map<String, String> initSuperAdmin(String username, String email, String password) {
         if (userRepository.existsByRole(Role.SUPERADMIN)) {
             return Map.of("message", "超级管理员已存在，不能重复初始化");
@@ -171,6 +178,7 @@ public class UserService {
      * @param operatorId   操作者的用户 ID（用于自操作校验）
      * @param id           目标用户 ID
      */
+    @CacheEvict(value = "superAdminExists", allEntries = true)
     @Transactional
     public Map<String, String> deleteUser(Role operatorRole, Long operatorId, Long id) {
         // 禁止删除自己

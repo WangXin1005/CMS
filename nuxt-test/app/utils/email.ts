@@ -4,10 +4,10 @@
  */
 export function validateEmail(email) {
   if (!email) {
-    return "请输入邮箱地址"
+    return '请输入邮箱地址'
   }
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    return "邮箱格式不正确"
+    return '邮箱格式不正确'
   }
   return null // 验证通过
 }

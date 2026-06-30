@@ -1,3 +1,6 @@
+/**
+ * 操作日志切面 — 拦截控制器写操作，自动记录操作日志（创建/更新/删除/登录）。
+ */
 package com.example.nuxtproject.config;
 
 import java.lang.reflect.Method;

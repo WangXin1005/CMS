@@ -1,18 +1,20 @@
-﻿<script lang="ts" setup>
+<!-- User — 用户管理页（ADMIN/SUPERADMIN）：用户列表、新增、编辑角色、删除、密码修改 -->
+
+<script lang="ts" setup>
 /**
  * User - 用户管理页面
  * 支持分页列表、搜索、新增用户、编辑用户、删除用户功能。
  * 新增/编辑使用弹窗表单，删除需确认。需 auth 中间件保护。
  */
-definePageMeta({ middleware: 'auth' })
 import { ref, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { validatePassword } from '~/utils/password'
 import { validateUsername } from '~/utils/username'
 import { validateEmail } from '~/utils/email'
 import { Search, Plus } from '@element-plus/icons-vue'
+definePageMeta({ middleware: 'auth' })
 
-const { getUserList, createUser, updateUser, deleteUser, role, checkUsername } = useAuth()
+const { getUserList, createUser, updateUser, deleteUser, checkUsername } = useAuth()
 
 const tableData = ref([])
 const total = ref(0)
@@ -46,22 +48,37 @@ const pwdError = ref('')
 const nameError = ref('')
 const mailError = ref('')
 async function onNameBlur(val) {
-  if (!val) { nameError.value = ''; return }
+  if (!val) {
+    nameError.value = ''
+    return
+  }
   const err = validateUsername(val)
-  if (err) { nameError.value = err; return }
+  if (err) {
+    nameError.value = err
+    return
+  }
   // 编辑时不校验重复
   if (!editingId.value) {
     const taken = await checkUsername(val)
-    if (taken) { nameError.value = '用户名已被使用'; return }
+    if (taken) {
+      nameError.value = '用户名已被使用'
+      return
+    }
   }
   nameError.value = ''
 }
 function onMailBlur(val) {
-  if (!val) { mailError.value = ''; return }
+  if (!val) {
+    mailError.value = ''
+    return
+  }
   mailError.value = validateEmail(val) || ''
 }
 function onPwdBlur(val) {
-  if (!val) { pwdError.value = ''; return }
+  if (!val) {
+    pwdError.value = ''
+    return
+  }
   pwdError.value = validatePassword(val) || ''
 }
 
@@ -72,8 +89,12 @@ async function loadData() {
     const res = await getUserList(currentPage.value, pageSize.value)
     tableData.value = res.content ?? []
     total.value = res.totalElements ?? 0
-  } catch { tableData.value = []; total.value = 0 }
-  finally { loading.value = false }
+  } catch {
+    tableData.value = []
+    total.value = 0
+  } finally {
+    loading.value = false
+  }
 }
 
 /** 打开新增弹窗 */
@@ -113,7 +134,11 @@ async function handleSubmit() {
   submitting.value = true
   try {
     if (editingId.value) {
-      const payload = { username: form.value.username, email: form.value.email, role: form.value.role }
+      const payload = {
+        username: form.value.username,
+        email: form.value.email,
+        role: form.value.role,
+      }
       await updateUser(editingId.value, payload)
       ElMessage.success('用户更新成功')
     } else {
@@ -132,15 +157,17 @@ async function handleSubmit() {
 /** 删除用户 */
 async function handleDelete(id, username) {
   try {
-    await ElMessageBox.confirm(
-      `确定删除用户 "${username}"？此操作不可恢复`,
-      '确认删除',
-      { confirmButtonText: '确定', cancelButtonText: '取消', type: 'warning' }
-    )
+    await ElMessageBox.confirm(`确定删除用户 "${username}"？此操作不可恢复`, '确认删除', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning',
+    })
     await deleteUser(id)
     ElMessage.success('用户已删除')
     await loadData()
-  } catch { /* cancelled */ }
+  } catch {
+    /* cancelled */
+  }
 }
 
 onMounted(loadData)
@@ -155,11 +182,22 @@ onMounted(loadData)
 
     <div class="page-card">
       <div class="filter-bar">
-        <el-input v-model="search" placeholder="搜索用户..." :prefix-icon="Search" style="width:260px" clearable />
+        <el-input
+          v-model="search"
+          placeholder="搜索用户..."
+          :prefix-icon="Search"
+          style="width: 260px"
+          clearable
+        />
       </div>
 
-      <el-table :data="tableData" v-loading="loading" stripe>
-        <el-table-column type="index" label="#" width="60" :index="(i) => (currentPage - 1) * pageSize + i + 1" />
+      <el-table v-loading="loading" :data="tableData" stripe>
+        <el-table-column
+          type="index"
+          label="序号"
+          width="60"
+          :index="(i) => (currentPage - 1) * pageSize + i + 1"
+        />
         <el-table-column prop="username" label="用户名" width="120" />
         <el-table-column prop="email" label="邮箱" width="200" />
         <el-table-column prop="role" label="角色" width="130">
@@ -170,50 +208,89 @@ onMounted(loadData)
           </template>
         </el-table-column>
         <el-table-column prop="createdAt" label="创建时间" width="170">
-          <template #default="{ row }">{{ (row.createdAt || "").replace("T", " ").slice(0, 16) }}</template>
+          <template #default="{ row }">{{
+            (row.createdAt || '').replace('T', ' ').slice(0, 16)
+          }}</template>
         </el-table-column>
         <el-table-column label="操作" min-width="150" fixed="right">
           <template #default="{ row }">
             <el-button link type="primary" size="small" @click="openEdit(row)">编辑</el-button>
             <el-button
-              link type="danger" size="small"
+              link
+              type="danger"
+              size="small"
               :disabled="row.role === 'SUPERADMIN'"
               @click="handleDelete(row.id, row.username)"
-            >删除</el-button>
+              >删除</el-button
+            >
           </template>
         </el-table-column>
       </el-table>
 
       <div v-if="total > pageSize" class="pagination-wrapper">
         <el-pagination
-          v-model:current-page="currentPage" :page-size="pageSize"
-          :total="total" layout="prev, pager, next, total" background
+          v-model:current-page="currentPage"
+          :page-size="pageSize"
+          :total="total"
+          layout="prev, pager, next, total"
+          background
           @current-change="loadData"
         />
       </div>
     </div>
 
     <!-- 新增/编辑弹窗 -->
-    <el-dialog v-model="dialogVisible" :title="dialogTitle" width="480px" :close-on-click-modal="false">
+    <el-dialog
+      v-model="dialogVisible"
+      :title="dialogTitle"
+      width="480px"
+      :close-on-click-modal="false"
+    >
       <el-form label-position="top">
         <el-form-item label="用户名" required :error="nameError">
-          <el-input v-model="form.username" placeholder="4~15位，字母和数字" maxlength="15" @blur="onNameBlur(form.username)" />
+          <el-input
+            v-model="form.username"
+            placeholder="4~15位，字母和数字"
+            maxlength="15"
+            @blur="onNameBlur(form.username)"
+          />
         </el-form-item>
         <el-form-item label="邮箱" required :error="mailError">
-          <el-input v-model="form.email" placeholder="请输入邮箱地址" maxlength="100" @blur="onMailBlur(form.email)" />
+          <el-input
+            v-model="form.email"
+            placeholder="请输入邮箱地址"
+            maxlength="100"
+            @blur="onMailBlur(form.email)"
+          />
         </el-form-item>
         <el-form-item v-if="!editingId" label="密码" required :error="pwdError">
-          <el-input v-model="form.password" type="password" placeholder="请输入密码，12~16位含大小写字母、数字、特殊符号" show-password @blur="onPwdBlur(form.password)" />
+          <el-input
+            v-model="form.password"
+            type="password"
+            placeholder="请输入密码，12~16位含大小写字母、数字、特殊符号"
+            show-password
+            @blur="onPwdBlur(form.password)"
+          />
         </el-form-item>
         <el-form-item label="角色" required>
-          <el-select v-model="form.role" placeholder="选择角色" style="width:100%">
-            <el-option v-for="opt in roleOptions" :key="opt.value" :label="opt.label" :value="opt.value" />
+          <el-select v-model="form.role" placeholder="选择角色" style="width: 100%">
+            <el-option
+              v-for="opt in roleOptions"
+              :key="opt.value"
+              :label="opt.label"
+              :value="opt.value"
+            />
           </el-select>
         </el-form-item>
       </el-form>
       <template #footer>
         <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" :loading="submitting" :disabled="!formValid" @click="handleSubmit()">
+        <el-button
+          type="primary"
+          :loading="submitting"
+          :disabled="!formValid"
+          @click="handleSubmit()"
+        >
           {{ editingId ? '保存修改' : '创建用户' }}
         </el-button>
       </template>

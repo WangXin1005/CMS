@@ -1,3 +1,6 @@
+/**
+ * 文章实体 — 标题、Slug、内容（Markdown/HTML）、状态、分类、标签关联。
+ */
 package com.example.nuxtproject.entity;
 
 import io.swagger.v3.oas.annotations.media.Schema;

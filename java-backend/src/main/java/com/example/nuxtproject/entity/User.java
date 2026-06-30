@@ -1,3 +1,6 @@
+/**
+ * 用户实体 — 用户名、邮箱、BCrypt 密码、角色（SUPERADMIN/ADMIN/USER/GUEST）、Token 版本。
+ */
 package com.example.nuxtproject.entity;
 
 import io.swagger.v3.oas.annotations.media.Schema;

@@ -1,3 +1,6 @@
+/**
+ * 评论服务 — 公开提交/查询 + 管理后台审核/删除。
+ */
 package com.example.nuxtproject.service;
 
 import com.example.nuxtproject.entity.Article;

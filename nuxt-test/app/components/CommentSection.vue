@@ -18,7 +18,7 @@ const props = defineProps<{ articleId: number }>()
 const { getArticleComments, submit } = useComment()
 const { isLoggedIn } = useAuth()
 
-const comments = ref<any[]>([])
+const comments = ref<Record<string, unknown>[]>([])
 const loading = ref(true)
 const newComment = ref('')
 const submitting = ref(false)
@@ -59,10 +59,21 @@ onMounted(loadComments)
 
     <!-- 评论表单 -->
     <div v-if="isLoggedIn" class="comment-form">
-      <el-input v-model="newComment" type="textarea" :rows="3"
-        placeholder="写下你的评论..." maxlength="1000" show-word-limit />
+      <el-input
+        v-model="newComment"
+        type="textarea"
+        :rows="3"
+        placeholder="写下你的评论..."
+        maxlength="1000"
+        show-word-limit
+      />
       <div class="form-actions">
-        <el-button type="primary" :loading="submitting" :disabled="!newComment.trim()" @click="handleSubmit">
+        <el-button
+          type="primary"
+          :loading="submitting"
+          :disabled="!newComment.trim()"
+          @click="handleSubmit"
+        >
           提交评论
         </el-button>
       </div>
@@ -77,21 +88,21 @@ onMounted(loadComments)
     <div v-if="loading" class="comments-loading">
       <el-skeleton :count="2">
         <template #template>
-          <el-skeleton-item variant="text" style="width:30%" />
-          <el-skeleton-item variant="text" style="width:100%" />
+          <el-skeleton-item variant="text" style="width: 30%" />
+          <el-skeleton-item variant="text" style="width: 100%" />
         </template>
       </el-skeleton>
     </div>
 
-    <div v-else-if="comments.length === 0" class="comments-empty">
-      暂无评论
-    </div>
+    <div v-else-if="comments.length === 0" class="comments-empty">暂无评论</div>
 
     <div v-else class="comments-list">
       <div v-for="comment in comments" :key="comment.id" class="comment-item">
         <div class="comment-header">
           <strong>{{ comment.author?.username || '匿名' }}</strong>
-          <span class="comment-date">{{ (comment.createdAt || "").replace("T", " ").slice(0, 16) }}</span>
+          <span class="comment-date">{{
+            (comment.createdAt || '').replace('T', ' ').slice(0, 16)
+          }}</span>
         </div>
         <p class="comment-content">{{ comment.content }}</p>
       </div>
@@ -100,18 +111,69 @@ onMounted(loadComments)
 </template>
 
 <style lang="less" scoped>
-.comment-section { margin-top: 8px; }
-.comment-title { font-size: 18px; font-weight: 600; margin: 0 0 16px 0; }
-.comment-form { margin-bottom: 16px; }
-.form-actions { margin-top: 12px; text-align: right; }
-.login-hint { text-align: center; padding: 24px; background: #fafafa; border-radius: 8px; color: #999; }
-.login-link { color: var(--el-color-primary); text-decoration: none; font-weight: 500; }
-.comments-loading { padding: 16px; }
-.comments-empty { text-align: center; padding: 32px; color: #999; }
-.comments-list { display: flex; flex-direction: column; gap: 16px; }
-.comment-item { padding: 16px; background: #fafafa; border-radius: 8px; }
-.comment-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-.comment-header strong { font-size: 14px; color: #333; }
-.comment-date { font-size: 12px; color: #999; }
-.comment-content { font-size: 14px; line-height: 1.6; color: #555; margin: 0; }
+.comment-section {
+  margin-top: 8px;
+}
+.comment-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0 0 16px 0;
+}
+.comment-form {
+  margin-bottom: 16px;
+}
+.form-actions {
+  margin-top: 12px;
+  text-align: right;
+}
+.login-hint {
+  text-align: center;
+  padding: 24px;
+  background: #fafafa;
+  border-radius: 8px;
+  color: #999;
+}
+.login-link {
+  color: var(--el-color-primary);
+  text-decoration: none;
+  font-weight: 500;
+}
+.comments-loading {
+  padding: 16px;
+}
+.comments-empty {
+  text-align: center;
+  padding: 32px;
+  color: #999;
+}
+.comments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.comment-item {
+  padding: 16px;
+  background: #fafafa;
+  border-radius: 8px;
+}
+.comment-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.comment-header strong {
+  font-size: 14px;
+  color: #333;
+}
+.comment-date {
+  font-size: 12px;
+  color: #999;
+}
+.comment-content {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #555;
+  margin: 0;
+}
 </style>

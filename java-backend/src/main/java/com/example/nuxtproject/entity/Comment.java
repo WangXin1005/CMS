@@ -1,3 +1,6 @@
+/**
+ * 评论实体 — 文章评论，含审核状态（待审/通过/驳回）。
+ */
 package com.example.nuxtproject.entity;
 
 import io.swagger.v3.oas.annotations.media.Schema;

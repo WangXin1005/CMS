@@ -1,3 +1,6 @@
+/**
+ * 站点设置实体 — 键值对形式的站点配置项。
+ */
 package com.example.nuxtproject.entity;
 
 import io.swagger.v3.oas.annotations.media.Schema;

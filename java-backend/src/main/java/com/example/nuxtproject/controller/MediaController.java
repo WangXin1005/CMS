@@ -1,3 +1,6 @@
+/**
+ * 媒体控制器 — 文件上传（SUPERADMIN/ADMIN/USER）+ 管理后台列表/删除。
+ */
 package com.example.nuxtproject.controller;
 
 import com.example.nuxtproject.entity.Media;

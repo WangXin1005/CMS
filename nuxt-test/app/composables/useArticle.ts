@@ -26,15 +26,14 @@
 import request from '~/utils/request'
 
 export const useArticle = () => {
-
   // ===== 公开接口 =====
 
   const getPublished = async (
     page: number = 1,
     size: number = 10,
-    filters?: { categoryId?: number; tagId?: number; keyword?: string }
+    filters?: { categoryId?: number; tagId?: number; keyword?: string },
   ) => {
-    const params: Record<string, any> = { page, size }
+    const params: Record<string, string | number | undefined> = { page, size }
     if (filters?.categoryId) params.categoryId = filters.categoryId
     if (filters?.tagId) params.tagId = filters.tagId
     if (filters?.keyword) params.keyword = filters.keyword
@@ -61,8 +60,15 @@ export const useArticle = () => {
   // ===== 个人文章接口（USER 角色可用） =====
 
   /** 获取我的文章列表（所有已登录用户可用） */
-  const getMyArticles = async (page: number = 1, size: number = 20, status?: string, keyword?: string, categoryId?: number, tagId?: number) => {
-    const params: Record<string, any> = { page, size }
+  const getMyArticles = async (
+    page: number = 1,
+    size: number = 20,
+    status?: string,
+    keyword?: string,
+    categoryId?: number,
+    tagId?: number,
+  ) => {
+    const params: Record<string, string | number | undefined> = { page, size }
     if (status) params.status = status
     if (keyword) params.keyword = keyword
     if (categoryId) params.categoryId = categoryId
@@ -78,18 +84,34 @@ export const useArticle = () => {
   }
   /** 创建我的文章 */
   const createMyArticle = async (data: {
-    title: string; slug: string; content?: string; summary?: string
-    coverImage?: string; status?: string; categoryId?: number; tagIds?: number[]
+    title: string
+    slug: string
+    content?: string
+    summary?: string
+    coverImage?: string
+    status?: string
+    categoryId?: number
+    tagIds?: number[]
   }) => {
     const res = await request.post('/articles/my', data)
     return res.data
   }
 
   /** 更新我的文章 */
-  const updateMyArticle = async (id: number, data: {
-    title?: string; slug?: string; content?: string; summary?: string
-    coverImage?: string; status?: string; visibility?: string; categoryId?: number; tagIds?: number[]
-  }) => {
+  const updateMyArticle = async (
+    id: number,
+    data: {
+      title?: string
+      slug?: string
+      content?: string
+      summary?: string
+      coverImage?: string
+      status?: string
+      visibility?: string
+      categoryId?: number
+      tagIds?: number[]
+    },
+  ) => {
     const res = await request.put(`/articles/my/${id}`, data)
     return res.data
   }
@@ -101,8 +123,16 @@ export const useArticle = () => {
   }
   // ===== 管理接口 =====
 
-  const getAdminList = async (page: number = 1, size: number = 20, status?: string, keyword?: string, categoryId?: number, tagId?: number, authorId?: number) => {
-    const params: Record<string, any> = { page, size }
+  const getAdminList = async (
+    page: number = 1,
+    size: number = 20,
+    status?: string,
+    keyword?: string,
+    categoryId?: number,
+    tagId?: number,
+    authorId?: number,
+  ) => {
+    const params: Record<string, string | number | undefined> = { page, size }
     if (status) params.status = status
     if (keyword) params.keyword = keyword
     if (categoryId) params.categoryId = categoryId
@@ -118,17 +148,33 @@ export const useArticle = () => {
   }
 
   const create = async (data: {
-    title: string; slug: string; content?: string; summary?: string
-    coverImage?: string; status?: string; categoryId?: number; tagIds?: number[]
+    title: string
+    slug: string
+    content?: string
+    summary?: string
+    coverImage?: string
+    status?: string
+    categoryId?: number
+    tagIds?: number[]
   }) => {
     const res = await request.post('/admin/articles', data)
     return res.data
   }
 
-  const update = async (id: number, data: {
-    title?: string; slug?: string; content?: string; summary?: string
-    coverImage?: string; status?: string; visibility?: string; categoryId?: number; tagIds?: number[]
-  }) => {
+  const update = async (
+    id: number,
+    data: {
+      title?: string
+      slug?: string
+      content?: string
+      summary?: string
+      coverImage?: string
+      status?: string
+      visibility?: string
+      categoryId?: number
+      tagIds?: number[]
+    },
+  ) => {
     const res = await request.put(`/admin/articles/${id}`, data)
     return res.data
   }
@@ -138,5 +184,20 @@ export const useArticle = () => {
     return res.data
   }
 
-  return { getPublished, getBySlug, getStats, getRecent, getMyArticles, getMyArticleById, createMyArticle, updateMyArticle, removeMyArticle, getAdminList, getById, create, update, remove }
+  return {
+    getPublished,
+    getBySlug,
+    getStats,
+    getRecent,
+    getMyArticles,
+    getMyArticleById,
+    createMyArticle,
+    updateMyArticle,
+    removeMyArticle,
+    getAdminList,
+    getById,
+    create,
+    update,
+    remove,
+  }
 }

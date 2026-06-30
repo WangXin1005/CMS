@@ -1,3 +1,6 @@
+/**
+ * 标签数据访问层 — 按 Slug 查找。
+ */
 package com.example.nuxtproject.repository;
 
 import com.example.nuxtproject.entity.Tag;

@@ -1,3 +1,4 @@
+<!-- Header — 管理后台顶部导航栏，显示用户信息和退出按钮 -->
 <script lang="ts" setup>
 import { ArrowDown } from '@element-plus/icons-vue'
 import { ref } from 'vue'
@@ -47,7 +48,10 @@ async function handleChangePassword() {
   }
   passwordLoading.value = true
   try {
-    await changePassword({ oldPassword: passwordForm.value.oldPassword, newPassword: passwordForm.value.newPassword })
+    await changePassword({
+      oldPassword: passwordForm.value.oldPassword,
+      newPassword: passwordForm.value.newPassword,
+    })
     ElMessage.success('密码修改成功')
     dialogVisible.value = false
   } catch (e) {
@@ -76,7 +80,9 @@ function handleCommand(command: string) {
     <div class="header-right">
       <el-dropdown trigger="click" @command="handleCommand">
         <span class="user-info">
-          <el-avatar :size="32" class="user-avatar">{{ username?.charAt(0)?.toUpperCase() }}</el-avatar>
+          <el-avatar :size="32" class="user-avatar">{{
+            username?.charAt(0)?.toUpperCase()
+          }}</el-avatar>
           <span class="username">{{ username }}</span>
           <el-icon><ArrowDown /></el-icon>
         </span>
@@ -99,18 +105,35 @@ function handleCommand(command: string) {
       </el-form-item>
       <el-divider />
       <el-form-item label="原密码">
-        <el-input v-model="passwordForm.oldPassword" type="password" placeholder="请输入原密码" show-password />
+        <el-input
+          v-model="passwordForm.oldPassword"
+          type="password"
+          placeholder="请输入原密码"
+          show-password
+        />
       </el-form-item>
       <el-form-item label="新密码">
-        <el-input v-model="passwordForm.newPassword" type="password" placeholder="请输入新密码" show-password />
+        <el-input
+          v-model="passwordForm.newPassword"
+          type="password"
+          placeholder="请输入新密码"
+          show-password
+        />
       </el-form-item>
       <el-form-item label="确认密码">
-        <el-input v-model="passwordForm.confirmPassword" type="password" placeholder="请再次输入新密码" show-password />
+        <el-input
+          v-model="passwordForm.confirmPassword"
+          type="password"
+          placeholder="请再次输入新密码"
+          show-password
+        />
       </el-form-item>
     </el-form>
     <template #footer>
       <el-button @click="dialogVisible = false">取消</el-button>
-      <el-button type="primary" :loading="passwordLoading" @click="handleChangePassword">确认修改</el-button>
+      <el-button type="primary" :loading="passwordLoading" @click="handleChangePassword"
+        >确认修改</el-button
+      >
     </template>
   </el-dialog>
 </template>
@@ -124,7 +147,7 @@ function handleCommand(command: string) {
   align-items: center;
   justify-content: space-between;
   padding: 0 24px !important;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
   z-index: 10;
 }
 
@@ -180,24 +203,3 @@ function handleCommand(command: string) {
   margin: 2px 4px;
 }
 </style>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

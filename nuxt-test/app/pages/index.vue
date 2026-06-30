@@ -1,4 +1,6 @@
-﻿<script lang="ts" setup>
+<!-- index — 博客首页（公开）：搜索、分类/标签筛选、分页文章列表、侧边栏 -->
+
+<script lang="ts" setup>
 /**
  * index — 博客首页（公开）
  *
@@ -12,17 +14,17 @@
  *   onMounted → loadArticles() + loadSidebar() 并行加载
  *   用户交互 → 更新筛选条件 → currentPage=1 → loadArticles()
  */
-definePageMeta({ layout: 'public' })
-
 import { ref, onMounted } from 'vue'
 import { Search } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
+
+definePageMeta({ layout: 'public' })
 
 const { getPublished } = useArticle()
 const { getList: getCategories } = useCategory()
 const { getList: getTags } = useTag()
 
-const articles = ref<any[]>([])
+const articles = ref<Record<string, unknown>[]>([])
 const loading = ref(true)
 const total = ref(0)
 const currentPage = ref(1)
@@ -32,8 +34,8 @@ const searchKeyword = ref('')
 const activeCategoryId = ref<number | null>(null)
 const activeTagId = ref<number | null>(null)
 
-const categories = ref<any[]>([])
-const tags = ref<any[]>([])
+const categories = ref<Record<string, unknown>[]>([])
+const tags = ref<Record<string, unknown>[]>([])
 
 async function loadArticles() {
   loading.value = true
@@ -56,7 +58,7 @@ async function loadArticles() {
 
 async function loadSidebar() {
   try {
-    const [catRes, tagRes] = await Promise.all([ getCategories(), getTags() ])
+    const [catRes, tagRes] = await Promise.all([getCategories(), getTags()])
     categories.value = catRes ?? []
     tags.value = tagRes ?? []
   } catch {
@@ -89,7 +91,7 @@ function navigateToArticle(slug: string) {
 }
 
 onMounted(async () => {
-  await Promise.all([ loadArticles(), loadSidebar() ])
+  await Promise.all([loadArticles(), loadSidebar()])
 })
 </script>
 
@@ -97,21 +99,30 @@ onMounted(async () => {
   <div class="blog-layout">
     <div class="main-content">
       <div class="search-bar">
-        <el-input v-model="searchKeyword" placeholder="搜索文章..."
-          clearable :prefix-icon="Search" size="large"
-          @clear="handleSearch" @keyup.enter="handleSearch" />
+        <el-input
+          v-model="searchKeyword"
+          placeholder="搜索文章..."
+          clearable
+          :prefix-icon="Search"
+          size="large"
+          @clear="handleSearch"
+          @keyup.enter="handleSearch"
+        />
       </div>
 
       <div v-if="loading" class="skeleton-grid">
-        <el-skeleton v-for="i in 4" :key="i" :count="1" style="--el-skeleton-color:#f0f0f0">
+        <el-skeleton v-for="i in 4" :key="i" :count="1" style="--el-skeleton-color: #f0f0f0">
           <template #template>
-            <div style="padding:0">
-              <el-skeleton-item variant="image" style="width:100%;height:180px;border-radius:8px 8px 0 0" />
-              <div style="padding:14px">
-                <el-skeleton-item variant="text" style="width:40%" />
-                <el-skeleton-item variant="h3" style="width:80%;margin-top:8px" />
-                <el-skeleton-item variant="text" style="width:60%;margin-top:8px" />
-                <el-skeleton-item variant="text" style="width:30%;margin-top:8px" />
+            <div style="padding: 0">
+              <el-skeleton-item
+                variant="image"
+                style="width: 100%; height: 180px; border-radius: 8px 8px 0 0"
+              />
+              <div style="padding: 14px">
+                <el-skeleton-item variant="text" style="width: 40%" />
+                <el-skeleton-item variant="h3" style="width: 80%; margin-top: 8px" />
+                <el-skeleton-item variant="text" style="width: 60%; margin-top: 8px" />
+                <el-skeleton-item variant="text" style="width: 30%; margin-top: 8px" />
               </div>
             </div>
           </template>
@@ -119,21 +130,40 @@ onMounted(async () => {
       </div>
 
       <el-empty v-else-if="articles.length === 0" description="暂无文章">
-        <el-button v-if="activeCategoryId || activeTagId || searchKeyword" type="primary"
-          @click="() => { activeCategoryId=null; activeTagId=null; searchKeyword=''; handleSearch() }">
+        <el-button
+          v-if="activeCategoryId || activeTagId || searchKeyword"
+          type="primary"
+          @click="
+            () => {
+              activeCategoryId = null
+              activeTagId = null
+              searchKeyword = ''
+              handleSearch()
+            }
+          "
+        >
           清空筛选条件
         </el-button>
       </el-empty>
 
       <div v-else class="article-grid">
-        <ArticleCard v-for="article in articles" :key="article.id"
-          :article="article" @click="navigateToArticle(article.slug)" />
+        <ArticleCard
+          v-for="article in articles"
+          :key="article.id"
+          :article="article"
+          @click="navigateToArticle(article.slug)"
+        />
       </div>
 
       <div v-if="total > pageSize" class="pagination-wrapper">
-        <el-pagination v-model:current-page="currentPage" :page-size="pageSize"
-          :total="total" layout="prev, pager, next, total" background
-          @current-change="loadArticles" />
+        <el-pagination
+          v-model:current-page="currentPage"
+          :page-size="pageSize"
+          :total="total"
+          layout="prev, pager, next, total"
+          background
+          @current-change="loadArticles"
+        />
       </div>
     </div>
 
@@ -141,9 +171,12 @@ onMounted(async () => {
       <div class="widget">
         <h3 class="widget-title">📂 分类</h3>
         <ul v-if="categories.length" class="category-list">
-          <li v-for="cat in categories" :key="cat.id"
+          <li
+            v-for="cat in categories"
+            :key="cat.id"
             :class="{ active: activeCategoryId === cat.id }"
-            @click="selectCategory(cat.id)">
+            @click="selectCategory(cat.id)"
+          >
             {{ cat.name }}
           </li>
         </ul>
@@ -152,10 +185,14 @@ onMounted(async () => {
       <div class="widget">
         <h3 class="widget-title">🏷️ 标签</h3>
         <div v-if="tags.length" class="tag-cloud">
-          <el-tag v-for="tag in tags" :key="tag.id"
+          <el-tag
+            v-for="tag in tags"
+            :key="tag.id"
             :type="activeTagId === tag.id ? 'primary' : undefined"
             :effect="activeTagId === tag.id ? 'dark' : undefined"
-            class="tag-item" @click="selectTag(tag.id)">
+            class="tag-item"
+            @click="selectTag(tag.id)"
+          >
             {{ tag.name }}
           </el-tag>
         </div>
@@ -193,16 +230,23 @@ onMounted(async () => {
   margin: 0;
 }
 
-.main-content { flex: 1; min-width: 0; }
+.main-content {
+  flex: 1;
+  min-width: 0;
+}
 
-.search-bar { margin-top: 16px; margin-bottom: 24px; }
+.search-bar {
+  margin-top: 16px;
+  margin-bottom: 24px;
+}
 
 .search-bar :deep(.el-input__wrapper) {
   border-radius: 24px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
-.article-grid, .skeleton-grid {
+.article-grid,
+.skeleton-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 24px;
@@ -215,14 +259,17 @@ onMounted(async () => {
 }
 
 // ===== 侧边栏 =====
-.sidebar { width: 280px; flex-shrink: 0; }
+.sidebar {
+  width: 280px;
+  flex-shrink: 0;
+}
 
 .widget {
   background: #fff;
   border-radius: 10px;
   padding: 20px;
   margin-bottom: 20px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
 }
 
 .widget-title {
@@ -234,7 +281,11 @@ onMounted(async () => {
   color: #333;
 }
 
-.category-list { list-style: none; padding: 0; margin: 0; }
+.category-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
 
 .category-list li {
   padding: 9px 0;
@@ -247,7 +298,9 @@ onMounted(async () => {
   justify-content: space-between;
   align-items: center;
 
-  &:last-child { border-bottom: none; }
+  &:last-child {
+    border-bottom: none;
+  }
 
   &:hover {
     color: #667eea;
@@ -260,9 +313,20 @@ onMounted(async () => {
   }
 }
 
-.tag-cloud { display: flex; flex-wrap: wrap; gap: 8px; }
+.tag-cloud {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
 
-.tag-item { cursor: pointer; transition: all 0.25s ease; }.tag-item:hover { color: #409eff !important; border-color: #409eff !important; }
+.tag-item {
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+.tag-item:hover {
+  color: #409eff !important;
+  border-color: #409eff !important;
+}
 
 .empty-hint {
   color: #999;
@@ -273,9 +337,15 @@ onMounted(async () => {
 }
 
 @media (max-width: 768px) {
-  .blog-layout { flex-direction: column; }
-  .article-grid, .skeleton-grid { grid-template-columns: 1fr; }
-  .sidebar { width: 100%; }
+  .blog-layout {
+    flex-direction: column;
+  }
+  .article-grid,
+  .skeleton-grid {
+    grid-template-columns: 1fr;
+  }
+  .sidebar {
+    width: 100%;
+  }
 }
-
 </style>

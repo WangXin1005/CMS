@@ -1,3 +1,6 @@
+/**
+ * 操作日志服务 — 日志持久化与分页查询。
+ */
 package com.example.nuxtproject.service;
 
 import com.example.nuxtproject.entity.OperationLog;

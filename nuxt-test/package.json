@@ -7,7 +7,14 @@
     "dev": "nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
-    "postinstall": "nuxt prepare"
+    "postinstall": "nuxt prepare",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "dependencies": {
     "@element-plus/icons-vue": "^2.3.2",
@@ -16,7 +23,9 @@
     "@tiptap/extension-link": "^3.27.1",
     "@tiptap/starter-kit": "^3.27.1",
     "@tiptap/vue-3": "^3.27.1",
+    "@types/dompurify": "^3.0.5",
     "axios": "^1.17.0",
+    "dompurify": "^3.4.11",
     "element-plus": "^2.14.1",
     "marked": "^18.0.5",
     "nuxt": "^4.4.7",
@@ -26,6 +35,14 @@
     "vue-router": "^5.1.0"
   },
   "devDependencies": {
-    "less": "^4.6.4"
+    "@nuxt/eslint-config": "^1.16.0",
+    "@nuxt/test-utils": "^4.0.3",
+    "@vue/test-utils": "^2.4.11",
+    "eslint": "^10.6.0",
+    "eslint-config-prettier": "^10.1.8",
+    "happy-dom": "^20.10.6",
+    "less": "^4.6.4",
+    "prettier": "^3.9.4",
+    "vitest": "^4.1.9"
   }
 }

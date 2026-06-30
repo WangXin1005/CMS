@@ -1,3 +1,6 @@
+/**
+ * 操作日志数据访问层 — 按时间倒序分页查询。
+ */
 package com.example.nuxtproject.repository;
 
 import com.example.nuxtproject.entity.OperationLog;

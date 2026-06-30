@@ -8,14 +8,16 @@ const TextStyle = Mark.create({
   },
 
   parseHTML() {
-    return [{
-      tag: 'span',
-      getAttrs: el => {
-        const style = el.style
-        if (style.fontSize || style.color || style.fontFamily) return {}
-        return false
+    return [
+      {
+        tag: 'span',
+        getAttrs: (el) => {
+          const style = el.style
+          if (style.fontSize || style.color || style.fontFamily) return {}
+          return false
+        },
       },
-    }]
+    ]
   },
 
   renderHTML({ HTMLAttributes }) {
@@ -24,11 +26,13 @@ const TextStyle = Mark.create({
 
   addCommands() {
     return {
-      removeEmptyTextStyle: () => ({ state, commands }) => {
-        const attrs = state.selection.$from.marks().find(m => m.type.name === this.name)?.attrs
-        if (!attrs || Object.keys(attrs).length === 0) return commands.unsetMark(this.name)
-        return true
-      },
+      removeEmptyTextStyle:
+        () =>
+        ({ state, commands }) => {
+          const attrs = state.selection.$from.marks().find((m) => m.type.name === this.name)?.attrs
+          if (!attrs || Object.keys(attrs).length === 0) return commands.unsetMark(this.name)
+          return true
+        },
     }
   },
 })

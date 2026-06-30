@@ -1,3 +1,6 @@
+/**
+ * 文件存储服务 — 上传文件到本地磁盘，按日期分目录，UUID 重命名，白名单校验 MIME 类型和大小。
+ */
 package com.example.nuxtproject.service;
 
 import com.example.nuxtproject.entity.Media;

@@ -1,3 +1,6 @@
+/**
+ * 分类服务 — 公开列表 + 管理后台 CRUD + 排序。
+ */
 package com.example.nuxtproject.service;
 
 import com.example.nuxtproject.entity.Category;

@@ -1,3 +1,6 @@
+/**
+ * 文章数据访问层 — 按状态/分类/标签/作者分页查询，支持 Slug 查找和关键词搜索。
+ */
 package com.example.nuxtproject.repository;
 
 import com.example.nuxtproject.entity.Article;

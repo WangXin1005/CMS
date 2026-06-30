@@ -1,3 +1,6 @@
+/**
+ * 站点设置控制器 — 读取和更新站点配置项（SUPERADMIN/ADMIN）。
+ */
 package com.example.nuxtproject.controller;
 
 import com.example.nuxtproject.entity.SiteSetting;

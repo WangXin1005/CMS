@@ -1,3 +1,6 @@
+/**
+ * 认证控制器 — 用户登录、访客注册与 Token 颁发。
+ */
 package com.example.nuxtproject.controller;
 
 import com.example.nuxtproject.service.AuthService;
@@ -8,6 +11,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

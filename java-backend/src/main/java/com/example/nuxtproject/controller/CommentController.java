@@ -1,3 +1,6 @@
+/**
+ * 评论控制器 — 公开提交/查询 + 管理后台审核（ADMIN/SUPERADMIN）。
+ */
 package com.example.nuxtproject.controller;
 
 import com.example.nuxtproject.entity.Comment;

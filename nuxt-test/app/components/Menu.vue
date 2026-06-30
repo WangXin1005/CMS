@@ -1,3 +1,4 @@
+<!-- Menu — 管理后台侧边菜单，根据角色动态显示菜单项 -->
 <template>
   <div class="menu-container">
     <div class="menu-logo">
@@ -28,30 +29,30 @@
         <el-icon><PriceTag /></el-icon>
         <span>标签管理</span>
       </el-menu-item>
-      <el-menu-item index="/comments" v-if="isAdmin">
+      <el-menu-item v-if="isAdmin" index="/comments">
         <el-icon><ChatDotRound /></el-icon>
         <span>评论管理</span>
       </el-menu-item>
-      <el-menu-item index="/media" v-if="isNotGuest">
+      <el-menu-item v-if="isNotGuest" index="/media">
         <el-icon><Picture /></el-icon>
         <span>媒体管理</span>
       </el-menu-item>
-      <el-menu-item index="/user" v-if="isAdmin">
+      <el-menu-item v-if="isAdmin" index="/user">
         <el-icon><User /></el-icon>
         <span>用户管理</span>
       </el-menu-item>
-      <el-menu-item index="/setting" v-if="isSuperAdmin">
+      <el-menu-item v-if="isSuperAdmin" index="/setting">
         <el-icon><Setting /></el-icon>
         <span>站点设置</span>
       </el-menu-item>
-      <el-menu-item index="/logs" v-if="isAdmin">
+      <el-menu-item v-if="isAdmin" index="/logs">
         <el-icon><List /></el-icon>
         <span>操作日志</span>
       </el-menu-item>
 
       <!-- 返回博客首页 -->
       <div class="menu-footer">
-        <el-divider style="margin:8px 16px;border-color:#2a2a3d" />
+        <el-divider style="margin: 8px 16px; border-color: #2a2a3d" />
         <el-menu-item index="/" class="back-to-site">
           <el-icon><View /></el-icon>
           <span>返回博客</span>
@@ -63,8 +64,16 @@
 
 <script lang="ts" setup>
 import {
-  HomeFilled, Document, Folder, PriceTag,
-  ChatDotRound, Picture, User, Setting, View, List
+  HomeFilled,
+  Document,
+  Folder,
+  PriceTag,
+  ChatDotRound,
+  Picture,
+  User,
+  Setting,
+  View,
+  List,
 } from '@element-plus/icons-vue'
 import { computed } from 'vue'
 const route = useRoute()
@@ -90,7 +99,9 @@ const isSuperAdmin = computed(() => role.value === 'SUPERADMIN')
   padding: 20px 20px 16px;
   border-bottom: 1px solid #2a2a3d;
 }
-.logo-icon { font-size: 22px; }
+.logo-icon {
+  font-size: 22px;
+}
 .logo-text {
   font-size: 18px;
   font-weight: 700;
@@ -128,6 +139,11 @@ const isSuperAdmin = computed(() => role.value === 'SUPERADMIN')
   margin: 2px 8px;
   border-radius: 8px;
 }
-.side-menu::-webkit-scrollbar { width: 4px; }
-.side-menu::-webkit-scrollbar-thumb { background: #2a2a3d; border-radius: 2px; }
+.side-menu::-webkit-scrollbar {
+  width: 4px;
+}
+.side-menu::-webkit-scrollbar-thumb {
+  background: #2a2a3d;
+  border-radius: 2px;
+}
 </style>

@@ -1,3 +1,6 @@
+/**
+ * 操作日志实体 — 记录用户操作的时间、类型、IP、数据变更。
+ */
 package com.example.nuxtproject.entity;
 
 import io.swagger.v3.oas.annotations.media.Schema;

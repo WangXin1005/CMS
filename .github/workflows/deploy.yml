@@ -10,8 +10,40 @@ jobs:
     steps:
       - name: 检出代码
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 安装 Java 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Java 后端 SonarQube 审计
+        run: |
+          mvn sonar:sonar \
+            -Dsonar.host.url=${{ secrets.SONARQUBE_URL }} \
+            -Dsonar.token=${{ secrets.SONARQUBE_TOKEN }} \
+            -Dsonar.projectKey=CMS-backend \
+            -Dsonar.projectName="CMS Backend (Spring Boot)" \
+            -Dsonar.java.binaries=target/classes \
+            -Dsonar.qualitygate.wait=true \
+            -DskipTests
+        working-directory: ./java-backend
+
+      - name: 前端 Nuxt SonarQube 审计
+        uses: SonarSource/sonarqube-scan-action@v5
+        env:
+          SONAR_HOST_URL: ${{ secrets.SONARQUBE_URL }}
+          SONAR_TOKEN: ${{ secrets.SONARQUBE_TOKEN }}
+        with:
+          projectBaseDir: ./nuxt-test
+          args: >
+            -Dsonar.qualitygate.wait=true
 
       - name: 远程部署到服务器
+        if: success()
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.DEPLOY_HOST }}

@@ -1,3 +1,6 @@
+/**
+ * 标签服务 — 公开列表 + 管理后台 CRUD。
+ */
 package com.example.nuxtproject.service;
 
 import com.example.nuxtproject.entity.Tag;

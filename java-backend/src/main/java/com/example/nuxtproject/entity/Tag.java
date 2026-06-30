@@ -1,3 +1,6 @@
+/**
+ * 标签实体 — 文章标签，多对多关联文章。
+ */
 package com.example.nuxtproject.entity;
 
 import io.swagger.v3.oas.annotations.media.Schema;

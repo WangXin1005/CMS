@@ -1,3 +1,6 @@
+/**
+ * 媒体数据访问层 — 文件记录持久化。
+ */
 package com.example.nuxtproject.repository;
 
 import com.example.nuxtproject.entity.Media;

@@ -1,3 +1,6 @@
+/**
+ * 分类控制器 — 公开查询 + 管理后台 CRUD（ADMIN/SUPERADMIN）。
+ */
 package com.example.nuxtproject.controller;
 
 import com.example.nuxtproject.entity.Category;

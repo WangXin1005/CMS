@@ -12,7 +12,6 @@
 import request from '~/utils/request'
 
 export const useComment = () => {
-
   /** 获取文章已审核评论（公开） */
   const getArticleComments = async (articleId: number) => {
     const res = await request.get(`/comments/article/${articleId}`)
@@ -27,7 +26,7 @@ export const useComment = () => {
 
   /** 管理后台：评论列表 */
   const getAdminList = async (page: number = 1, size: number = 20, status?: string) => {
-    const params: Record<string, any> = { page, size }
+    const params: Record<string, string | number | undefined> = { page, size }
     if (status) params.status = status
     const res = await request.get('/admin/comments', { params })
     return res.data

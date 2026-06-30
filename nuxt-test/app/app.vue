@@ -10,19 +10,26 @@
   </NuxtLayout>
 </template>
 
-<script setup lang="ts">
-</script>
+<script setup lang="ts"></script>
 
 <!-- 全局样式 -->
 <style lang="less">
-* { margin: 0; padding: 0; box-sizing: border-box; }
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
-html, body { height: 100%; }
+html,
+body {
+  height: 100%;
+}
 
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
-    'Noto Sans SC', sans-serif;
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans SC',
+    sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color: #333;
@@ -48,7 +55,7 @@ body {
 .page-card {
   background: #fff;
   border-radius: 10px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
   padding: 24px;
 }
 
@@ -81,7 +88,7 @@ body {
 .el-card {
   border-radius: 10px;
   border: none;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
 // ===== 分页 =====
@@ -92,10 +99,20 @@ body {
 }
 
 // ===== 滚动条美化 =====
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #ddd; border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: #bbb; }
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #ddd;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #bbb;
+}
 
 // ===== 统计卡片网格 =====
 .stats-grid {
@@ -130,23 +147,44 @@ body {
   word-wrap: break-word;
 }
 
-.article-content-render p { margin: 0 0 12px; }
+.article-content-render p {
+  margin: 0 0 12px;
+}
 
 .article-content-render h1,
 .article-content-render h2,
 .article-content-render h3,
 .article-content-render h4,
-.article-content-render h5 { margin: 20px 0 10px; font-weight: 600; color: #1a1a1a; }
+.article-content-render h5 {
+  margin: 20px 0 10px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
 
-.article-content-render h1 { font-size: 24px; }
-.article-content-render h2 { font-size: 20px; }
-.article-content-render h3 { font-size: 17px; }
-.article-content-render h4 { font-size: 15px; }
-.article-content-render h5 { font-size: 14px; }
+.article-content-render h1 {
+  font-size: 24px;
+}
+.article-content-render h2 {
+  font-size: 20px;
+}
+.article-content-render h3 {
+  font-size: 17px;
+}
+.article-content-render h4 {
+  font-size: 15px;
+}
+.article-content-render h5 {
+  font-size: 14px;
+}
 
 .article-content-render ul,
-.article-content-render ol { padding-left: 24px; margin: 8px 0; }
-.article-content-render li { margin: 4px 0; }
+.article-content-render ol {
+  padding-left: 24px;
+  margin: 8px 0;
+}
+.article-content-render li {
+  margin: 4px 0;
+}
 
 .article-content-render blockquote {
   border-left: 3px solid var(--el-color-primary, #409eff);
@@ -221,5 +259,4 @@ body {
   background: #f7f8fa;
   font-weight: 600;
 }
-
 </style>

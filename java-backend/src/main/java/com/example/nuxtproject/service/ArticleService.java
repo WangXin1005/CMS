@@ -1,3 +1,6 @@
+/**
+ * 文章服务 — 公开列表/搜索/详情 + 管理后台 CRUD + 个人文章管理。
+ */
 package com.example.nuxtproject.service;
 
 import com.example.nuxtproject.entity.Article;

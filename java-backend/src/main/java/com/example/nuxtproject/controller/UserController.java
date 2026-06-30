@@ -1,3 +1,6 @@
+/**
+ * 用户控制器 — 超管检查/初始化 + 用户 CRUD（ADMIN/SUPERADMIN）+ 密码修改。
+ */
 package com.example.nuxtproject.controller;
 
 import com.example.nuxtproject.entity.Role;
@@ -11,6 +14,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;

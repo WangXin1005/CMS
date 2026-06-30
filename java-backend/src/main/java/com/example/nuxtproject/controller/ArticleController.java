@@ -1,3 +1,6 @@
+/**
+ * 文章控制器 — 公开查询 + 管理后台 CRUD，含个人文章接口（USER 角色可用）。
+ */
 package com.example.nuxtproject.controller;
 
 import com.example.nuxtproject.entity.Article;

@@ -1,3 +1,4 @@
+<!-- default 布局 — 管理后台标准布局：Header + Menu + 内容区 -->
 <template>
   <div class="admin-layout">
     <Header />
@@ -60,7 +61,7 @@
   background: #fff;
   border-radius: 8px;
   padding: 20px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
 }
 
 /* 分页容器 */

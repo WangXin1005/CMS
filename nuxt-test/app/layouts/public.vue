@@ -1,3 +1,4 @@
+<!-- public 布局 — 公开博客布局：顶栏导航 + 内容 + 页脚 -->
 <template>
   <div class="public-layout">
     <header class="public-header">
@@ -61,7 +62,9 @@ const { username, isLoggedIn } = useAuth()
   gap: 8px;
   text-decoration: none;
 }
-.logo-icon { font-size: 24px; }
+.logo-icon {
+  font-size: 24px;
+}
 .logo-text {
   font-size: 22px;
   font-weight: 700;
@@ -83,19 +86,28 @@ const { username, isLoggedIn } = useAuth()
   border-radius: 6px;
   transition: all 0.2s;
   font-weight: 500;
-  &:hover { color: #667eea; background: #f5f5f5; }
+  &:hover {
+    color: #667eea;
+    background: #f5f5f5;
+  }
 }
 .logged-in-hint {
   color: #999;
   font-size: 13px;
   cursor: default;
 }
-.logged-in-hint:hover { color: #999; background: transparent; }
+.logged-in-hint:hover {
+  color: #999;
+  background: transparent;
+}
 .admin-btn {
   background: #52c41a;
   color: #fff !important;
 }
-.admin-btn:hover { opacity: 0.9; background: #52c41a; }
+.admin-btn:hover {
+  opacity: 0.9;
+  background: #52c41a;
+}
 .login-btn-placeholder {
   text-decoration: none;
   color: #fff;
@@ -110,9 +122,14 @@ const { username, isLoggedIn } = useAuth()
 .login-btn {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: #fff !important;
-  &:hover { opacity: 0.9; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+  &:hover {
+    opacity: 0.9;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  }
 }
-.main-area { flex: 1; }
+.main-area {
+  flex: 1;
+}
 .public-footer {
   text-align: center;
   padding: 24px;
@@ -121,6 +138,8 @@ const { username, isLoggedIn } = useAuth()
   border-top: 1px solid #e8e8e8;
   margin-top: 40px;
   background: #fff;
-  p { margin: 0; }
+  p {
+    margin: 0;
+  }
 }
 </style>

@@ -9,19 +9,25 @@ import { ref, computed } from 'vue'
 
 const props = defineProps<{
   article: {
-    id: number; title: string; slug: string
-    summary: string | null; content?: string | null
+    id: number
+    title: string
+    slug: string
+    summary: string | null
+    content?: string | null
     coverImage: string | null
     category: { id: number; name: string } | null
     tags: Array<{ id: number; name: string }>
     author: { id: number; username: string }
-    viewCount: number; createdAt: string
+    viewCount: number
+    createdAt: string
   }
 }>()
 
 const emit = defineEmits<{ click: [] }>()
 const imageError = ref(false)
-const formattedDate = computed(() => (props.article.createdAt || "").replace("T", " ").slice(0, 16) ?? '')
+const formattedDate = computed(
+  () => (props.article.createdAt || '').replace('T', ' ').slice(0, 16) ?? '',
+)
 const displaySummary = computed(() => {
   if (props.article.summary) return props.article.summary
   if (props.article.content) {
@@ -36,9 +42,20 @@ const coverUrl = computed(() => props.article.coverImage ?? '')
 <template>
   <div class="article-card" @click="emit('click')">
     <div class="card-cover">
-      <img v-if="coverUrl && !imageError" :src="coverUrl" :alt="article.title"
-           class="cover-image" @error="imageError = true" />
-      <div v-else class="cover-placeholder" :style="{ background: `linear-gradient(135deg, hsl(${(article.id * 137) % 360}, 70%, 60%), hsl(${(article.id * 137 + 60) % 360}, 70%, 40%))` }">
+      <img
+        v-if="coverUrl && !imageError"
+        :src="coverUrl"
+        :alt="article.title"
+        class="cover-image"
+        @error="imageError = true"
+      />
+      <div
+        v-else
+        class="cover-placeholder"
+        :style="{
+          background: `linear-gradient(135deg, hsl(${(article.id * 137) % 360}, 70%, 60%), hsl(${(article.id * 137 + 60) % 360}, 70%, 40%))`,
+        }"
+      >
         <span class="placeholder-text">{{ article.title.charAt(0) }}</span>
       </div>
     </div>
@@ -68,11 +85,11 @@ const coverUrl = computed(() => props.article.coverImage ?? '')
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   flex-direction: column;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 
   &:hover {
     transform: translateY(-6px);
-    box-shadow: 0 12px 24px rgba(0,0,0,0.08);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
   }
 }
 
@@ -89,7 +106,9 @@ const coverUrl = computed(() => props.article.coverImage ?? '')
   object-fit: cover;
   transition: transform 0.4s ease;
 
-  .article-card:hover & { transform: scale(1.08); }
+  .article-card:hover & {
+    transform: scale(1.08);
+  }
 }
 
 .cover-placeholder {
@@ -103,12 +122,17 @@ const coverUrl = computed(() => props.article.coverImage ?? '')
 .placeholder-text {
   font-size: 64px;
   font-weight: 700;
-  color: rgba(255,255,255,0.85);
+  color: rgba(255, 255, 255, 0.85);
   text-transform: uppercase;
-  text-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
-.card-body { padding: 20px; flex: 1; display: flex; flex-direction: column; }
+.card-body {
+  padding: 20px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
 
 .card-meta {
   display: flex;
@@ -117,7 +141,9 @@ const coverUrl = computed(() => props.article.coverImage ?? '')
   margin-bottom: 10px;
 }
 
-.category-tag { flex-shrink: 0; }
+.category-tag {
+  flex-shrink: 0;
+}
 
 .date {
   font-size: 12px;
