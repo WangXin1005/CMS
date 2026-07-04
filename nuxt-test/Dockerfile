@@ -1,8 +1,8 @@
 # ===== 构建阶段 =====
 FROM node:22-alpine AS builder
 WORKDIR /app
-COPY package*.json ./
-RUN npm config set registry https://registry.npmmirror.com && npm ci
+COPY package*.json .npmrc ./
+RUN npm install
 COPY . .
 RUN npm run build
 
