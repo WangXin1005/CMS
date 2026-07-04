@@ -27,7 +27,8 @@ jobs:
 
             echo "===== 拉取代码 ====="
             cd /opt/CMS
-            git pull origin main
+            git fetch origin main
+            git reset --hard origin/main
 
             echo "===== 串行构建容器 ====="
             docker compose -f docker-compose.yml -f docker-compose.prod.yml build backend
