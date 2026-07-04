@@ -1,8 +1,10 @@
 # ===== 构建阶段 =====
 FROM node:22-alpine AS builder
 WORKDIR /app
-COPY package*.json .npmrc ./
-RUN npm install
+# 安装原生模块编译依赖
+RUN apk add --no-cache python3 make g++
+COPY package*.json ./
+RUN npm config set registry https://registry.npmmirror.com && npm install
 COPY . .
 RUN npm run build
 
