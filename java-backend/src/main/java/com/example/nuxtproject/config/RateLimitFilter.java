@@ -14,7 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 简易内存限流过滤器
- * 对登录和用户名检查端点进行频率限制，防止暴力破解和用户枚举攻击。
+ * 对登录、用户名检查、评论提交等敏感端点进行频率限制，防止暴力破解、用户枚举和垃圾评论
  */
 @Component
 public class RateLimitFilter extends OncePerRequestFilter {
@@ -24,18 +24,24 @@ public class RateLimitFilter extends OncePerRequestFilter {
 
     /** 限流窗口大小（毫秒） */
     private static final long WINDOW_MS = 60_000;
-    /** 每个窗口最大请求数（登录） */
-    private static final int LOGIN_MAX = 5;
-    /** 每个窗口最大请求数（用户名检查） */
-    private static final int CHECK_MAX = 10;
+
+    /** 每个窗口最大请求数 */
+    private static final int LOGIN_MAX = 5;         // 登录：5次/分钟
+    private static final int CHECK_MAX = 10;         // 用户名检查：10次/分钟
+    private static final int COMMENT_MAX = 6;        // 评论提交：6次/分钟
 
     private static final String LOGIN_PATH = "/api/auth/login";
     private static final String CHECK_USERNAME_PATH = "/api/users/check-username";
+    private static final String COMMENT_PATH = "/api/comments";
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
-        return !path.equals(LOGIN_PATH) && !path.equals(CHECK_USERNAME_PATH);
+        String method = request.getMethod();
+        boolean isLogin = path.equals(LOGIN_PATH);
+        boolean isCheckUsername = path.equals(CHECK_USERNAME_PATH);
+        boolean isCommentSubmit = path.equals(COMMENT_PATH) && "POST".equalsIgnoreCase(method);
+        return !isLogin && !isCheckUsername && !isCommentSubmit;
     }
 
     @Override
@@ -45,7 +51,15 @@ public class RateLimitFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
         String ip = getClientIP(request);
         String path = request.getRequestURI();
-        int maxRequests = path.equals(LOGIN_PATH) ? LOGIN_MAX : CHECK_MAX;
+        int maxRequests;
+
+        if (path.equals(LOGIN_PATH)) {
+            maxRequests = LOGIN_MAX;
+        } else if (path.equals(CHECK_USERNAME_PATH)) {
+            maxRequests = CHECK_MAX;
+        } else {
+            maxRequests = COMMENT_MAX;
+        }
 
         long now = System.currentTimeMillis();
         RateWindow window = buckets.compute(ip, (k, v) -> {
@@ -68,6 +82,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
         chain.doFilter(request, response);
     }
 
+    /** 获取客户端真实 IP（支持反向代理） */
     private String getClientIP(HttpServletRequest request) {
         String xff = request.getHeader("X-Forwarded-For");
         if (xff != null && !xff.isBlank()) {

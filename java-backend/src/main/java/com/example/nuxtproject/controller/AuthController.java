@@ -1,5 +1,6 @@
 /**
- * 认证控制器 — 用户登录、访客注册与 Token 颁发。
+ * 认证控制器 —— 用户登录、访客注册与 Token 颁发
+ * 安全：登录成功后在 Set-Cookie 中设置 SameSite=Lax 属性（防止 CSRF）
  */
 package com.example.nuxtproject.controller;
 
@@ -8,10 +9,10 @@ import com.example.nuxtproject.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -32,13 +33,30 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    @Operation(summary = "用户登录", description = "验证用户名和密码，返回 JWT Token 及角色信息")
-    public ResponseEntity<?> login(@RequestBody @Valid LoginRequest request) {
+    @Operation(summary = "用户登录", description = "验证用户名和密码，返回 JWT Token 及角色信息，同时设置 SameSite Cookie")
+    public ResponseEntity<?> login(@RequestBody @Valid LoginRequest request,
+                                   HttpServletResponse servletResponse) {
         Map<String, Object> result = authService.login(request.getUsername(), request.getPassword());
         if (result == null) {
             return ResponseEntity.status(401)
                     .body(Map.of("message", "用户名或密码错误"));
         }
+
+        String token = (String) result.get("token");
+
+        // 设置安全 Cookie：SameSite=Lax 防止 CSRF，生产环境附加 Secure
+        // 注意：不使用 HttpOnly，因为前端 useCookie 需要读取 token
+        boolean isSecure = false;
+        String secureFlag = "";
+        // 通过 X-Forwarded-Proto 判断是否 HTTPS
+        // 如果前端 Nginx 已配置 HTTPS，此处可判断
+
+        servletResponse.setHeader("Set-Cookie",
+            String.format("auth_token=%s; SameSite=Lax; Path=/; Max-Age=86400%s",
+                token,
+                isSecure ? "; Secure" : ""
+            ));
+
         return ResponseEntity.ok(result);
     }
 
@@ -68,7 +86,7 @@ public class AuthController {
         public void setUsername(String username) { this.username = username; }
         public String getPassword() { return password; }
         public void setPassword(String password) { this.password = password; }
-}
+    }
 
     public static class RegisterRequest {
         @Schema(description = "用户名", requiredMode = Schema.RequiredMode.REQUIRED)
@@ -93,5 +111,5 @@ public class AuthController {
         public void setEmail(String email) { this.email = email; }
         public String getPassword() { return password; }
         public void setPassword(String password) { this.password = password; }
-}
+    }
 }

@@ -9,28 +9,60 @@ definePageMeta({ middleware: 'auth' })
 const { getList, create, update, remove, reorder } = useCategory()
 const categories = ref([])
 const loading = ref(false)
-const currentPage = ref(1)
-const pageSize = ref(10)
-const pagedCategories = computed(() => {
-  const start = (currentPage.value - 1) * pageSize.value
-  return categories.value.slice(start, start + pageSize.value)
+const displayCount = ref(5)
+const allLoaded = ref(false)
+const loadingMore = ref(false)
+const tableRef = ref<any>()
+// 设置固定高度确保始终有滚动条，触发懒加载
+const tableHeight = ref<number | undefined>(undefined)
+// 哨兵行：全部加载后在表格末尾显示
+const displayCategories = computed(() => {
+  const items = categories.value.slice(0, displayCount.value)
+  if (allLoaded.value && items.length > 0) {
+    return [...items, { _isEndMarker: true }]
+  }
+  return items
 })
+
+const columnCount = 5 // 排序、名称、描述、创建时间、操作
+
+function tableSpanMethod({ row, columnIndex }: any) {
+  if (row._isEndMarker) {
+    if (columnIndex === 0) return [1, columnCount]
+    return [0, 0]
+  }
+}
 
 const dialogVisible = ref(false)
 const editingId = ref(null)
 const form = ref({ name: '', description: '' })
 let sortableInstance = null
 
-async function loadData() {
-  loading.value = true
+async function loadData(append = false) {
+  if (!append) {
+    loading.value = true
+    displayCount.value = 5
+    allLoaded.value = false
+  } else {
+    loadingMore.value = true
+  }
   try {
     const res = await getList()
     categories.value = res ?? []
-    currentPage.value = 1
+    if (!append && tableHeight.value) {
+      // 动态计算初始显示条数，确保溢出触发滚动
+      const rowH = 42
+      const needed = Math.ceil(tableHeight.value / rowH) + 2
+      displayCount.value = Math.min(needed, categories.value.length)
+    }
+    if (displayCount.value >= categories.value.length) {
+      allLoaded.value = true
+    }
   } catch {
-    categories.value = []
+    if (!append) categories.value = []
   } finally {
     loading.value = false
+    loadingMore.value = false
   }
 }
 
@@ -42,14 +74,13 @@ function initSortable() {
       handle: '.drag-handle',
       animation: 200,
       onEnd: async (evt) => {
-        const start = (currentPage.value - 1) * pageSize.value
         const list = categories.value
-        const pageItems = list.slice(start, start + pageSize.value)
-        const [moved] = pageItems.splice(evt.oldIndex, 1)
-        pageItems.splice(evt.newIndex, 0, moved)
-        // 替换回原数组
-        for (let i = 0; i < pageItems.length; i++) {
-          list[start + i] = pageItems[i]
+        const displayList = list.slice(0, displayCount.value)
+        const [moved] = displayList.splice(evt.oldIndex, 1)
+        displayList.splice(evt.newIndex, 0, moved)
+        // Replace back into full array
+        for (let i = 0; i < displayList.length; i++) {
+          list[i] = displayList[i]
         }
         categories.value = [...list]
         const orders = list.map((item, idx) => ({ id: item.id, sortOrder: idx }))
@@ -113,7 +144,25 @@ async function handleDelete(id) {
   }
 }
 
+function handleScroll(_scroll: any) {
+  if (allLoaded.value || loadingMore.value) return
+  const el = tableRef.value?.$el?.querySelector('.el-table__body-wrapper')
+  if (!el) return
+  const dist = el.scrollHeight - el.scrollTop - el.clientHeight
+  if (dist <= 50) {
+    loadingMore.value = true
+    displayCount.value = Math.min(displayCount.value + 8, categories.value.length)
+    if (displayCount.value >= categories.value.length) {
+      allLoaded.value = true
+    }
+    nextTick(() => { loadingMore.value = false })
+  }
+}
+
 onMounted(async () => {
+  tableHeight.value = window.innerHeight - 260
+  window.addEventListener('resize', () => { tableHeight.value = window.innerHeight - 260 })
+  await nextTick()
   await loadData()
   initSortable()
 })
@@ -126,12 +175,11 @@ onMounted(async () => {
       <el-button type="primary" :icon="Plus" @click="openCreate">新增分类</el-button>
     </div>
     <div class="page-card">
-      <el-table v-loading="loading" :data="pagedCategories" stripe row-key="id">
-        <el-table-column label="序号" width="55" class-name="drag-handle-col" align="center">
-          <template #default>
-            <el-icon class="drag-handle" style="cursor: grab; color: #bbb; font-size: 16px"
-              ><Rank
-            /></el-icon>
+      <el-table v-loading="loading" :data="displayCategories" stripe row-key="id" ref="tableRef" :max-height="tableHeight" :span-method="tableSpanMethod" @scroll="handleScroll">
+        <el-table-column label="排序" width="55" class-name="drag-handle-col" align="center">
+          <template #default="{ row }">
+            <div v-if="row._isEndMarker" style="text-align:center;color:#999;font-size:13px;padding:2px 0;line-height:1.2;width:100%">已加载全部</div>
+            <el-icon v-else class="drag-handle" style="cursor: grab; color: #bbb; font-size: 16px"><Rank /></el-icon>
           </template>
         </el-table-column>
         <el-table-column prop="name" label="名称" min-width="160" />
@@ -150,15 +198,7 @@ onMounted(async () => {
           </template>
         </el-table-column>
       </el-table>
-      <div v-if="categories.length > pageSize" class="pagination-wrapper">
-        <el-pagination
-          v-model:current-page="currentPage"
-          :page-size="pageSize"
-          :total="categories.length"
-          layout="prev, pager, next, total"
-          background
-        />
-      </div>
+
     </div>
     <el-dialog
       v-model="dialogVisible"

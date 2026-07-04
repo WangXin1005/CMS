@@ -14,174 +14,8 @@ import { ElMessage } from 'element-plus'
 import { validatePassword } from '~/utils/password'
 import { validateUsername } from '~/utils/username'
 import { validateEmail } from '~/utils/email'
-</script>
 
-<template>
-  <div class="login-wrapper">
-    <div v-if="mode === 'checking'" class="login-card">
-      <div class="card-brand">
-        <span class="brand-icon">📝</span>
-        <h1 class="brand-title">CodeBlog</h1>
-      </div>
-      <div class="checking-area">
-        <el-icon class="is-loading" :size="32"><Loading /></el-icon>
-        <p>正在检查系统状态...</p>
-      </div>
-    </div>
-
-    <div v-else-if="mode === 'init'" class="login-card">
-      <div class="card-brand">
-        <span class="brand-icon">🚀</span>
-        <h1 class="brand-title">初始化系统</h1>
-        <p class="brand-desc">首次使用，请创建超级管理员账号</p>
-      </div>
-      <el-form label-position="top" @submit.prevent="handleInit">
-        <el-form-item label="用户名" :error="initUsernameError">
-          <el-input
-            v-model="registerForm.username"
-            placeholder="请输入用户名"
-            :prefix-icon="User"
-            @blur="onInitUsernameBlur"
-          />
-        </el-form-item>
-        <el-form-item label="邮箱" :error="initEmailError">
-          <el-input
-            v-model="registerForm.email"
-            placeholder="请输入邮箱"
-            :prefix-icon="Message"
-            @blur="onInitEmailBlur"
-          />
-        </el-form-item>
-        <el-form-item label="密码" :error="initPasswordError">
-          <el-input
-            v-model="registerForm.password"
-            type="password"
-            placeholder="请输入密码"
-            :prefix-icon="Lock"
-            show-password
-            @blur="onInitPasswordBlur"
-          />
-        </el-form-item>
-        <el-form-item label="确认密码" :error="initConfirmError">
-          <el-input
-            v-model="registerForm.confirmPassword"
-            type="password"
-            placeholder="请再次输入密码"
-            :prefix-icon="Lock"
-            show-password
-            @blur="onInitConfirmBlur"
-          />
-        </el-form-item>
-        <el-button
-          type="primary"
-          size="large"
-          class="login-btn"
-          :loading="initLoading"
-          native-type="submit"
-          block
-        >
-          创建超级管理员
-        </el-button>
-      </el-form>
-    </div>
-
-    <div v-else class="login-card">
-      <div class="card-brand">
-        <span class="brand-icon">📝</span>
-        <h1 class="brand-title">CodeBlog</h1>
-        <p class="brand-desc">欢迎回来，请登录您的账号</p>
-      </div>
-      <div v-if="!showRegister">
-        <el-form label-position="top" @submit.prevent="handleLogin">
-          <el-form-item label="用户名">
-            <el-input v-model="loginForm.username" placeholder="请输入用户名" :prefix-icon="User" />
-          </el-form-item>
-          <el-form-item label="密码">
-            <el-input
-              v-model="loginForm.password"
-              type="password"
-              placeholder="请输入密码"
-              :prefix-icon="Lock"
-              show-password
-            />
-          </el-form-item>
-          <el-form-item>
-            <el-checkbox v-model="rememberMe" class="remember-checkbox">记住账号</el-checkbox>
-          </el-form-item>
-          <el-button
-            type="primary"
-            size="large"
-            class="login-btn"
-            :loading="loginLoading"
-            native-type="submit"
-            block
-          >
-            登录
-          </el-button>
-        </el-form>
-        <div class="form-footer">
-          <el-button link type="primary" @click="showRegister = true">游客注册</el-button>
-        </div>
-      </div>
-      <div v-else>
-        <el-form label-position="top" @submit.prevent="handleRegister">
-          <el-form-item label="用户名" :error="regUsernameError">
-            <el-input
-              v-model="registerForm.username"
-              placeholder="请输入用户名"
-              :prefix-icon="User"
-              @blur="onRegUsernameBlur"
-            />
-          </el-form-item>
-          <el-form-item label="邮箱" :error="regEmailError">
-            <el-input
-              v-model="registerForm.email"
-              placeholder="请输入邮箱"
-              :prefix-icon="Message"
-              @blur="onRegEmailBlur"
-            />
-          </el-form-item>
-          <el-form-item label="密码" :error="regPasswordError">
-            <el-input
-              v-model="registerForm.password"
-              type="password"
-              placeholder="请输入密码"
-              :prefix-icon="Lock"
-              show-password
-              @blur="onRegPasswordBlur"
-            />
-          </el-form-item>
-          <el-form-item label="确认密码" :error="regConfirmError">
-            <el-input
-              v-model="registerForm.confirmPassword"
-              type="password"
-              placeholder="请再次输入密码"
-              :prefix-icon="Lock"
-              show-password
-              @blur="onRegConfirmBlur"
-            />
-          </el-form-item>
-          <el-button
-            type="primary"
-            size="large"
-            class="login-btn"
-            :loading="registerLoading"
-            native-type="submit"
-            block
-          >
-            注册
-          </el-button>
-        </el-form>
-        <div class="form-footer">
-          <el-button link type="primary" @click="showRegister = false">返回登录</el-button>
-        </div>
-      </div>
-    </div>
-  </div>
-</template>
-
-<script lang="ts">
-import { Loading } from '@element-plus/icons-vue'
+import { Loading, User, Lock, Message } from '@element-plus/icons-vue'
 definePageMeta({ layout: 'blank' })
 
 const { login, registerGuest, checkSuperAdmin, initSuperAdmin, hasSuperAdmin, checkUsername } =
@@ -397,7 +231,174 @@ async function handleInit() {
   }
 }
 // components 已通过 <script setup> 自动注册，无需手动声明
+
 </script>
+
+<template>
+  <div class="login-wrapper">
+    <div v-if="mode === 'checking'" class="login-card">
+      <div class="card-brand">
+        <span class="brand-icon">📝</span>
+        <h1 class="brand-title">CodeBlog</h1>
+      </div>
+      <div class="checking-area">
+        <el-icon class="is-loading" :size="32"><Loading /></el-icon>
+        <p>正在检查系统状态...</p>
+      </div>
+    </div>
+
+    <div v-else-if="mode === 'init'" class="login-card">
+      <div class="card-brand">
+        <span class="brand-icon">🚀</span>
+        <h1 class="brand-title">初始化系统</h1>
+        <p class="brand-desc">首次使用，请创建超级管理员账号</p>
+      </div>
+      <el-form label-position="top" @submit.prevent="handleInit">
+        <el-form-item label="用户名" :error="initUsernameError">
+          <el-input
+            v-model="registerForm.username"
+            placeholder="请输入用户名"
+            :prefix-icon="User"
+            @blur="onInitUsernameBlur"
+          />
+        </el-form-item>
+        <el-form-item label="邮箱" :error="initEmailError">
+          <el-input
+            v-model="registerForm.email"
+            placeholder="请输入邮箱"
+            :prefix-icon="Message"
+            @blur="onInitEmailBlur"
+          />
+        </el-form-item>
+        <el-form-item label="密码" :error="initPasswordError">
+          <el-input
+            v-model="registerForm.password"
+            type="password"
+            placeholder="请输入密码"
+            :prefix-icon="Lock"
+            show-password
+            @blur="onInitPasswordBlur"
+          />
+        </el-form-item>
+        <el-form-item label="确认密码" :error="initConfirmError">
+          <el-input
+            v-model="registerForm.confirmPassword"
+            type="password"
+            placeholder="请再次输入密码"
+            :prefix-icon="Lock"
+            show-password
+            @blur="onInitConfirmBlur"
+          />
+        </el-form-item>
+        <el-button
+          type="primary"
+          size="large"
+          class="login-btn"
+          :loading="initLoading"
+          native-type="submit"
+          block
+        >
+          创建超级管理员
+        </el-button>
+      </el-form>
+    </div>
+
+    <div v-else class="login-card">
+      <div class="card-brand">
+        <span class="brand-icon">📝</span>
+        <h1 class="brand-title">CodeBlog</h1>
+        <p class="brand-desc">欢迎回来，请登录您的账号</p>
+      </div>
+      <div v-if="!showRegister">
+        <el-form label-position="top" @submit.prevent="handleLogin">
+          <el-form-item label="用户名">
+            <el-input v-model="loginForm.username" placeholder="请输入用户名" :prefix-icon="User" />
+          </el-form-item>
+          <el-form-item label="密码">
+            <el-input
+              v-model="loginForm.password"
+              type="password"
+              placeholder="请输入密码"
+              :prefix-icon="Lock"
+              show-password
+            />
+          </el-form-item>
+          <el-form-item>
+            <el-checkbox v-model="rememberMe" class="remember-checkbox">记住账号</el-checkbox>
+          </el-form-item>
+          <el-button
+            type="primary"
+            size="large"
+            class="login-btn"
+            :loading="loginLoading"
+            native-type="submit"
+            block
+          >
+            登录
+          </el-button>
+        </el-form>
+        <div class="form-footer">
+          <el-button link type="primary" @click="showRegister = true">游客注册</el-button>
+        </div>
+      </div>
+      <div v-else>
+        <el-form label-position="top" @submit.prevent="handleRegister">
+          <el-form-item label="用户名" :error="regUsernameError">
+            <el-input
+              v-model="registerForm.username"
+              placeholder="请输入用户名"
+              :prefix-icon="User"
+              @blur="onRegUsernameBlur"
+            />
+          </el-form-item>
+          <el-form-item label="邮箱" :error="regEmailError">
+            <el-input
+              v-model="registerForm.email"
+              placeholder="请输入邮箱"
+              :prefix-icon="Message"
+              @blur="onRegEmailBlur"
+            />
+          </el-form-item>
+          <el-form-item label="密码" :error="regPasswordError">
+            <el-input
+              v-model="registerForm.password"
+              type="password"
+              placeholder="请输入密码"
+              :prefix-icon="Lock"
+              show-password
+              @blur="onRegPasswordBlur"
+            />
+          </el-form-item>
+          <el-form-item label="确认密码" :error="regConfirmError">
+            <el-input
+              v-model="registerForm.confirmPassword"
+              type="password"
+              placeholder="请再次输入密码"
+              :prefix-icon="Lock"
+              show-password
+              @blur="onRegConfirmBlur"
+            />
+          </el-form-item>
+          <el-button
+            type="primary"
+            size="large"
+            class="login-btn"
+            :loading="registerLoading"
+            native-type="submit"
+            block
+          >
+            注册
+          </el-button>
+        </el-form>
+        <div class="form-footer">
+          <el-button link type="primary" @click="showRegister = false">返回登录</el-button>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+
 
 <style scoped>
 .login-wrapper {

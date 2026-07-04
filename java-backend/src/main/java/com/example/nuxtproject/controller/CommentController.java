@@ -1,5 +1,6 @@
 /**
- * 评论控制器 — 公开提交/查询 + 管理后台审核（ADMIN/SUPERADMIN）。
+ * 评论控制器 —— 公开提交/查询 + 管理后台审核（ADMIN/SUPERADMIN）
+ * 安全约束：提交评论需登录用户，匿名用户将被拒绝
  */
 package com.example.nuxtproject.controller;
 
@@ -44,10 +45,14 @@ public class CommentController {
     }
 
     @PostMapping("/api/comments")
-    @Operation(summary = "提交评论", description = "公开接口，提交评论后进入待审核状态")
+    @Operation(summary = "提交评论", description = "需登录用户提交评论，提交后进入待审核状态")
     public ResponseEntity<?> submit(
             @Parameter(hidden = true) @AuthenticationPrincipal UserPrincipal principal,
             @RequestBody @Valid SubmitCommentRequest request) {
+        // 安全校验：拒绝匿名用户提交评论
+        if (principal == null) {
+            return ResponseEntity.status(401).body(Map.of("message", "请先登录后再提交评论"));
+        }
         User user = new User();
         user.setId(principal.userId());
         Map<String, String> result = commentService.submit(

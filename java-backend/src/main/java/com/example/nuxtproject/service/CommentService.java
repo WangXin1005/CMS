@@ -1,5 +1,6 @@
 /**
- * 评论服务 — 公开提交/查询 + 管理后台审核/删除。
+ * 评论服务 —— 公开提交/查询 + 管理后台审核/删除
+ * 安全：提交评论时对内容进行 HTML 消毒，防止存储型 XSS
  */
 package com.example.nuxtproject.service;
 
@@ -33,15 +34,21 @@ public class CommentService {
         return commentRepository.findByArticleIdAndStatusOrderByCreatedAtDesc(articleId, CommentStatus.APPROVED);
     }
 
-    /** 访客提交评论（状态为 PENDING，需审核） */
+    /**
+     * 访客提交评论（状态为 PENDING，需审核）
+     * 安全：对评论内容进行 HTML 标签剥离，防止存储型 XSS
+     */
     public Map<String, String> submit(String content, Long articleId, User author, Long parentId) {
         Article article = articleRepository.findById(articleId).orElse(null);
         if (article == null) {
             return Map.of("message", "文章不存在");
         }
 
+        // 后端消毒：剥离所有 HTML 标签，仅保留纯文本
+        String safeContent = stripHtml(content);
+
         Comment comment = new Comment();
-        comment.setContent(content);
+        comment.setContent(safeContent);
         comment.setArticle(article);
         comment.setAuthor(author);
 
@@ -52,6 +59,22 @@ public class CommentService {
 
         commentRepository.save(comment);
         return Map.of("message", "评论提交成功，等待审核");
+    }
+
+    /**
+     * 剥离 HTML 标签，防止存储型 XSS
+     * 将 < > & 等特殊字符转义为 HTML 实体
+     */
+    private String stripHtml(String input) {
+        if (input == null) return "";
+        // 先转义 HTML 特殊字符
+        String escaped = input
+            .replace("&", "&amp;")
+            .replace("<", "&lt;")
+            .replace(">", "&gt;")
+            .replace("\"", "&quot;")
+            .replace("'", "&#x27;");
+        return escaped;
     }
 
     /** 后台：分页获取所有评论 */

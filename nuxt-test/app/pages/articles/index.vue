@@ -329,6 +329,7 @@ onMounted(async () => {
                 font-size: 13px;
                 padding: 2px 0;
                 line-height: 1.2;
+                width: 100%;
               "
             >
               已加载全部

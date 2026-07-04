@@ -10,12 +10,17 @@ import request from '~/utils/request'
  */
 export const useAuth = () => {
   // Cookie 持久化：Token、用户名、角色
-  const token = useCookie('auth_token', { default: () => '', secure: true, sameSite: 'lax' })
-  const username = useCookie('username', { default: () => '', secure: true, sameSite: 'lax' })
-  const role = useCookie('user_role', { default: () => '', secure: true, sameSite: 'lax' })
+  const token = useCookie('auth_token', { default: () => '', sameSite: 'lax' })
+  const username = useCookie('username', { default: () => '', sameSite: 'lax' })
+  const role = useCookie('user_role', { default: () => '', sameSite: 'lax' })
 
   /** 是否已登录（Token 存在即视为已登录）*/
-  const isLoggedIn = computed(() => !!token.value)
+  const isLoggedIn = computed(() => {
+    if (typeof sessionStorage !== "undefined") {
+      return !!token.value && !!sessionStorage.getItem("auth_session")
+    }
+    return !!token.value
+  })
 
   /** 是否存在超级管理员（需调用 checkSuperAdmin 确认）*/
   const hasSuperAdmin = ref(false)
@@ -61,6 +66,7 @@ export const useAuth = () => {
     token.value = newToken
     username.value = resUsername
     role.value = resRole
+    sessionStorage.setItem('auth_session', '1')
   }
 
   /**
@@ -83,6 +89,7 @@ export const useAuth = () => {
     token.value = ''
     username.value = ''
     role.value = ''
+    sessionStorage.removeItem('auth_session')
     const router = useRouter()
     router.push('/')
   }

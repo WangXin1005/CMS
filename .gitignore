@@ -34,3 +34,5 @@ java-backend/uploads/
 *.bak
 *.swp
 *.tmp
+
+AGENTS.md

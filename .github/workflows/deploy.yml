@@ -13,7 +13,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: 代码审计 + 部署
+      - name:   部署
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.DEPLOY_HOST }}

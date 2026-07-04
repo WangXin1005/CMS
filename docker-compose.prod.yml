@@ -9,11 +9,13 @@ services:
   backend:
     environment:
       SPRING_PROFILES_ACTIVE: prod
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD}
       JWT_SECRET: ${JWT_SECRET}
     restart: always
 
   frontend:
+    environment:
+      NUXT_API_PROXY_TARGET: http://backend:8080
     restart: always
 
   nginx:
