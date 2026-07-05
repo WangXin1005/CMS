@@ -1,17 +1,15 @@
 # ===== 构建阶段 =====
-FROM node:22-alpine AS builder
+FROM node:22-bookworm-slim AS builder
 WORKDIR /app
-# 安装原生模块编译依赖
-RUN apk add --no-cache python3 make g++
 COPY package*.json ./
-RUN npm config set registry https://registry.npmmirror.com && npm install
+RUN npm ci
 COPY . .
 RUN npm run build
 
 # ===== 运行阶段 =====
-FROM node:22-alpine
+FROM node:22-bookworm-slim
 WORKDIR /app
-RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+RUN groupadd -r appgroup && useradd -r -g appgroup appuser
 COPY --from=builder /app/.output ./.output
 RUN chown -R appuser:appgroup /app
 USER appuser
