@@ -30,7 +30,6 @@ public class UserService {
 
     /**
      * 妫€鏌ョ郴缁熶腑鏄惁瀛樺湪瓒呯骇绠＄悊鍛?     */
-    @Cacheable("superAdminExists")
     public boolean existsSuperAdmin() {
         return userRepository.existsByRole(Role.SUPERADMIN);
     }

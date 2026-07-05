@@ -6,6 +6,13 @@ let _initialized: boolean | null = null
 let _pending: Promise<void> | null = null
 
 export default defineNuxtRouteMiddleware(async (to) => {
+  // 进入 /login 时重置缓存，确保初始化后能正确识别
+  if (to.path === '/login') {
+    _initialized = null;
+    _pending = null;
+    return;
+  }
+
   // 已缓存结果
   if (_initialized !== null) {
     if (_initialized === false && to.path !== '/login') {
