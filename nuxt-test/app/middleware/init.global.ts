@@ -21,12 +21,14 @@ export default defineNuxtRouteMiddleware(async (to) => {
         _initialized = res?.exists === true
       })
       .catch(() => {
-        _initialized = true
+        // API 不可达时不缓存结果，下次请求重试
+        _pending = null
       })
   }
 
   await _pending
 
+  // API 调用失败时 _pending 被重置，跳过后续判断
   if (_initialized === false && to.path !== '/login') {
     return navigateTo('/login')
   }
