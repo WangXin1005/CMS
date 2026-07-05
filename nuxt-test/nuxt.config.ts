@@ -26,6 +26,14 @@ export default defineNuxtConfig({
   },
 
   vite: {
+    optimizeDeps: {
+      include: [
+        'dayjs',
+        'dayjs/plugin/*.js',
+        'lodash-unified',
+        'sortablejs',
+      ],
+    },
     server: {
       proxy: {
         '/api': {

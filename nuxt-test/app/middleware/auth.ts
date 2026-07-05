@@ -8,12 +8,6 @@ export default defineNuxtRouteMiddleware(() => {
     return navigateTo('/login')
   }
 
-  // 浏览器关闭后 sessionStorage 自动清空，检测到不一致则清除 token 要求重新登录（仅客户端）
-  if (typeof sessionStorage !== 'undefined' && !sessionStorage.getItem('auth_session')) {
-    token.value = ''
-    return navigateTo('/login')
-  }
-
   // 客户端解析 JWT 载荷，检查是否过期（防御过期 Token 绕过）
   try {
     const parts = token.value.split('.')

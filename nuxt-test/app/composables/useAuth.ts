@@ -16,6 +16,7 @@ export const useAuth = () => {
 
   /** 是否已登录（Token 存在即视为已登录）*/
   const isLoggedIn = computed(() => {
+    // 客户端：同时检查 sessionStorage（浏览器重启后清空，cookie 可能残留）
     if (typeof sessionStorage !== "undefined") {
       return !!token.value && !!sessionStorage.getItem("auth_session")
     }

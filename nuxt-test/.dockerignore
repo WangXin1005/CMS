@@ -1,5 +1,11 @@
-﻿node_modules/
-.nuxt/
-.output/
+﻿node_modules
+.nuxt
+.output
 .git
-*.log
+.gitignore
+*.md
+tests
+.npmrc
+.prettierrc
+eslint.config.mjs
+vitest.config.ts

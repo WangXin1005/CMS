@@ -1,8 +1,5 @@
-﻿target/
-*.log
+﻿target
 .git
-.idea
-*.iml
-.mvn/
-mvnw
-mvnw.cmd
+.gitignore
+*.md
+uploads
