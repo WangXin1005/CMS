@@ -2,9 +2,9 @@
 FROM node:22-bookworm-slim AS builder
 WORKDIR /app
 COPY package*.json ./
-RUN npm install
+RUN npm install --no-audit --no-fund --ignore-scripts
 COPY . .
-RUN npm run build
+RUN npx nuxt prepare && npm run build
 
 # ===== 运行阶段 =====
 FROM node:22-bookworm-slim
