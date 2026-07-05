@@ -4,7 +4,8 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install --no-audit --no-fund --ignore-scripts
 COPY . .
-RUN npx nuxt prepare && npm run build
+ENV NODE_OPTIONS=--max-old-space-size=384
+RUN npx nuxt prepare && npm run build -- --log-level verbose
 
 # ===== 运行阶段 =====
 FROM node:22-bookworm-slim
