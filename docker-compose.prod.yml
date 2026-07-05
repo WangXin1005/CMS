@@ -109,7 +109,7 @@ services:
           memory: 200M
 
   nginx:
-    image: nginx:1.27-alpine
+    image: nginx:alpine
     container_name: codeblog-nginx
     restart: unless-stopped
     environment:
