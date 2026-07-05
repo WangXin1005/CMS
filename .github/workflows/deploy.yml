@@ -1,9 +1,9 @@
-ï»¿# ============================================================
-# CodeBlog CMS â€” è‡ªåŠ¨éƒ¨ç½²å·¥ä½œæµ
-# è§¦å‘æ¡ä»¶ï¼šæ¨é€åˆ° main åˆ†æ”¯
-# æµç¨‹ï¼šæ„å»ºé•œåƒ â†’ æ¨é€ GHCR â†’ SSH è¿œç¨‹éƒ¨ç½²
 # ============================================================
-name: è‡ªåŠ¨éƒ¨ç½²åˆ°æœåŠ¡å™¨
+# CodeBlog CMS ¡ª ×Ô¶¯²¿Êğ¹¤×÷Á÷
+# ´¥·¢Ìõ¼ş£ºÍÆËÍµ½ main ·ÖÖ§
+# Á÷³Ì£º¹¹½¨¾µÏñ ¡ú ÍÆËÍ GHCR ¡ú SSH Ô¶³Ì²¿Êğ
+# ============================================================
+name: ×Ô¶¯²¿Êğµ½·şÎñÆ÷
 
 on:
   push:
@@ -14,13 +14,13 @@ on:
       - '.env.example'
 
 env:
-  # GitHub Container Registry é•œåƒåœ°å€
+  # GitHub Container Registry ¾µÏñµØÖ·
   REGISTRY: ghcr.io
   BACKEND_IMAGE: ghcr.io/${{ github.repository_owner }}/codeblog-backend
   FRONTEND_IMAGE: ghcr.io/${{ github.repository_owner }}/codeblog-frontend
 
 jobs:
-  # ==================== æ„å»º & æ¨é€é•œåƒ ====================
+  # ==================== ¹¹½¨ & ÍÆËÍ¾µÏñ ====================
   build-and-push:
     runs-on: ubuntu-latest
     permissions:
@@ -28,17 +28,17 @@ jobs:
       packages: write
 
     steps:
-      - name: æ£€å‡ºä»£ç 
+      - name: ¼ì³ö´úÂë
         uses: actions/checkout@v4
 
-      - name: ç™»å½• GHCRï¼ˆGitHub å®¹å™¨ä»“åº“ï¼‰
+      - name: µÇÂ¼ GHCR£¨GitHub ÈİÆ÷²Ö¿â£©
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: æ„å»º & æ¨é€åç«¯é•œåƒ
+      - name: ¹¹½¨ & ÍÆËÍºó¶Ë¾µÏñ
         uses: docker/build-push-action@v6
         with:
           context: ./java-backend
@@ -50,7 +50,7 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: æ„å»º & æ¨é€å‰ç«¯é•œåƒ
+      - name: ¹¹½¨ & ÍÆËÍÇ°¶Ë¾µÏñ
         uses: docker/build-push-action@v6
         with:
           context: ./nuxt-test
@@ -62,47 +62,47 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-  # ==================== SSH è¿œç¨‹éƒ¨ç½² ====================
+  # ==================== SSH Ô¶³Ì²¿Êğ ====================
   deploy:
     needs: build-and-push
     runs-on: ubuntu-latest
-    # ä»…æ„å»ºæˆåŠŸåæ‰éƒ¨ç½²
+    # ½ö¹¹½¨³É¹¦ºó²Å²¿Êğ
     if: success()
 
     steps:
-      - name: æ£€å‡ºä»£ç ï¼ˆéœ€è¦ docker-compose.prod.ymlï¼‰
+      - name: ¼ì³ö´úÂë£¨ĞèÒª docker-compose.prod.yml£©
         uses: actions/checkout@v4
 
-      - name: SSH éƒ¨ç½²åˆ°æœåŠ¡å™¨
+      - name: SSH ²¿Êğµ½·şÎñÆ÷
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT || 22 }}
-          # éƒ¨ç½²è„šæœ¬
+          # ²¿Êğ½Å±¾
           script: |
             set -e
 
-            # åˆ‡æ¢åˆ°é¡¹ç›®ç›®å½•
+            # ÇĞ»»µ½ÏîÄ¿Ä¿Â¼
             cd /opt/codeblog
 
-            # ç™»å½• GHCRï¼ˆæ‹‰å–ç§æœ‰é•œåƒéœ€è¦ï¼‰
+            # µÇÂ¼ GHCR£¨À­È¡Ë½ÓĞ¾µÏñĞèÒª£©
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-            # æ‹‰å–æœ€æ–°é•œåƒ
+            # À­È¡×îĞÂ¾µÏñ
             docker compose -f docker-compose.prod.yml pull
 
-            # æ»šåŠ¨æ›´æ–°ï¼ˆå…ˆå¯åŠ¨æ–°å®¹å™¨ï¼Œå†åœæ—§å®¹å™¨ï¼Œå‡å°‘åœæœºæ—¶é—´ï¼‰
+            # ¹ö¶¯¸üĞÂ£¨ÏÈÆô¶¯ĞÂÈİÆ÷£¬ÔÙÍ£¾ÉÈİÆ÷£¬¼õÉÙÍ£»úÊ±¼ä£©
             docker compose -f docker-compose.prod.yml up -d --remove-orphans
 
-            # æ¸…ç†æ—§é•œåƒï¼ˆä¿ç•™æœ€è¿‘2ä¸ªç‰ˆæœ¬ï¼‰
+            # ÇåÀí¾É¾µÏñ£¨±£Áô×î½ü2¸ö°æ±¾£©
             docker image prune -af --filter "until=72h" 2>/dev/null || true
 
-            # ç™»å‡º GHCR
+            # µÇ³ö GHCR
             docker logout ghcr.io
 
             echo ""
             echo "============================================"
-            echo "  éƒ¨ç½²å®Œæˆï¼è®¿é—® http://${{ secrets.SSH_HOST }}"
+            echo "  ²¿ÊğÍê³É£¡·ÃÎÊ http://${{ secrets.SSH_HOST }}"
             echo "============================================"

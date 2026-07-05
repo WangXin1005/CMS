@@ -1,26 +1,23 @@
-﻿# ============================================================
-# CodeBlog CMS — Docker 部署方案（2核CPU / 2GB 内存）
-# 架构：Nginx(反向代理) → Nuxt(Node.js SSR) + Spring Boot(JVM) + MySQL
+# ============================================================
+# CodeBlog CMS �� Docker ���𣨿���/�ֶ������ã����ع�������
 # ============================================================
 services:
 
-  # ==================== MySQL 数据库 ====================
   mysql:
     image: mysql:8.0
     container_name: codeblog-mysql
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: \
-      MYSQL_DATABASE: \
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
       MYSQL_CHARSET: utf8mb4
       MYSQL_COLLATION: utf8mb4_unicode_ci
       TZ: Asia/Shanghai
     ports:
-      - "\:3306"
+      - "127.0.0.1:3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
       - ./docker/mysql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
-    # MySQL 低内存调优（2GB 服务器专用）
     command: >
       --character-set-server=utf8mb4
       --collation-server=utf8mb4_unicode_ci
@@ -33,14 +30,13 @@ services:
       --performance-schema=OFF
       --skip-log-bin
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p\$\"]
+      test: mysqladmin ping -h localhost -u root -p$${MYSQL_ROOT_PASSWORD}
       interval: 10s
       timeout: 5s
       retries: 10
       start_period: 30s
     networks:
       - codeblog-net
-    # 内存限制
     deploy:
       resources:
         limits:
@@ -48,7 +44,6 @@ services:
         reservations:
           memory: 256M
 
-  # ==================== Spring Boot 后端 ====================
   backend:
     build:
       context: ./java-backend
@@ -56,37 +51,30 @@ services:
     container_name: codeblog-backend
     restart: unless-stopped
     environment:
-      # 激活生产环境配置
       SPRING_PROFILES_ACTIVE: prod
-      # 数据库连接（容器内 DNS 名 "mysql"）
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/\?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/${DB_NAME}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
       SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: \
-      # JWT 密钥（生产环境务必修改为强随机字符串）
-      JWT_SECRET: \
-      JWT_EXPIRATION: \
-      # CORS 允许的域名
-      APP_CORS_ALLOWED_ORIGINS: \
-      # 文件上传目录
+      SPRING_DATASOURCE_PASSWORD: ${DB_ROOT_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRATION: ${JWT_EXPIRATION:-86400000}
+      APP_CORS_ALLOWED_ORIGINS: ${CORS_ORIGINS}
       APP_UPLOAD_DIR: /app/uploads
-      # 时区
       TZ: Asia/Shanghai
     ports:
-      - "\:8080"
+      - "127.0.0.1:8080:8080"
     volumes:
       - uploads_data:/app/uploads
     depends_on:
       mysql:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/api/users/check"]
+      test: curl -f http://localhost:8080/api/users/check
       interval: 30s
       timeout: 10s
       retries: 5
       start_period: 60s
     networks:
       - codeblog-net
-    # JVM 内存限制（2GB 服务器专用）
     deploy:
       resources:
         limits:
@@ -94,7 +82,6 @@ services:
         reservations:
           memory: 256M
 
-  # ==================== Nuxt 前端（SSR 模式） ====================
   frontend:
     build:
       context: ./nuxt-test
@@ -102,25 +89,22 @@ services:
     container_name: codeblog-frontend
     restart: unless-stopped
     environment:
-      # 后端 API 代理目标（容器内部通信）
       NUXT_API_PROXY_TARGET: http://backend:8080
       TZ: Asia/Shanghai
-      # Node.js 内存限制
       NODE_OPTIONS: "--max-old-space-size=200"
     ports:
-      - "\:3000"
+      - "127.0.0.1:3000:3000"
     depends_on:
       backend:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/"]
+      test: curl -f http://localhost:3000/
       interval: 30s
       timeout: 10s
       retries: 5
       start_period: 30s
     networks:
       - codeblog-net
-    # Node.js 内存限制
     deploy:
       resources:
         limits:
@@ -128,7 +112,6 @@ services:
         reservations:
           memory: 200M
 
-  # ==================== Nginx 反向代理 ====================
   nginx:
     image: nginx:1.27-alpine
     container_name: codeblog-nginx
@@ -139,8 +122,6 @@ services:
     volumes:
       - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./docker/nginx/conf.d:/etc/nginx/conf.d:ro
-      # SSL 证书目录（生产环境挂载真实证书）
-      # - ./docker/nginx/ssl:/etc/nginx/ssl:ro
     depends_on:
       frontend:
         condition: service_healthy
@@ -155,12 +136,10 @@ services:
         reservations:
           memory: 32M
 
-# ==================== 网络 ====================
 networks:
   codeblog-net:
     driver: bridge
 
-# ==================== 数据卷 ====================
 volumes:
   mysql_data:
     driver: local

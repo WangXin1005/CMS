@@ -1,5 +1,5 @@
 # ============================================================
-# CodeBlog CMS — 生产环境 Docker Compose（自动部署用）
+# CodeBlog CMS �� �������� Docker Compose��GHCR Ԥ��������
 # ============================================================
 services:
 
@@ -30,7 +30,7 @@ services:
       --performance-schema=OFF
       --skip-log-bin
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$$MYSQL_ROOT_PASSWORD"]
+      test: mysqladmin ping -h localhost -u root -p$${MYSQL_ROOT_PASSWORD}
       interval: 10s
       timeout: 5s
       retries: 10
@@ -45,7 +45,7 @@ services:
           memory: 256M
 
   backend:
-    image: ghcr.io/${GITHUB_REPO_OWNER:-your-username}/codeblog-backend:latest
+    image: ghcr.io/wangxin1005/codeblog-backend:latest
     container_name: codeblog-backend
     restart: unless-stopped
     environment:
@@ -66,7 +66,7 @@ services:
       mysql:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/api/users/check"]
+      test: curl -f http://localhost:8080/api/users/check
       interval: 30s
       timeout: 10s
       retries: 5
@@ -81,7 +81,7 @@ services:
           memory: 256M
 
   frontend:
-    image: ghcr.io/${GITHUB_REPO_OWNER:-your-username}/codeblog-frontend:latest
+    image: ghcr.io/wangxin1005/codeblog-frontend:latest
     container_name: codeblog-frontend
     restart: unless-stopped
     environment:
@@ -94,7 +94,7 @@ services:
       backend:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/"]
+      test: curl -f http://localhost:3000/
       interval: 30s
       timeout: 10s
       retries: 5
@@ -142,8 +142,10 @@ services:
     volumes:
       - certbot_certs:/etc/letsencrypt
       - certbot_www:/var/www/certbot
-    entrypoint: >
-      sh -c "trap exit TERM; while :; do sleep 12h & wait $$!; certbot renew --webroot -w /var/www/certbot --quiet; done"
+    entrypoint:
+      - sh
+      - -c
+      - "trap exit TERM; while :; do sleep 12h & wait $$!; certbot renew --webroot -w /var/www/certbot --quiet; done"
     networks:
       - codeblog-net
     deploy:
