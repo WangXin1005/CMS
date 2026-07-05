@@ -41,7 +41,7 @@ public class UserService {
     @CacheEvict(value = "superAdminExists", allEntries = true)
     public Map<String, String> initSuperAdmin(String username, String email, String password) {
         if (userRepository.existsByRole(Role.SUPERADMIN)) {
-            return Map.of("message", "瓒呯骇绠＄悊鍛樺凡瀛樺湪锛屼笉鑳介噸澶嶅垵濮嬪寲");
+            return Map.of("message", "超级管理员已存在，不能重复初始化");
         }
 
         if (userRepository.findByUsername(username).isPresent()) {
@@ -59,7 +59,7 @@ public class UserService {
         user.setRole(Role.SUPERADMIN);
         userRepository.save(user);
 
-        return Map.of("message", "瓒呯骇绠＄悊鍛樺垵濮嬪寲鎴愬姛");
+        return Map.of("message", "超级管理员初始化成功");
     }
 
     /**
