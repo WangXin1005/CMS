@@ -19,6 +19,7 @@ env:
 
 jobs:
   build-and-push:
+    timeout-minutes: 60
     runs-on: ubuntu-24.04
     permissions:
       contents: read
@@ -41,6 +42,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 构建并推送后端镜像
+        timeout-minutes: 25
         uses: docker/build-push-action@v6
         with:
           context: ./java-backend
@@ -53,6 +55,7 @@ jobs:
           cache-to: type=gha,mode=max
 
       - name: 构建并推送前端镜像
+        timeout-minutes: 25
         uses: docker/build-push-action@v6
         with:
           context: ./nuxt-test
