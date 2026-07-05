@@ -80,6 +80,8 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT || 22 }}
+          timeout: 600s
+          command_timeout: 600s
           script: |
             set -e
             cd /opt/codeblog
