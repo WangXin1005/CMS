@@ -19,6 +19,9 @@ RUN npm ci
 # 复制源码
 COPY . .
 
+# 修复二进制权限（Alpine 偶发问题）
+RUN chmod -R +x node_modules/.bin
+
 # 构建
 RUN npm run build
 
