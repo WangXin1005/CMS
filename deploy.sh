@@ -3,10 +3,10 @@
 # CodeBlog CMS — 一键部署脚本（2核2G 服务器）
 #
 # 用法：
-#   bash deploy.sh              # 首次部署（构建 + 启动）
-#   bash deploy.sh --update     # 更新部署（拉代码 + 重建 + 启动）
-#   bash deploy.sh --stop       # 停止所有服务
-#   bash deploy.sh --logs       # 查看实时日志
+#   bash deploy.sh              # 首次部署
+#   bash deploy.sh --update     # 更新部署
+#   bash deploy.sh --stop       # 停止服务
+#   bash deploy.sh --logs       # 查看日志
 #   bash deploy.sh --ssl        # 配置 HTTPS（备案完成后）
 # ============================================================
 
@@ -24,7 +24,6 @@ log_error() { echo -e "${RED}[ERROR]${NC} $1"; }
 PROJECT_DIR="$(cd "$(dirname "$0")" && pwd)"
 cd "$PROJECT_DIR"
 
-# 检测 Docker Compose 命令
 if docker compose version &> /dev/null; then
     DOCKER_COMPOSE="docker compose"
 else
@@ -34,102 +33,85 @@ fi
 # ==================== 环境检查 ====================
 check_docker() {
     if ! command -v docker &> /dev/null; then
-        log_error "Docker 未安装，请先安装 Docker"
+        log_error "Docker 未安装"
         exit 1
     fi
 }
 
 check_env() {
     if [ ! -f .env ]; then
-        log_warn ".env 文件不存在，从 .env.example 复制..."
+        log_warn ".env 不存在，从 .env.example 复制..."
         cp .env.example .env
-        log_error "请先编辑 .env 文件，修改密码和密钥后重新运行！"
+        log_error "请先编辑 .env 修改密码和密钥后重新运行！"
         exit 1
     fi
-    # 加载环境变量
     set -a; source .env; set +a
 }
 
 # ==================== 首次部署 ====================
 deploy() {
-    log_info "========== 开始部署（首次） =========="
-
-    # 创建必要目录
+    log_info "========== 开始部署 =========="
     mkdir -p uploads
 
-    # 启用 swap（如果未启用）
+    # 检查 swap
     if ! swapon --show | grep -q .; then
         log_warn "swap 未启用，正在启用..."
-        sudo swapon -a 2>/dev/null || log_warn "无法启用 swap，低内存构建可能失败"
+        sudo swapon -a 2>/dev/null || log_warn "无法启用 swap"
     fi
 
     # 拉取基础镜像
     log_info "拉取基础镜像..."
     $DOCKER_COMPOSE pull mysql nginx
 
-    # 逐序构建（避免内存溢出）
-    log_info "[1/2] 构建后端镜像（约 5-10 分钟）..."
+    # 逐序构建
+    log_info "[1/3] 构建后端（约 5-10 分钟）..."
     $DOCKER_COMPOSE build --no-cache backend
 
-    log_info "[2/2] 构建前端镜像（约 3-5 分钟）..."
+    log_info "[2/3] 构建前端（约 3-5 分钟）..."
     $DOCKER_COMPOSE build --no-cache frontend
 
-    # 构建 Webhook
-    log_info "构建 Webhook 服务..."
+    log_info "[3/3] 构建 Webhook..."
     $DOCKER_COMPOSE build webhook
 
-    # 启动服务
+    # 启动
     log_info "启动所有服务..."
     $DOCKER_COMPOSE up -d --remove-orphans
 
-    # 等待服务就绪
     wait_for_services
-
-    log_info "============================================"
-    log_info "  部署完成！"
-    log_info "  前端: http://服务器IP"
-    log_info "  API:  http://服务器IP/api"
-    log_info "============================================"
+    log_info "部署完成！浏览器访问 http://服务器IP"
 }
 
 # ==================== 更新部署 ====================
 update_deploy() {
-    log_info "========== 开始更新部署 =========="
+    log_info "========== 更新部署 =========="
 
-    # 拉取最新代码
     log_info "拉取最新代码..."
-    git pull origin main 2>/dev/null || log_warn "git pull 失败，继续使用现有代码"
+    git pull origin main 2>/dev/null || log_warn "git pull 失败"
 
-    # 停止服务
     log_info "停止现有服务..."
     $DOCKER_COMPOSE down
 
-    # 逐序重建
     log_info "[1/2] 重建后端..."
     $DOCKER_COMPOSE build --no-cache backend
 
     log_info "[2/2] 重建前端..."
     $DOCKER_COMPOSE build --no-cache frontend
 
-    # 启动
     log_info "启动服务..."
     $DOCKER_COMPOSE up -d --remove-orphans
 
-    # 清理旧镜像（释放磁盘空间）
     docker image prune -f
-
     wait_for_services
     log_info "更新完成！"
 }
 
-# ==================== 停止服务 ====================
+# ==================== 停止/日志 ====================
 stop_services() {
     log_info "停止所有服务..."
     $DOCKER_COMPOSE down
-    log_info "服务已停止"
+    log_info "已停止"
 }
 
-# ==================== 查看日志 ====================
 show_logs() {
     $DOCKER_COMPOSE logs -f --tail=50
 }
@@ -139,19 +121,15 @@ setup_ssl() {
     check_env
 
     if [ -z "${DOMAIN:-}" ] || [ "$DOMAIN" = "your-domain.com" ]; then
-        log_error "请先编辑 .env 设置 DOMAIN 为你的实际域名"
+        log_error "请先编辑 .env 设置 DOMAIN"
         exit 1
     fi
 
-    log_info "为域名 ${DOMAIN} 配置 HTTPS..."
-
-    # 创建 certbot 目录
+    log_info "为 $DOMAIN 配置 HTTPS..."
     mkdir -p docker/certbot/www docker/certbot/certs
 
-    # 临时停止 nginx 释放 80 端口
     $DOCKER_COMPOSE stop nginx 2>/dev/null || true
 
-    # 申请证书
     log_info "申请 Let's Encrypt 证书..."
     docker run --rm \
         -v "$(pwd)/docker/certbot/certs:/etc/letsencrypt" \
@@ -160,48 +138,42 @@ setup_ssl() {
         certbot/certbot:latest \
         certonly --standalone \
         -d "$DOMAIN" \
-        --email "${EMAIL:-admin@\$DOMAIN}" \
+        --email "${EMAIL:-admin@$DOMAIN}" \
         --agree-tos \
         --no-eff-email
 
-    if [ \$? -ne 0 ]; then
-        log_error "证书申请失败！请检查 DNS 解析是否正确"
+    if [ $? -ne 0 ]; then
+        log_error "证书申请失败，请检查 DNS 解析"
         exit 1
     fi
 
-    # 启用 HTTPS 配置
     log_info "切换到 HTTPS 模式..."
     sed -i 's|^    include /etc/nginx/conf.d/ip.conf;|    # include /etc/nginx/conf.d/ip.conf;|' docker/nginx/nginx.conf
     sed -i 's|^    # include /etc/nginx/conf.d/default.conf;|    include /etc/nginx/conf.d/default.conf;|' docker/nginx/nginx.conf
 
-    # 重启 nginx
     $DOCKER_COMPOSE restart nginx
-
-    log_info "============================================"
-    log_info "  HTTPS 配置完成！"
-    log_info "  站点: https://${DOMAIN}"
-    log_info "============================================"
+    log_info "HTTPS 配置完成！https://$DOMAIN"
 }
 
 # ==================== 等待服务就绪 ====================
 wait_for_services() {
     log_info "等待服务就绪（最多 120 秒）..."
 
-    for i in \$(seq 1 60); do
+    for i in $(seq 1 60); do
         local code
-        code=\$(curl -s -o /dev/null -w "%{http_code}" http://localhost/api/users/check 2>/dev/null || echo "000")
-        if [ "\$code" = "200" ]; then
-            log_info "✓ 后端服务就绪"
+        code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost/api/users/check 2>/dev/null || echo "000")
+        if [ "$code" = "200" ]; then
+            log_info "后端就绪"
             break
         fi
         sleep 2
     done
 
     sleep 5
-    local front_code
-    front_code=\$(curl -s -o /dev/null -w "%{http_code}" http://localhost/ 2>/dev/null || echo "000")
-    if [ "\$front_code" = "200" ] || [ "\$front_code" = "302" ]; then
-        log_info "✓ 前端服务就绪"
+    local fcode
+    fcode=$(curl -s -o /dev/null -w "%{http_code}" http://localhost/ 2>/dev/null || echo "000")
+    if [ "$fcode" = "200" ] || [ "$fcode" = "302" ]; then
+        log_info "前端就绪"
     fi
 }
 
