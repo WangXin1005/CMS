@@ -36,3 +36,5 @@ java-backend/uploads/
 *.tmp
 
 AGENTS.md
+
+DEPLOY.md

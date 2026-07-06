@@ -1,19 +1,28 @@
+# ============================================================
+# CodeBlog 后端 Dockerfile — 为 2核2G 服务器优化
+# 采用多阶段构建，运行阶段只保留 JRE
+# Maven 构建阶段限制内存，避免 OOM
+# ============================================================
+
 FROM maven:3.9-eclipse-temurin-21-alpine AS builder
 
 WORKDIR /build
 
-# Alpine APK 换国内源加速
+# 替换 Alpine 软件源为国内镜像，加速构建
 RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
 
-# Maven 内存限制（2GB 服务器用）
+# Maven 构建内存限制（适配 2GB 服务器）
 ENV MAVEN_OPTS="-Xmx384m -XX:+UseSerialGC"
 
+# 先复制 pom.xml 利用 Docker 缓存层
 COPY pom.xml settings.xml ./
 RUN mvn dependency:go-offline -s settings.xml -q -B
 
+# 再复制源码并构建
 COPY src ./src
 RUN mvn package -s settings.xml -DskipTests -q -B
 
+# ==================== 运行阶段 ====================
 FROM eclipse-temurin:21-jre-alpine AS runtime
 
 WORKDIR /app
@@ -23,6 +32,7 @@ RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
     cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && \
     echo "Asia/Shanghai" > /etc/timezone
 
+# 创建非 root 用户运行
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 RUN mkdir -p /app/uploads && chown -R appuser:appgroup /app
 
@@ -30,8 +40,8 @@ COPY --from=builder /build/target/*.jar app.jar
 
 USER appuser
 
-# JVM 运行内存限制
-ENV JAVA_OPTS="-Xmx200m -Xms128m -XX:+UseSerialGC -XX:MaxRAM=256m -XX:+ExitOnOutOfMemoryError -Djava.security.egd=file:/dev/./urandom"
+# JVM 参数：堆内存 256M，使用 SerialGC（低内存最优）
+ENV JAVA_OPTS="-Xmx256m -Xms128m -XX:+UseSerialGC -XX:MaxRAM=300m -XX:+ExitOnOutOfMemoryError -Djava.security.egd=file:/dev/./urandom"
 
 EXPOSE 8080
 

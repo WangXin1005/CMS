@@ -1,16 +1,13 @@
-﻿#!/bin/bash
+#!/bin/bash
 # ============================================================
-# CodeBlog CMS — Docker 部署脚本
-# 
-# 两种模式：
-#   开发模式：docker-compose.yml（本地构建镜像）
-#   生产模式：docker-compose.prod.yml（拉取 GHCR 预构建镜像）
+# CodeBlog CMS — 一键部署脚本（2核2G 服务器）
 #
 # 用法：
-#   bash deploy.sh              # 自动检测模式并部署
-#   bash deploy.sh --update     # 更新部署（仅重建 backend + frontend）
+#   bash deploy.sh              # 首次部署（构建 + 启动）
+#   bash deploy.sh --update     # 更新部署（拉代码 + 重建 + 启动）
 #   bash deploy.sh --stop       # 停止所有服务
 #   bash deploy.sh --logs       # 查看实时日志
+#   bash deploy.sh --ssl        # 配置 HTTPS（备案完成后）
 # ============================================================
 
 set -e
@@ -34,22 +31,10 @@ else
     DOCKER_COMPOSE="docker-compose"
 fi
 
-# 检测 compose 文件（生产优先）
-detect_compose_file() {
-    if [ -f "docker-compose.prod.yml" ] && [ -n "${GITHUB_REPO_OWNER:-}" ] && [ "$GITHUB_REPO_OWNER" != "your-username" ]; then
-        COMPOSE_FILE="docker-compose.prod.yml"
-        COMPOSE_MODE="生产模式（GHCR 预构建镜像）"
-    else
-        COMPOSE_FILE="docker-compose.yml"
-        COMPOSE_MODE="开发模式（本地构建镜像）"
-    fi
-    log_info "部署模式：$COMPOSE_MODE"
-}
-
-# 检查环境
+# ==================== 环境检查 ====================
 check_docker() {
     if ! command -v docker &> /dev/null; then
-        log_error "Docker 未安装，请先运行 bash server-setup.sh"
+        log_error "Docker 未安装，请先安装 Docker"
         exit 1
     fi
 }
@@ -67,97 +52,161 @@ check_env() {
 
 # ==================== 首次部署 ====================
 deploy() {
-    log_info "开始部署..."
+    log_info "========== 开始部署（首次） =========="
 
-    # 创建上传目录
+    # 创建必要目录
     mkdir -p uploads
 
-    if [ "$COMPOSE_MODE" = "生产模式（GHCR 预构建镜像）" ]; then
-        log_info "登录 GitHub Container Registry..."
-        echo "$GITHUB_TOKEN" | docker login ghcr.io -u "$GITHUB_REPO_OWNER" --password-stdin 2>/dev/null || \
-            docker login ghcr.io -u "$GITHUB_REPO_OWNER"
-        log_info "拉取最新镜像..."
-        $DOCKER_COMPOSE -f "$COMPOSE_FILE" pull
+    # 启用 swap（如果未启用）
+    if ! swapon --show | grep -q .; then
+        log_warn "swap 未启用，正在启用..."
+        sudo swapon -a 2>/dev/null || log_warn "无法启用 swap，低内存构建可能失败"
     fi
 
+    # 拉取基础镜像
+    log_info "拉取基础镜像..."
+    $DOCKER_COMPOSE pull mysql nginx
+
+    # 逐序构建（避免内存溢出）
+    log_info "[1/2] 构建后端镜像（约 5-10 分钟）..."
+    $DOCKER_COMPOSE build --no-cache backend
+
+    log_info "[2/2] 构建前端镜像（约 3-5 分钟）..."
+    $DOCKER_COMPOSE build --no-cache frontend
+
+    # 构建 Webhook
+    log_info "构建 Webhook 服务..."
+    $DOCKER_COMPOSE build webhook
+
+    # 启动服务
     log_info "启动所有服务..."
-    $DOCKER_COMPOSE -f "$COMPOSE_FILE" up -d --remove-orphans
-
-    # 非生产模式才本地构建
-    if [ "$COMPOSE_MODE" != "生产模式（GHCR 预构建镜像）" ]; then
-        $DOCKER_COMPOSE -f "$COMPOSE_FILE" build
-        $DOCKER_COMPOSE -f "$COMPOSE_FILE" up -d --remove-orphans
-    fi
+    $DOCKER_COMPOSE up -d --remove-orphans
 
     # 等待服务就绪
-    log_info "等待服务启动（最多 120 秒）..."
     wait_for_services
 
     log_info "============================================"
     log_info "  部署完成！"
-    log_info "  前端: http://localhost"
-    log_info "  API:  http://localhost/api"
+    log_info "  前端: http://服务器IP"
+    log_info "  API:  http://服务器IP/api"
     log_info "============================================"
 }
 
 # ==================== 更新部署 ====================
 update_deploy() {
-    log_info "更新部署..."
+    log_info "========== 开始更新部署 =========="
 
-    if [ "$COMPOSE_MODE" = "生产模式（GHCR 预构建镜像）" ]; then
-        log_info "拉取最新镜像..."
-        $DOCKER_COMPOSE -f "$COMPOSE_FILE" pull backend frontend
-        $DOCKER_COMPOSE -f "$COMPOSE_FILE" up -d --remove-orphans backend frontend nginx
-    else
-        log_info "重建镜像..."
-        $DOCKER_COMPOSE -f "$COMPOSE_FILE" up -d --build --no-deps backend frontend
-    fi
+    # 拉取最新代码
+    log_info "拉取最新代码..."
+    git pull origin main 2>/dev/null || log_warn "git pull 失败，继续使用现有代码"
 
-    # 清理旧镜像
+    # 停止服务
+    log_info "停止现有服务..."
+    $DOCKER_COMPOSE down
+
+    # 逐序重建
+    log_info "[1/2] 重建后端..."
+    $DOCKER_COMPOSE build --no-cache backend
+
+    log_info "[2/2] 重建前端..."
+    $DOCKER_COMPOSE build --no-cache frontend
+
+    # 启动
+    log_info "启动服务..."
+    $DOCKER_COMPOSE up -d --remove-orphans
+
+    # 清理旧镜像（释放磁盘空间）
     docker image prune -f
 
+    wait_for_services
     log_info "更新完成！"
 }
 
 # ==================== 停止服务 ====================
 stop_services() {
     log_info "停止所有服务..."
-    $DOCKER_COMPOSE -f "$COMPOSE_FILE" down
+    $DOCKER_COMPOSE down
     log_info "服务已停止"
 }
 
 # ==================== 查看日志 ====================
 show_logs() {
-    $DOCKER_COMPOSE -f "$COMPOSE_FILE" logs -f --tail=50
+    $DOCKER_COMPOSE logs -f --tail=50
+}
+
+# ==================== HTTPS 配置 ====================
+setup_ssl() {
+    check_env
+
+    if [ -z "${DOMAIN:-}" ] || [ "$DOMAIN" = "your-domain.com" ]; then
+        log_error "请先编辑 .env 设置 DOMAIN 为你的实际域名"
+        exit 1
+    fi
+
+    log_info "为域名 ${DOMAIN} 配置 HTTPS..."
+
+    # 创建 certbot 目录
+    mkdir -p docker/certbot/www docker/certbot/certs
+
+    # 临时停止 nginx 释放 80 端口
+    $DOCKER_COMPOSE stop nginx 2>/dev/null || true
+
+    # 申请证书
+    log_info "申请 Let's Encrypt 证书..."
+    docker run --rm \
+        -v "$(pwd)/docker/certbot/certs:/etc/letsencrypt" \
+        -v "$(pwd)/docker/certbot/www:/var/www/certbot" \
+        -p 80:80 \
+        certbot/certbot:latest \
+        certonly --standalone \
+        -d "$DOMAIN" \
+        --email "${EMAIL:-admin@\$DOMAIN}" \
+        --agree-tos \
+        --no-eff-email
+
+    if [ \$? -ne 0 ]; then
+        log_error "证书申请失败！请检查 DNS 解析是否正确"
+        exit 1
+    fi
+
+    # 启用 HTTPS 配置
+    log_info "切换到 HTTPS 模式..."
+    sed -i 's|^    include /etc/nginx/conf.d/ip.conf;|    # include /etc/nginx/conf.d/ip.conf;|' docker/nginx/nginx.conf
+    sed -i 's|^    # include /etc/nginx/conf.d/default.conf;|    include /etc/nginx/conf.d/default.conf;|' docker/nginx/nginx.conf
+
+    # 重启 nginx
+    $DOCKER_COMPOSE restart nginx
+
+    log_info "============================================"
+    log_info "  HTTPS 配置完成！"
+    log_info "  站点: https://${DOMAIN}"
+    log_info "============================================"
 }
 
 # ==================== 等待服务就绪 ====================
 wait_for_services() {
-    local max_attempts=60
-    local attempts=0
+    log_info "等待服务就绪（最多 120 秒）..."
 
-    while [ $attempts -lt $max_attempts ]; do
-        local status
-        status=$(curl -s -o /dev/null -w "%{http_code}" http://localhost/api/users/check 2>/dev/null || echo "000")
-        if [ "$status" = "200" ]; then
+    for i in \$(seq 1 60); do
+        local code
+        code=\$(curl -s -o /dev/null -w "%{http_code}" http://localhost/api/users/check 2>/dev/null || echo "000")
+        if [ "\$code" = "200" ]; then
             log_info "✓ 后端服务就绪"
             break
         fi
-        attempts=$((attempts + 1))
         sleep 2
     done
 
     sleep 5
-    local front_status
-    front_status=$(curl -s -o /dev/null -w "%{http_code}" http://localhost/ 2>/dev/null || echo "000")
-    if [ "$front_status" = "200" ]; then
+    local front_code
+    front_code=\$(curl -s -o /dev/null -w "%{http_code}" http://localhost/ 2>/dev/null || echo "000")
+    if [ "\$front_code" = "200" ] || [ "\$front_code" = "302" ]; then
         log_info "✓ 前端服务就绪"
     fi
 }
 
 # ==================== 主流程 ====================
 check_docker
-detect_compose_file
 
 case "${1:-}" in
     --update)
@@ -169,6 +218,9 @@ case "${1:-}" in
         ;;
     --logs)
         show_logs
+        ;;
+    --ssl)
+        setup_ssl
         ;;
     *)
         check_env
