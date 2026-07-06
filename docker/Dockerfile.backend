@@ -1,13 +1,12 @@
-# ============================================================
-# Spring Boot ��� �� ��׶ι����������ƾ�����٣�
-# ============================================================
-
 FROM maven:3.9-eclipse-temurin-21-alpine AS builder
 
 WORKDIR /build
 
-# Alpine APK ������Դ����
+# Alpine APK 换国内源加速
 RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
+
+# Maven 内存限制（2GB 服务器用）
+ENV MAVEN_OPTS="-Xmx384m -XX:+UseSerialGC"
 
 COPY pom.xml settings.xml ./
 RUN mvn dependency:go-offline -s settings.xml -q -B
@@ -31,6 +30,7 @@ COPY --from=builder /build/target/*.jar app.jar
 
 USER appuser
 
+# JVM 运行内存限制
 ENV JAVA_OPTS="-Xmx200m -Xms128m -XX:+UseSerialGC -XX:MaxRAM=256m -XX:+ExitOnOutOfMemoryError -Djava.security.egd=file:/dev/./urandom"
 
 EXPOSE 8080
