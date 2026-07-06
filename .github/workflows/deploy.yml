@@ -1,5 +1,7 @@
 # ============================================================
-# CodeBlog CMS — 自动部署工作流（阿里云镜像加速）
+# CodeBlog CMS — 自动部署工作流
+# 构建镜像 + 推送 GHCR + SSH 部署
+# GitHub Actions 在美国，直接用 Docker Hub 不套镜像
 # ============================================================
 name: 自动部署到服务器
 
@@ -19,7 +21,7 @@ env:
 jobs:
   build-and-push:
     runs-on: ubuntu-24.04
-    timeout-minutes: 60
+    timeout-minutes: 90
     permissions:
       contents: read
       packages: write
@@ -28,17 +30,8 @@ jobs:
       - name: 检出代码
         uses: actions/checkout@v4
 
-      - name: 配置阿里云 Docker 镜像加速
-        run: |
-          sudo mkdir -p /etc/docker
-          echo '{"registry-mirrors":["https://2eko5i08.mirror.aliyuncs.com"]}' | sudo tee /etc/docker/daemon.json
-          sudo systemctl restart docker
-          sleep 3
-
       - name: 配置 Docker Buildx
         uses: docker/setup-buildx-action@v3
-        with:
-          driver: docker
 
       - name: 登录 GHCR
         uses: docker/login-action@v3
@@ -48,7 +41,6 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 构建并推送后端镜像
-        timeout-minutes: 30
         uses: docker/build-push-action@v6
         with:
           context: ./java-backend
@@ -57,9 +49,10 @@ jobs:
           tags: |
             ${{ env.BACKEND_IMAGE }}:latest
             ${{ env.BACKEND_IMAGE }}:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       - name: 构建并推送前端镜像
-        timeout-minutes: 30
         uses: docker/build-push-action@v6
         with:
           context: ./nuxt-test
@@ -68,6 +61,8 @@ jobs:
           tags: |
             ${{ env.FRONTEND_IMAGE }}:latest
             ${{ env.FRONTEND_IMAGE }}:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
   deploy:
     needs: build-and-push
@@ -75,9 +70,6 @@ jobs:
     if: success()
 
     steps:
-      - name: 检出代码
-        uses: actions/checkout@v4
-
       - name: SSH 部署到服务器
         uses: appleboy/ssh-action@v1
         with:
@@ -88,6 +80,7 @@ jobs:
           script: |
             set -e
             cd /opt/codeblog
+            git pull origin main
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
             docker compose -f docker-compose.prod.yml pull
             docker compose -f docker-compose.prod.yml down
