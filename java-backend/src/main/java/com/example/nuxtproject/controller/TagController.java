@@ -69,7 +69,7 @@ public class TagController {
     }
 
     @DeleteMapping("/api/admin/tags/{id}")
-    @PreAuthorize("hasRole('SUPERADMIN')")
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN')")
     @Operation(summary = "删除标签", description = "仅超级管理员可删除标签")
     public ResponseEntity<?> delete(
             @Parameter(description = "标签 ID", required = true) @PathVariable Long id) {
@@ -86,7 +86,6 @@ public class TagController {
         private String name;
 
         @Schema(description = "标签 Slug（URL 唯一标识）", requiredMode = Schema.RequiredMode.REQUIRED)
-        @NotBlank(message = "Slug 不能为空")
         @Size(max = 100, message = "Slug 长度不能超过100")
         private String slug;
 

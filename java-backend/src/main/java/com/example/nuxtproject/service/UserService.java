@@ -49,7 +49,7 @@ public class UserService {
         }
 
         if (userRepository.existsByEmail(email)) {
-            return Map.of("message", "閭宸茶浣跨敤");
+            return Map.of("message", "邮箱已被使用");
         }
 
         User user = new User();
@@ -77,7 +77,7 @@ public class UserService {
     /**
      * 创建用户
      *
-     * @param operatorRole 鎿嶄綔鑰呯殑瑙掕壊
+     * @param operatorRole 操作者的角色
      * @param username     用户名
      * @param email        邮箱
      * @param password     密码
@@ -90,17 +90,17 @@ public class UserService {
 
         // 角色权限校验：只有SUPERADMIN能创建ADMIN，任何人都不能创建SUPERADMIN
         if (targetRole == Role.SUPERADMIN) {
-            return Map.of("message", "涓嶅厑璁哥洿鎺ュ垱寤鸿秴绾х鐞嗗憳");
+            return Map.of("message", "不允许直接创建超级管理员");
         }
         if (targetRole == Role.ADMIN && operatorRole != Role.SUPERADMIN) {
-            return Map.of("message", "鍙湁瓒呯骇绠＄悊鍛樻墠鑳藉垱寤虹鐞嗗憳璐﹀彿");
+            return Map.of("message", "只有超级管理员才能创建管理员账号");
         }
 
         if (userRepository.findByUsername(username).isPresent()) {
             return Map.of("message", "用户名已被使用");
         }
         if (userRepository.existsByEmail(email)) {
-            return Map.of("message", "閭宸茶浣跨敤");
+            return Map.of("message", "邮箱已被使用");
         }
 
         User user = new User();
@@ -116,7 +116,7 @@ public class UserService {
     /**
      * 更新用户信息
      *
-     * @param operatorRole 鎿嶄綔鑰呯殑瑙掕壊
+     * @param operatorRole 操作者的角色
      * @param operatorId   操作者的用户 ID（用于自操作校验）
      * @param id           目标用户 ID
      * @param username     新用户名（null 表示不修改）
@@ -155,7 +155,7 @@ public class UserService {
 
         if (email != null && !email.equals(target.getEmail())) {
             if (userRepository.existsByEmail(email)) {
-                return Map.of("message", "閭宸茶浣跨敤");
+                return Map.of("message", "邮箱已被使用");
             }
             target.setEmail(email);
         }
@@ -167,13 +167,13 @@ public class UserService {
     /**
      * 删除用户
      *
-     * @param operatorRole 鎿嶄綔鑰呯殑瑙掕壊
+     * @param operatorRole 操作者的角色
      * @param operatorId   操作者的用户 ID（用于自操作校验）
      * @param id           目标用户 ID */
     @CacheEvict(value = "superAdminExists", allEntries = true)
     @Transactional
     public Map<String, String> deleteUser(Role operatorRole, Long operatorId, Long id) {
-        // 绂佹鍒犻櫎鑷繁
+        // 禁止删除自己
         if (operatorId.equals(id)) {
             return Map.of("message", "不能删除自己的账号");
         }
@@ -189,9 +189,9 @@ public class UserService {
             return Map.of("message", error);
         }
 
-        // 绂佹鍒犻櫎鏈€鍚庝竴涓秴绾х鐞嗗憳
+        // 禁止删除最后一个超级管理员
         if (target.getRole() == Role.SUPERADMIN && userRepository.countByRole(Role.SUPERADMIN) <= 1) {
-            return Map.of("message", "绯荤粺蹇呴』鑷冲皯淇濈暀涓€涓秴绾х鐞嗗憳");
+            return Map.of("message", "系统必须至少保留一个超级管理员");
         }
 
         userRepository.delete(target);
@@ -212,7 +212,7 @@ public class UserService {
         }
 
         if (userRepository.existsByEmail(email)) {
-            return Map.of("message", "閭宸茶浣跨敤");
+            return Map.of("message", "邮箱已被使用");
         }
 
         User user = new User();

@@ -1,4 +1,4 @@
-<!-- default 甯冨眬 鈥?绠＄悊鍚庡彴鏍囧噯甯冨眬锛欻eader + Menu + 鍐呭鍖?-->
+<!-- default 布局 — 管理后台标准布局：Header + Menu + 内容区 -->
 <template>
   <div class="admin-layout">
     <Header />

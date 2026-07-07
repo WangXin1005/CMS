@@ -18,9 +18,11 @@ function canEditPreview() {
   if (isGuest.value) return false
   if (role.value === 'SUPERADMIN') return true
   const authorName = dialogArticle.value?.author?.username
+  // 自己的文章始终可编辑
+  if (authorName === currentUsername.value) return true
   const authorRole = (dialogArticle.value?.author?.role as string) || ''
+  // ADMIN 可编辑下级用户（USER/GUEST）的文章
   if (role.value === 'ADMIN') return roleLevel[authorRole] <= 1
-  if (role.value === 'USER') return authorName === currentUsername.value
   return false
 }
 const canEditArticle = computed(() => canEditPreview())

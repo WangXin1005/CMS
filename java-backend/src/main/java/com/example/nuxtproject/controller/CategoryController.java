@@ -80,7 +80,7 @@ public class CategoryController {
     }
 
     @DeleteMapping("/api/admin/categories/{id}")
-    @PreAuthorize("hasRole('SUPERADMIN')")
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN')")
     @Operation(summary = "删除分类", description = "仅超级管理员可删除分类")
     public ResponseEntity<?> delete(
             @Parameter(description = "分类 ID", required = true) @PathVariable Long id) {
@@ -97,7 +97,6 @@ public class CategoryController {
         private String name;
 
         @Schema(description = "分类 Slug（URL 唯一标识）", requiredMode = Schema.RequiredMode.REQUIRED)
-        @NotBlank(message = "Slug 不能为空")
         @Size(max = 100, message = "Slug 长度不能超过100")
         private String slug;
 

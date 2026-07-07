@@ -1,42 +1,21 @@
 # ============================================
-# 前端 Nuxt Dockerfile — 多阶段构建
-# 适配 2核2G 阿里云服务器
+# 前端运行时镜像 — 本地已 npm run build，此处仅复制 .output
+# Node.js 128MB，适配 2G 服务器
 # ============================================
 
-# ---------- 阶段一：依赖安装 ----------
-FROM node:20-alpine AS deps
-WORKDIR /app
-COPY package.json package-lock.json* ./
-RUN npm ci --omit=dev
-
-# ---------- 阶段二：构建 ----------
-FROM node:20-alpine AS builder
-WORKDIR /app
-COPY package.json package-lock.json* ./
-RUN npm ci
-COPY . .
-# Nuxt 构建（生产模式）
-RUN npm run build
-
-# ---------- 阶段三：运行时 ----------
 FROM node:20-alpine
 WORKDIR /app
-
-# 创建非 root 用户
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 
-# 复制生产依赖和构建产物
-COPY --from=deps /app/node_modules ./node_modules
-COPY --from=builder /app/.output ./.output
-COPY --from=builder /app/package.json ./
+# 复制本地构建好的 .output（需先在本地执行 npm run build:frontend）
+COPY nuxt-test/.output ./.output
 
-# Node.js 内存限制（适配 2G 服务器）
-ENV NODE_OPTIONS="--max-old-space-size=256"
+ENV NODE_OPTIONS="--max-old-space-size=128"
 ENV HOST=0.0.0.0
 ENV PORT=3000
 
 USER appuser
 EXPOSE 3000
-HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
   CMD wget -q -O /dev/null http://localhost:3000/ || exit 1
 CMD ["node", ".output/server/index.mjs"]

@@ -1,34 +1,19 @@
 # ============================================
-# 后端 Spring Boot Dockerfile — 多阶段构建
-# 适配 2核2G 阿里云服务器，JVM 堆内存限制 256MB
+# 后端运行时镜像 — 本地已 mvn package，此处仅复制 jar
+# JVM 128MB，适配 2G 服务器
 # ============================================
 
-# ---------- 阶段一：Maven 构建 ----------
-FROM maven:3.9-eclipse-temurin-21-alpine AS builder
-WORKDIR /app
-# 先复制 pom.xml 利用 Docker 缓存层加速
-COPY pom.xml .
-RUN mvn dependency:go-offline -B -q
-# 复制源码并构建
-COPY src ./src
-RUN mvn package -DskipTests -B -q
-
-# ---------- 阶段二：运行时镜像 ----------
 FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
-
-# 创建非 root 用户运行服务
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 
-# 复制构建产物
-COPY --from=builder /app/target/*.jar app.jar
+# 复制本地构建好的 jar（需先在本地执行 npm run build:backend）
+COPY java-backend/target/*.jar app.jar
 
-# JVM 参数（2G 内存服务器优化）
-# -Xms128m 初始堆, -Xmx256m 最大堆
-ENV JAVA_OPTS="-Xms128m -Xmx256m -XX:+UseContainerSupport -XX:MaxRAMPercentage=50.0 -XX:+UseG1GC -XX:MaxGCPauseMillis=200"
+ENV JAVA_OPTS="-Xms64m -Xmx128m -XX:+UseSerialGC -XX:MaxRAMPercentage=40.0 -XX:+UseContainerSupport"
 
 USER appuser
 EXPOSE 8080
-HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
+HEALTHCHECK --interval=30s --timeout=10s --start-period=90s --retries=3 \
   CMD wget -q -O /dev/null http://localhost:8080/api/health || exit 1
 ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]

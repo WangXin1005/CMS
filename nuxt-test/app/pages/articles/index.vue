@@ -15,16 +15,21 @@ const roleLevel: Record<string, number> = { SUPERADMIN: 3, ADMIN: 2, USER: 1, GU
 function canEdit(row: Record<string, unknown>) {
   if (isGuest.value) return false;
   if (role.value === 'SUPERADMIN') return true;
+  // 自己的文章始终可编辑
+  if (row.author?.username === currentUsername.value) return true;
+  // ADMIN 可编辑下级用户（USER/GUEST）的文章
   if (role.value === 'ADMIN') { const lv = roleLevel[(row.author?.role as string) || ''] ?? -1; return lv <= 1; }
-  return row.author?.username === currentUsername.value;
+  return false;
 }
 function canEditPreview() {
   if (isGuest.value) return false;
   if (role.value === 'SUPERADMIN') return true;
   const authorName = dialogArticle.value?.author?.username;
+  // 自己的文章始终可编辑
+  if (authorName === currentUsername.value) return true;
   const authorRole = (dialogArticle.value?.author?.role as string) || '';
+  // ADMIN 可编辑下级用户（USER/GUEST）的文章
   if (role.value === 'ADMIN') return roleLevel[authorRole] <= 1;
-  if (role.value === 'USER') return authorName === currentUsername.value;
   return false;
 }
 const canEditPreviewDialog = computed(() => canEditPreview());

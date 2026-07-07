@@ -39,7 +39,7 @@ public class ArticleService {
         this.commentRepository = commentRepository;
     }
 
-    /** 鑾峰彇宸插彂甯冪殑鍏紑鏂囩珷鍒楄〃 */
+    /** 获取已发布的公开文章列表 */
     public Page<Article> listPublished(Pageable pageable, Long categoryId, Long tagId, Long currentUserId) {
         if (categoryId != null) {
             return articleRepository.findByCategoryIdAndStatusAndVisibility(categoryId, ArticleStatus.PUBLISHED, pageable);
@@ -68,7 +68,7 @@ public class ArticleService {
         return article;
     }
 
-    /** 鍚庡彴绠＄悊锛氳幏鍙栨墍鏈夋枃绔狅紙鍚崏绋匡級 */
+    /** 后台管理：获取所有文章（含草稿） */
         /** 仪表盘近期文章：仅返回已发布且公开的文章 */
     @Transactional(readOnly = true)
     public Page<Article> listRecentForDashboard(Pageable pageable) {
@@ -114,18 +114,18 @@ public class ArticleService {
         return results;
     }
 
-    /** 鑾峰彇鎸囧畾浣滆€呯殑鎵€鏈夋枃绔狅紙鍚崏绋匡級锛屾敮鎸佹寜鐘舵€佺瓫閫?*/
+    /** 获取指定作者的所有文章（含草稿），支持按状态筛选 */
     public Page<Article> listByAuthor(Long authorId, Pageable pageable, ArticleStatus status, String keyword, Long categoryId, Long tagId, Long currentUserId) {
         return articleRepository.searchAllFilters(status, keyword, categoryId, tagId, authorId, pageable);
     }
 
-    /** 鍚庡彴绠＄悊锛氶€氳繃 ID 鑾峰彇鏂囩珷 */
+    /** 后台管理：通过 ID 获取文章 */
     @Transactional(readOnly = true)
     public Article getById(Long id) {
         return articleRepository.findById(id).orElse(null);
     }
 
-    /** 鑾峰彇鎸囧畾鏂囩珷骞舵牎楠屼綔鑰呰韩浠?*/
+    /** 获取指定文章并校验作者身份*/
     @Transactional(readOnly = true)
     public Article getByAuthor(Long id, Long authorId) {
         Article article = articleRepository.findById(id).orElse(null);
@@ -134,12 +134,12 @@ public class ArticleService {
         }
         return null;
     }
-    /** 妫€鏌?Slug 鏄惁宸茶浣跨敤锛堜笉鍒嗙姸鎬侊級 */
+    /** 检查 Slug 是否已被使用（不分状态） */
     public boolean isSlugTaken(String slug) {
         return articleRepository.findBySlug(slug).isPresent();
     }
 
-    /** 鍒涘缓鏂囩珷 */
+    /** 创建文章 */
     public Article create(String title, String slug, String content, String summary,
                           String coverImage, ArticleStatus status, Long categoryId,
                           Set<Long> tagIds, User author) {
@@ -166,7 +166,7 @@ public class ArticleService {
         return articleRepository.save(article);
     }
 
-    /** 鏇存柊鏂囩珷 */
+    /** 更新文章 */
     public Article update(Long id, String title, String slug, String content, String summary,
                           String coverImage, ArticleStatus status, Article.ArticleVisibility visibility, Long categoryId, Set<Long> tagIds) {
         Article article = articleRepository.findById(id).orElse(null);
@@ -192,7 +192,7 @@ public class ArticleService {
         return articleRepository.save(article);
     }
 
-    /** 鍒犻櫎鏂囩珷 */
+    /** 删除文章 */
     @Transactional
     public boolean delete(Long id) {
         if (!articleRepository.existsById(id)) return false;
@@ -200,7 +200,7 @@ public class ArticleService {
         return true;
     }
 
-    /** 鍒犻櫎鎸囧畾鏂囩珷骞舵牎楠屼綔鑰呰韩浠?*/
+    /** 删除指定文章并校验作者身份*/
     @Transactional
     public boolean deleteByAuthor(Long id, Long authorId) {
         Article article = articleRepository.findById(id).orElse(null);
