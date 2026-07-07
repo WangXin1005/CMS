@@ -1,14 +1,15 @@
 # Java / Maven
 target/
+!java-backend/target/
 *.class
 *.jar
+!java-backend/target/*.jar
 *.war
 *.log
 .mvn/timing.log
 
 # Nuxt / Node
 nuxt-test/.nuxt/
-nuxt-test/.output/
 nuxt-test/node_modules/
 nuxt-test/.cache/
 nuxt-test/dist/

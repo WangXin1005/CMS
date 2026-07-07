@@ -53,25 +53,13 @@ deploy() {
     log_info "========== 开始部署 =========="
     mkdir -p uploads
 
-    # 检查 swap
-    if ! swapon --show | grep -q .; then
-        log_warn "swap 未启用，正在启用..."
-        sudo swapon -a 2>/dev/null || log_warn "无法启用 swap"
-    fi
-
     # 拉取基础镜像
     log_info "拉取基础镜像..."
     $DOCKER_COMPOSE pull mysql nginx certbot
 
-    # 逐序构建
-    log_info "[1/3] 构建后端（约 5-10 分钟）..."
-    $DOCKER_COMPOSE build --no-cache backend
-
-    log_info "[2/3] 构建前端（约 3-5 分钟）..."
-    $DOCKER_COMPOSE build --no-cache frontend
-
-    log_info "[3/3] 构建 Webhook..."
-    $DOCKER_COMPOSE build webhook
+    # 构建所有服务（本地预构建产物，仅复制，很快）
+    log_info "构建镜像..."
+    $DOCKER_COMPOSE build
 
     # 启动
     log_info "启动所有服务..."
@@ -91,11 +79,8 @@ update_deploy() {
     log_info "停止现有服务..."
     $DOCKER_COMPOSE down
 
-    log_info "[1/2] 重建后端..."
-    $DOCKER_COMPOSE build --no-cache backend
-
-    log_info "[2/2] 重建前端..."
-    $DOCKER_COMPOSE build --no-cache frontend
+    log_info "重建镜像..."
+    $DOCKER_COMPOSE build
 
     log_info "启动服务..."
     $DOCKER_COMPOSE up -d --remove-orphans

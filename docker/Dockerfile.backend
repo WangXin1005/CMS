@@ -1,27 +1,10 @@
 # ============================================================
-# CodeBlog 后端 Dockerfile — 为 2核2G 服务器优化
-# 多阶段构建：Maven 打包 → JRE 运行
+# CodeBlog 后端 Dockerfile — 本地 Maven 构建 + 服务器仅运行
+# 构建：cd java-backend && mvn package -DskipTests
+# 产物 target/*.jar 提交到仓库，服务器直接复制运行
 # ============================================================
 
-FROM maven:3.9-eclipse-temurin-21-alpine AS builder
-
-WORKDIR /build
-
-# 替换 Alpine 软件源为国内镜像
-RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
-
-# Maven 构建内存限制
-ENV MAVEN_OPTS="-Xmx384m -XX:+UseSerialGC"
-
-# 复制源码和 settings.xml（阿里云 Maven 镜像）
-COPY pom.xml settings.xml ./
-COPY src ./src
-
-# 直接打包（跳过 go-offline 避免插件下载失败）
-RUN mvn package -s settings.xml -DskipTests -B
-
-# ==================== 运行阶段 ====================
-FROM eclipse-temurin:21-jre-alpine AS runtime
+FROM eclipse-temurin:21-jre-alpine
 
 WORKDIR /app
 
@@ -33,11 +16,11 @@ RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 RUN mkdir -p /app/uploads && chown -R appuser:appgroup /app
 
-COPY --from=builder /build/target/*.jar app.jar
+# 直接复制本地预构建 JAR
+COPY target/*.jar app.jar
 
 USER appuser
 
-# JVM 参数：堆内存 256M，SerialGC（低内存最优）
 ENV JAVA_OPTS="-Xmx256m -Xms128m -XX:+UseSerialGC -XX:MaxRAM=300m -XX:+ExitOnOutOfMemoryError -Djava.security.egd=file:/dev/./urandom"
 
 EXPOSE 8080
