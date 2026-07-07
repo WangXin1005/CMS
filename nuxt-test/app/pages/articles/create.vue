@@ -74,7 +74,7 @@ function insertTabInTextarea(e, field) {
 </script>
 
 <template>
-  <div>
+  <div style="overflow-y: auto; height: 100%;">
     <div class="page-header">
       <h2>创建文章</h2>
       <div>

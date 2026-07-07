@@ -49,16 +49,15 @@
         <el-icon><List /></el-icon>
         <span>操作日志</span>
       </el-menu-item>
-
-      <!-- 返回博客首页 -->
-      <div class="menu-footer">
-        <el-divider style="margin: 8px 16px; border-color: #2a2a3d" />
-        <el-menu-item index="/" class="back-to-site">
-          <el-icon><View /></el-icon>
-          <span>返回博客</span>
-        </el-menu-item>
-      </div>
     </el-menu>
+    <!-- 返回博客首页 — 固定在菜单底部 -->
+    <div class="menu-footer">
+      <el-divider style="margin: 8px 16px; border-color: #2a2a3d" />
+      <div class="back-to-site" @click="navigateTo('/')">
+        <el-icon><View /></el-icon>
+        <span>返回博客</span>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -136,8 +135,21 @@ const isSuperAdmin = computed(() => role.value === 'SUPERADMIN')
   padding-bottom: 8px;
 }
 .back-to-site {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  height: 44px;
+  line-height: 44px;
   margin: 2px 8px;
   border-radius: 8px;
+  color: #a2a3b7;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.back-to-site:hover {
+  background: #2a2a3d !important;
+  color: #fff !important;
 }
 .side-menu::-webkit-scrollbar {
   width: 4px;

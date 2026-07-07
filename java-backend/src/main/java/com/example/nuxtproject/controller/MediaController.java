@@ -44,7 +44,7 @@ public class MediaController {
     }
 
     @GetMapping("/api/admin/media")
-    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN', 'USER')")
     @Operation(summary = "媒体列表", description = "返回所有已上传的媒体文件")
     public ResponseEntity<List<Media>> listAll() {
         return ResponseEntity.ok(fileStorageService.listAll());

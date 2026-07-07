@@ -1,4 +1,4 @@
-<!-- categories - 分类管理页 -->
+<!-- categories - 分类管理页（懒加载+拖拽排序） -->
 <script lang="ts" setup>
 import { ref, computed, onMounted, nextTick } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
@@ -7,10 +7,12 @@ import Sortable from "sortablejs";
 definePageMeta({ middleware: "auth" })
 const { role } = useAuth()
 const isGuest = computed(() => role.value === "GUEST");
+const isAdmin = computed(() => role.value === "ADMIN" || role.value === "SUPERADMIN");
 
 const { getList, create, update, remove, reorder } = useCategory();
 const categories = ref([]);
-const { wrapperRef, tableHeight } = useTableHeight();
+// 使用 useTableHeight 测量 page-card 高度（懒加载无分页器，offset=0）
+const { wrapperRef, tableHeight } = useTableHeight(0);
 const loading = ref(false);
 const displayCount = ref(5);
 const allLoaded = ref(false);
@@ -80,7 +82,7 @@ async function handleSave() {
   if (!form.value.name) { ElMessage.warning("名称不能为空"); return; }
   try {
     if (editingId.value) { await update(editingId.value, { name: form.value.name, description: form.value.description }); ElMessage.success("更新成功"); }
-    else { const slug = form.value.name.toLowerCase().replace(/\s+/g, "-"); await create({ name: form.value.name, slug, description: form.value.description }); ElMessage.success("创建成功"); }
+    else { const slug = form.value.name.toLowerCase().replace(/s+/g, "-"); await create({ name: form.value.name, slug, description: form.value.description }); ElMessage.success("创建成功"); }
     dialogVisible.value = false; await loadData();
   } catch { /* 拦截器已处理消息提示 */ }
 }
@@ -109,9 +111,11 @@ onMounted(async () => { await nextTick(); await loadData(); initSortable(); });
 </script>
 
 <template>
-  <div>
-    <div class="page-header"><h2>分类管理</h2><el-button type="primary" :icon="Plus" @click="openCreate">新增分类</el-button></div>
-    <div class="page-card">
+  <!-- 根容器：flex 填充 content-inner 剩余空间 -->
+  <div style="flex:1; min-height:0; display:flex; flex-direction:column">
+    <div class="page-header"><h2>分类管理</h2><el-button v-if="!isGuest" type="primary" :icon="Plus" @click="openCreate">新增分类</el-button></div>
+    <!-- page-card 作为表格外容器，填充剩余空间，底边距窗口 25px -->
+    <div ref="wrapperRef" class="page-card" style="flex:1; min-height:0">
       <el-table ref="tableRef" :data="displayCategories" v-loading="loading" :span-method="tableSpanMethod" style="width: 100%" :max-height="tableHeight" @scroll="handleScroll" stripe>
           <el-table-column label="排序" width="55" class-name="drag-handle-col" align="center">
             <template #default="{ row }">
@@ -122,7 +126,7 @@ onMounted(async () => { await nextTick(); await loadData(); initSortable(); });
           <el-table-column prop="name" label="名称" min-width="220" />
           <el-table-column prop="description" label="描述" min-width="300" show-overflow-tooltip />
           <el-table-column prop="createdAt" label="创建时间" width="160"><template #default="{ row }">{{ (row.createdAt || "").replace("T", " ").slice(0, 16) }}</template></el-table-column>
-          <el-table-column v-if="!isGuest" label="操作" width="130" fixed="right">
+          <el-table-column v-if="isAdmin" label="操作" width="130" fixed="right">
             <template #default="{ row }">
               <el-button link type="primary" size="small" @click="openEdit(row)">编辑</el-button>
               <el-button link type="danger" size="small" @click="handleDelete(row.id)">删除</el-button>
@@ -140,4 +144,3 @@ onMounted(async () => { await nextTick(); await loadData(); initSortable(); });
     </el-dialog>
   </div>
 </template>
-

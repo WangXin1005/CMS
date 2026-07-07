@@ -65,7 +65,7 @@ public class UserService {
     /**
     /** 分页查询用户列表 */
     public Page<User> listUsers(Pageable pageable) {
-        return userRepository.findAll(pageable);
+        return userRepository.findAllByOrderByCreatedAtDesc(pageable);
     }
 
     /**

@@ -65,12 +65,14 @@ onMounted(loadSettings)
 </script>
 
 <template>
-  <div>
+  <!-- 根容器：flex 填充 content-inner 剩余空间 -->
+  <div style="flex:1; min-height:0; display:flex; flex-direction:column">
     <div class="page-header">
       <h2>站点设置</h2>
       <el-button type="primary" :loading="loading" @click="saveAll">保存全部</el-button>
     </div>
-    <div class="page-card">
+    <!-- page-card 表单外容器，填充剩余空间，底边距窗口 25px -->
+    <div class="page-card" style="flex:1; min-height:0; overflow:auto">
       <el-form label-width="120px" style="max-width: 640px">
         <el-form-item v-for="s in settingKeys" :key="s.key" :label="s.label">
           <el-input

@@ -9,11 +9,22 @@ import { ref, onMounted, computed } from 'vue'
 import { sanitizeHtml } from '~/utils/sanitize'
 definePageMeta({ middleware: 'auth' })
 
-const { getStats, getRecent, getById } = useArticle()
-const { role } = useAuth()
+const { getStats, getRecent, getById, getBySlug } = useArticle()
+const { role, username: currentUsername } = useAuth()
 const isAdmin = computed(() => role.value === 'ADMIN' || role.value === 'SUPERADMIN')
 const isGuest = computed(() => role.value === 'GUEST')
-const canClick = computed(() => !isGuest.value)
+const roleLevel: Record<string, number> = { SUPERADMIN: 3, ADMIN: 2, USER: 1, GUEST: 0 }
+function canEditPreview() {
+  if (isGuest.value) return false
+  if (role.value === 'SUPERADMIN') return true
+  const authorName = dialogArticle.value?.author?.username
+  const authorRole = (dialogArticle.value?.author?.role as string) || ''
+  if (role.value === 'ADMIN') return roleLevel[authorRole] <= 1
+  if (role.value === 'USER') return authorName === currentUsername.value
+  return false
+}
+const canEditArticle = computed(() => canEditPreview())
+const canClick = computed(() => true)
 
 const dialogVisible = ref(false)
 const dialogArticle = ref<Record<string, unknown> | null>(null)
@@ -40,7 +51,8 @@ function handlePreviewEdit() {
 }
 async function viewArticle(item: Record<string, unknown>) {
   try {
-    const full = await getById(item.id)
+    // 管理员用 admin API，普通用户用公开 API 避免 403
+    const full = isAdmin.value ? await getById(item.id) : await getBySlug(item.slug)
     dialogArticle.value = full
   } catch {
     dialogArticle.value = item
@@ -89,10 +101,12 @@ onMounted(async () => {
 
       <!-- 统计卡片 -->
       <div v-loading="statsLoading" class="stats-grid">
-        <el-card class="stat-card" shadow="never">
-          <div class="stat-value" style="color: #409eff">{{ stats.totalArticles }}</div>
-          <div class="stat-label">文章总数</div>
-        </el-card>
+        <el-tooltip content="包含私密文章" placement="top">
+          <el-card class="stat-card" shadow="never">
+            <div class="stat-value" style="color: #409eff">{{ stats.totalArticles }}</div>
+            <div class="stat-label">文章总数</div>
+          </el-card>
+        </el-tooltip>
         <el-card class="stat-card" shadow="never">
           <div class="stat-value" style="color: #67c23a">{{ stats.totalCategories }}</div>
           <div class="stat-label">分类总数</div>
@@ -169,7 +183,7 @@ onMounted(async () => {
     </div>
 
     <!-- 文章预览对话框 -->
-    <el-dialog v-model="dialogVisible" title="文章预览" width="700px" :close-on-click-modal="false">
+    <el-dialog v-model="dialogVisible" title="文章预览" width="700px" top="5vh">
       <template v-if="dialogArticle">
         <h2 style="font-size: 20px; margin: 0 0 12px; color: #1a1a1a">{{ dialogArticle.title }}</h2>
         <div style="font-size: 13px; color: #999; margin-bottom: 16px">
@@ -199,7 +213,7 @@ onMounted(async () => {
       </template>
       <template #footer>
         <el-button @click="dialogVisible = false">关闭</el-button>
-        <el-button v-if="isAdmin" type="primary" @click="handlePreviewEdit">编辑</el-button>
+        <el-button v-if="canEditArticle" type="primary" @click="handlePreviewEdit">编辑</el-button>
       </template>
     </el-dialog>
   </div>
@@ -328,4 +342,28 @@ onMounted(async () => {
   color: #333;
   transition: color 0.25s ease;
 }
+
+/* 文章预览 markdown 内容样式 */
+.article-content-render :deep(h1) { font-size: 26px; font-weight: 700; margin: 24px 0 14px; color: #1a1a1a; }
+.article-content-render :deep(h2) { font-size: 22px; font-weight: 700; margin: 22px 0 12px; padding-bottom: 8px; border-bottom: 1px solid #f0f0f0; color: #1a1a1a; }
+.article-content-render :deep(h3) { font-size: 18px; font-weight: 600; margin: 18px 0 10px; color: #1a1a1a; }
+.article-content-render :deep(h4) { font-size: 16px; font-weight: 600; margin: 14px 0 8px; color: #333; }
+.article-content-render :deep(h5) { font-size: 15px; font-weight: 600; margin: 12px 0 6px; color: #444; }
+.article-content-render :deep(p) { margin: 0 0 12px; }
+.article-content-render :deep(ul), .article-content-render :deep(ol) { padding-left: 24px; margin: 8px 0 12px; }
+.article-content-render :deep(li) { margin: 4px 0; }
+.article-content-render :deep(code) { background: #f0f2f5; padding: 2px 8px; border-radius: 4px; font-size: 13px; color: #e74c3c; font-family: Menlo, Consolas, monospace; }
+.article-content-render :deep(pre) { background: #1e1e2e; color: #cdd6f4; padding: 16px; border-radius: 8px; overflow-x: auto; margin: 12px 0 18px; font-size: 13px; line-height: 1.6; }
+.article-content-render :deep(pre code) { background: none; padding: 0; color: inherit; font-size: inherit; }
+.article-content-render :deep(blockquote) { border-left: 4px solid #667eea; margin: 12px 0 18px; padding: 10px 16px; background: #f8f9ff; border-radius: 0 8px 8px 0; color: #555; }
+.article-content-render :deep(blockquote p) { margin: 0; }
+.article-content-render :deep(img) { max-width: 100%; border-radius: 8px; margin: 10px 0; }
+.article-content-render :deep(strong) { font-weight: 700; color: #1a1a1a; }
+.article-content-render :deep(a) { color: #667eea; text-decoration: underline; }
+.article-content-render :deep(table) { border-collapse: collapse; width: 100%; margin: 12px 0; }
+.article-content-render :deep(th), .article-content-render :deep(td) { border: 1px solid #e4e7ed; padding: 8px 12px; }
+.article-content-render :deep(th) { background: #f5f7fa; font-weight: 600; }
+.article-content-render :deep(hr) { border: none; border-top: 1px solid #e4e7ed; margin: 18px 0; }
+
+
 </style>

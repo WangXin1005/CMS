@@ -1,4 +1,4 @@
-<!-- articles/index - 文章管理页 -->
+<!-- articles/index - 文章管理页（懒加载） -->
 <script lang="ts" setup>
 import { ref, onMounted, computed, nextTick } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
@@ -7,13 +7,31 @@ import { Plus } from "@element-plus/icons-vue";
 definePageMeta({ middleware: "auth" });
 
 const { getAdminList, getMyArticles, update, updateMyArticle, remove, removeMyArticle } = useArticle();
-const { role } = useAuth();
+const { role, username: currentUsername } = useAuth();
 
 const isAdmin = computed(() => role.value === "ADMIN" || role.value === "SUPERADMIN");
 const isGuest = computed(() => role.value === "GUEST");
+const roleLevel: Record<string, number> = { SUPERADMIN: 3, ADMIN: 2, USER: 1, GUEST: 0 };
+function canEdit(row: Record<string, unknown>) {
+  if (isGuest.value) return false;
+  if (role.value === 'SUPERADMIN') return true;
+  if (role.value === 'ADMIN') { const lv = roleLevel[(row.author?.role as string) || ''] ?? -1; return lv <= 1; }
+  return row.author?.username === currentUsername.value;
+}
+function canEditPreview() {
+  if (isGuest.value) return false;
+  if (role.value === 'SUPERADMIN') return true;
+  const authorName = dialogArticle.value?.author?.username;
+  const authorRole = (dialogArticle.value?.author?.role as string) || '';
+  if (role.value === 'ADMIN') return roleLevel[authorRole] <= 1;
+  if (role.value === 'USER') return authorName === currentUsername.value;
+  return false;
+}
+const canEditPreviewDialog = computed(() => canEditPreview());
 
 const articles = ref([]);
-const { wrapperRef, tableHeight } = useTableHeight();
+// 使用 useTableHeight 测量 page-card 高度（懒加载无分页器，offset=0）
+const { wrapperRef, tableHeight } = useTableHeight(0);
 const loading = ref(false);
 const currentPage = ref(1);
 const pageSize = ref(20);
@@ -146,17 +164,19 @@ onMounted(async () => { await loadFilters(); await loadData(); });
 </script>
 
 <template>
-  <div>
+  <!-- 根容器：flex 填充 content-inner 剩余空间 -->
+  <div style="flex:1; min-height:0; display:flex; flex-direction:column">
     <div class="page-header">
       <h2>文章管理</h2>
       <el-button v-if="!isGuest" type="primary" :icon="Plus" @click="goCreate()">写文章</el-button>
     </div>
 
-    <div class="page-card">
+    <!-- page-card 作为表格外容器，填充剩余空间，底边距窗口 25px -->
+    <div ref="wrapperRef" class="page-card" style="flex:1; min-height:0">
       <div class="filter-bar" style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap">
         <div style="display: flex; align-items: center">
-          <el-input v-model="keyword" placeholder="搜索标题..." clearable style="width: 220px" @keyup.enter="onSearch">
-            <template #prefix><el-icon><svg viewBox="0 0 1024 1024" width="1em" height="1em"><path d="M945.067 898.134l-189.3-189.3c-38.4-38.4-38.4-100.7 0-139.1l9.3-9.3c38.4-38.4 100.7-38.4 139.1 0l189.3 189.3c38.4 38.4 38.4 100.7 0 139.1l-9.3 9.3c-38.4 38.4-100.7 38.4-139.1 0zM426.667 768C238.933 768 85.333 614.4 85.333 426.667S238.933 85.333 426.667 85.333 768 238.933 768 426.667 614.4 768 426.667 768z m0-85.333c140.8 0 256-115.2 256-256S567.467 170.667 426.667 170.667 170.667 285.867 170.667 426.667 285.867 682.667 426.667 682.667z" fill="currentColor"/></svg></el-icon></template>
+          <el-input v-model="keyword" placeholder="搜索文章标题..." style="width: 240px" clearable @keyup.enter="onSearch">
+            <template #prefix><el-icon><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024"><path fill="currentColor" d="m795.904 750.72 124.992 124.928a32 32 0 0 1-45.248 45.248L750.656 795.904a416 416 0 1 1 45.248-45.248zM480 832a352 352 0 1 0 0-704 352 352 0 0 0 0 704"/></svg></el-icon></template>
           </el-input>
           <el-button type="primary" @click="onSearch" style="margin-left: 8px">搜索</el-button>
         </div>
@@ -179,6 +199,7 @@ onMounted(async () => { await loadFilters(); await loadData(); });
         </el-select>
       </div>
 
+      <!-- 懒加载表格：max-height 由 useTableHeight 动态计算 -->
       <el-table ref="tableRef" :data="displayArticles" v-loading="loading" :span-method="tableSpanMethod" style="width: 100%" :max-height="tableHeight" @scroll="handleTableScroll" stripe>
           <el-table-column label="序号" width="55">
             <template #default="{ row, $index }">
@@ -189,7 +210,7 @@ onMounted(async () => { await loadFilters(); await loadData(); });
 
           <el-table-column label="标题" min-width="300">
             <template #default="{ row }">
-              <div v-if="!row._isEndMarker" style="display:flex;align-items:center;gap:6px;cursor:pointer" @click="viewArticle(row)">
+              <div v-if="!row._isEndMarker" style="display:flex;align-items:center;gap:6px;cursor:pointer" @click="viewArticle(row)" :type="isGuest ? 'default' : 'primary'" :underline="!isGuest">
                 <span style="color:#409eff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ row.title }}</span>
               </div>
             </template>
@@ -217,7 +238,7 @@ onMounted(async () => { await loadFilters(); await loadData(); });
 
           <el-table-column v-if="!isGuest" label="可见性" width="80" align="center">
             <template #default="{ row }">
-              <el-switch v-if="!row._isEndMarker" :model-value="row.visibility === 'PUBLIC'" active-text="公" inactive-text="私" inline-prompt size="small" @change="handleVisibilityChange({ ...row, visibility: row.visibility === 'PUBLIC' ? 'PRIVATE' : 'PUBLIC' })" />
+              <el-switch v-if="!row._isEndMarker" :disabled="!canEdit(row)" :model-value="row.visibility === 'PUBLIC'" active-text="公" inactive-text="私" inline-prompt size="small" @change="handleVisibilityChange({ ...row, visibility: row.visibility === 'PUBLIC' ? 'PRIVATE' : 'PUBLIC' })" />
             </template>
           </el-table-column>
 
@@ -229,8 +250,8 @@ onMounted(async () => { await loadFilters(); await loadData(); });
           <el-table-column v-if="!isGuest" label="操作" width="130" fixed="right">
             <template #default="{ row }">
               <div v-if="!row._isEndMarker" style="display:flex;gap:4px">
-                <el-button link type="primary" size="small" @click="goEdit(row.id)">编辑</el-button>
-                <el-button link type="danger" size="small" @click="handleDelete(row.id)">删除</el-button>
+                <el-button :disabled="!canEdit(row)" link type="primary" size="small" @click="goEdit(row.id)">编辑</el-button>
+                <el-button :disabled="!canEdit(row)" link type="danger" size="small" @click="handleDelete(row.id)">删除</el-button>
               </div>
             </template>
           </el-table-column>
@@ -254,10 +275,38 @@ onMounted(async () => { await loadFilters(); await loadData(); });
       </template>
       <template #footer>
         <el-button @click="dialogVisible = false">关闭</el-button>
-        <el-button type="primary" @click="handleDialogEdit">编辑</el-button>
+        <el-button v-if="canEditPreviewDialog" type="primary" @click="handleDialogEdit">编辑</el-button>
       </template>
     </el-dialog>
   </div>
 </template>
 
 
+<style scoped>
+/* 文章预览 markdown 内容样式 */
+.article-preview-content {
+  font-size: 15px;
+  line-height: 1.9;
+  color: #2c3e50;
+}
+.article-preview-content :deep(h1) { font-size: 26px; font-weight: 700; margin: 24px 0 14px; color: #1a1a1a; }
+.article-preview-content :deep(h2) { font-size: 22px; font-weight: 700; margin: 22px 0 12px; padding-bottom: 8px; border-bottom: 1px solid #f0f0f0; color: #1a1a1a; }
+.article-preview-content :deep(h3) { font-size: 18px; font-weight: 600; margin: 18px 0 10px; color: #1a1a1a; }
+.article-preview-content :deep(h4) { font-size: 16px; font-weight: 600; margin: 14px 0 8px; color: #333; }
+.article-preview-content :deep(h5) { font-size: 15px; font-weight: 600; margin: 12px 0 6px; color: #444; }
+.article-preview-content :deep(p) { margin: 0 0 12px; }
+.article-preview-content :deep(ul), .article-preview-content :deep(ol) { padding-left: 24px; margin: 8px 0 12px; }
+.article-preview-content :deep(li) { margin: 4px 0; }
+.article-preview-content :deep(code) { background: #f0f2f5; padding: 2px 8px; border-radius: 4px; font-size: 13px; color: #e74c3c; font-family: Menlo, Consolas, monospace; }
+.article-preview-content :deep(pre) { background: #1e1e2e; color: #cdd6f4; padding: 16px; border-radius: 8px; overflow-x: auto; margin: 12px 0 18px; font-size: 13px; line-height: 1.6; }
+.article-preview-content :deep(pre code) { background: none; padding: 0; color: inherit; font-size: inherit; }
+.article-preview-content :deep(blockquote) { border-left: 4px solid #667eea; margin: 12px 0 18px; padding: 10px 16px; background: #f8f9ff; border-radius: 0 8px 8px 0; color: #555; }
+.article-preview-content :deep(blockquote p) { margin: 0; }
+.article-preview-content :deep(img) { max-width: 100%; border-radius: 8px; margin: 10px 0; }
+.article-preview-content :deep(strong) { font-weight: 700; color: #1a1a1a; }
+.article-preview-content :deep(a) { color: #667eea; text-decoration: underline; }
+.article-preview-content :deep(table) { border-collapse: collapse; width: 100%; margin: 12px 0; }
+.article-preview-content :deep(th), .article-preview-content :deep(td) { border: 1px solid #e4e7ed; padding: 8px 12px; text-align: left; }
+.article-preview-content :deep(th) { background: #f5f7fa; font-weight: 600; }
+.article-preview-content :deep(hr) { border: none; border-top: 1px solid #e4e7ed; margin: 18px 0; }
+</style>

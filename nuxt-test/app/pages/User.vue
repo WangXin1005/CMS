@@ -1,4 +1,4 @@
-<!-- User - 用户管理页 -->
+<!-- User - 用户管理页（分页 pageSize=10） -->
 <script lang="ts" setup>
 import { ref, computed, onMounted } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
@@ -15,6 +15,9 @@ const currentPage = ref(1);
 const pageSize = ref(10);
 const search = ref("");
 const loading = ref(false);
+
+// 使用 useTableHeight 测量 table-with-pagination 高度，预留 44px 给分页器
+const { wrapperRef, tableHeight } = useTableHeight(0);
 
 const roleOptions = [
   { value: "USER", label: "普通用户" },
@@ -97,12 +100,15 @@ onMounted(loadData);
 </script>
 
 <template>
-  <div>
+  <!-- 根容器：flex 填充 content-inner 剩余空间 -->
+  <div style="flex:1; min-height:0; display:flex; flex-direction:column">
     <div class="page-header"><h2>用户管理</h2><el-button type="primary" :icon="Plus" @click="openCreate()">新增用户</el-button></div>
-    <div class="page-card">
+    <!-- page-card 填充剩余空间，底边距窗口 25px -->
+    <div class="page-card" style="flex:1; min-height:0">
       <div class="filter-bar"><el-input v-model="search" placeholder="搜索用户..." :prefix-icon="Search" style="width: 260px" clearable /></div>
-      <div class="table-with-pagination">
-      <el-table :data="tableData" v-loading="loading" style="width: 100%" stripe>
+      <!-- table-with-pagination：表格+分页器外层容器 -->
+      <div ref="wrapperRef" class="table-with-pagination">
+        <el-table :data="tableData" v-loading="loading" style="width: 100%" :max-height="tableHeight" stripe>
           <el-table-column type="index" label="序号" width="60" :index="(i) => (currentPage - 1) * pageSize + i + 1" />
           <el-table-column prop="username" label="用户名" width="120" />
           <el-table-column prop="email" label="邮箱" width="200" />
@@ -114,9 +120,12 @@ onMounted(loadData);
               <el-button v-if="row.role !== 'SUPERADMIN'" link type="danger" size="small" @click="handleDelete(row.id, row.username)">删除</el-button>
             </template>
           </el-table-column>
-                  <template #empty><div style="padding:40px 0;color:#909399">暂无数据</div></template>
+          <template #empty><div style="padding:40px 0;color:#909399">暂无数据</div></template>
         </el-table>
-      <div class="pagination-wrapper"><el-pagination v-model:current-page="currentPage" :page-size="pageSize" :total="total" layout="prev, pager, next, jumper, total" :hide-on-single-page="false" background @current-change="loadData" /></div>
+        <!-- 分页器：绝对定位固定在右下角 -->
+        <div class="pagination-wrapper">
+          <el-pagination v-model:current-page="currentPage" :page-size="pageSize" :total="total" layout="prev, pager, next, jumper, total" :hide-on-single-page="false" background @current-change="loadData" />
+        </div>
       </div>
     </div>
 
@@ -144,7 +153,3 @@ onMounted(loadData);
     </el-dialog>
   </div>
 </template>
-<style scoped>.el-table { min-height: 500px; }.table-with-pagination { position: relative; }
-.table-with-pagination .pagination-wrapper { margin: 0; padding: 6px 12px; position: absolute; bottom: 0; right: 0; z-index: 1; background: rgba(255,255,255,0.95); border-radius: 4px; }
-.el-table { min-height: 500px; }
-</style>

@@ -45,7 +45,7 @@ public class TagController {
     }
 
     @PostMapping("/api/admin/tags")
-    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN', 'USER')")
     @Operation(summary = "创建标签", description = "创建新的文章标签")
     public ResponseEntity<?> create(@RequestBody @Valid CreateTagRequest request) {
         Tag tag = tagService.create(request.getName(), request.getSlug());

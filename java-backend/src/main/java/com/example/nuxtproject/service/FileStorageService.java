@@ -148,7 +148,7 @@ public class FileStorageService {
 
     /** 获取媒体列表 */
     public List<Media> listAll() {
-        return mediaRepository.findAll();
+        return mediaRepository.findAllByOrderByCreatedAtDesc();
     }
 
     /** 删除媒体文件 */

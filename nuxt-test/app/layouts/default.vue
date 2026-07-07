@@ -42,7 +42,7 @@
   max-width: 1200px;
   width: 100%;
   margin: 0 auto;
-  padding-bottom: 24px;
+  padding-bottom: 5px;
   display: flex;
   flex-direction: column;
 }
@@ -73,13 +73,28 @@
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
   display: flex;
   flex-direction: column;
+  position: relative;
 }
 
 /* 鍒嗛〉瀹瑰櫒 */
-.pagination-wrapper {
-  margin-top: 20px;
+/* 表格+分页外层容器：填充剩余空间 */
+.table-with-pagination {
+  flex: 1;
+  min-height: 0;
+  position: relative;
   display: flex;
-  justify-content: flex-end;
+  flex-direction: column;
+}
+
+/* 分页器：固定于表格容器右下角 */
+.pagination-wrapper {
+  position: absolute;
+  bottom: -15px;
+  right: 0;
+  z-index: 10;
+  padding: 6px 12px;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 4px;
 }
 
 /* 绛涢€夋爮 */

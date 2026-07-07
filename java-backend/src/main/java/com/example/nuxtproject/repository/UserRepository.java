@@ -3,6 +3,8 @@ package com.example.nuxtproject.repository;
 import com.example.nuxtproject.entity.Role;
 import com.example.nuxtproject.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -36,4 +38,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     /** 根据角色分页查询用户 */
     org.springframework.data.domain.Page<User> findByRole(Role role, org.springframework.data.domain.Pageable pageable);
+
+    /** 按创建时间倒序分页查询全部用户 */
+    Page<User> findAllByOrderByCreatedAtDesc(Pageable pageable);
 }

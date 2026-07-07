@@ -46,7 +46,7 @@ public class CategoryController {
     }
 
     @PostMapping("/api/admin/categories")
-    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN', 'USER')")
     @Operation(summary = "创建分类", description = "创建新的文章分类")
     public ResponseEntity<?> create(@RequestBody @Valid CreateCategoryRequest request) {
         Category category = categoryService.create(request.getName(), request.getSlug(),

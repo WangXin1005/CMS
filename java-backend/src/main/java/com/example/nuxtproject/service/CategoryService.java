@@ -18,7 +18,7 @@ public class CategoryService {
     }
 
     public List<Category> listAll() {
-        return categoryRepository.findAllByOrderBySortOrder();
+        return categoryRepository.findAllByOrderByCreatedAtDesc();
     }
 
     public Category getById(Long id) {

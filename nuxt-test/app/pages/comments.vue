@@ -1,4 +1,4 @@
-<!-- comments - 评论管理页 -->
+<!-- comments - 评论管理页（分页 pageSize=10） -->
 <script lang="ts" setup>
 import { ref, onMounted } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
@@ -12,6 +12,10 @@ const pageSize = ref(10);
 const total = ref(0);
 const statusFilter = ref(undefined);
 const stats = ref({ pending: 0, approved: 0 });
+
+// 使用 useTableHeight 测量 table-with-pagination 高度，预留 44px 给分页器
+const { wrapperRef, tableHeight } = useTableHeight(0);
+
 const statusLabel = { PENDING: "待审核", APPROVED: "已通过", REJECTED: "已驳回" };
 const statusType = { PENDING: "warning", APPROVED: "success", REJECTED: "danger" };
 
@@ -35,7 +39,8 @@ onMounted(() => { loadData(); loadStats(); });
 </script>
 
 <template>
-  <div>
+  <!-- 根容器：flex 填充 content-inner 剩余空间 -->
+  <div style="flex:1; min-height:0; display:flex; flex-direction:column">
     <div class="page-header">
       <h2>评论管理</h2>
       <div style="display: flex; gap: 8px">
@@ -43,7 +48,8 @@ onMounted(() => { loadData(); loadStats(); });
         <el-tag type="success">已通过: {{ stats.approved ?? 0 }}</el-tag>
       </div>
     </div>
-    <div class="page-card">
+    <!-- page-card 填充剩余空间，底边距窗口 25px -->
+    <div class="page-card" style="flex:1; min-height:0">
       <div class="filter-bar">
         <el-radio-group :model-value="statusFilter" @change="onStatusChange">
           <el-radio-button value="__all__">全部</el-radio-button>
@@ -52,8 +58,9 @@ onMounted(() => { loadData(); loadStats(); });
           <el-radio-button value="REJECTED">已驳回</el-radio-button>
         </el-radio-group>
       </div>
-      <div class="table-with-pagination">
-      <el-table :data="comments" v-loading="loading" style="width: 100%" stripe>
+      <!-- table-with-pagination：表格+分页器外层容器 -->
+      <div ref="wrapperRef" class="table-with-pagination">
+        <el-table :data="comments" v-loading="loading" style="width: 100%" :max-height="tableHeight" stripe>
           <el-table-column type="index" label="序号" width="55" align="center" :index="(i) => (currentPage - 1) * pageSize + i + 1" />
           <el-table-column prop="content" label="评论内容" min-width="250" show-overflow-tooltip />
           <el-table-column prop="author.username" label="用户" width="120" />
@@ -66,15 +73,13 @@ onMounted(() => { loadData(); loadStats(); });
               <el-button link type="danger" size="small" @click="handleDelete(row.id)">删除</el-button>
             </template>
           </el-table-column>
-                  <template #empty><div style="padding:40px 0;color:#909399">暂无数据</div></template>
+          <template #empty><div style="padding:40px 0;color:#909399">暂无数据</div></template>
         </el-table>
-      <div class="pagination-wrapper">
-        <el-pagination v-model:current-page="currentPage" :page-size="pageSize" :total="total" layout="prev, pager, next, jumper, total" :hide-on-single-page="false" background @current-change="loadData" />
-      </div>
+        <!-- 分页器：绝对定位固定在右下角 -->
+        <div class="pagination-wrapper">
+          <el-pagination v-model:current-page="currentPage" :page-size="pageSize" :total="total" layout="prev, pager, next, jumper, total" :hide-on-single-page="false" background @current-change="loadData" />
+        </div>
       </div>
     </div>
   </div>
 </template>
-<style scoped>.el-table { min-height: 500px; }.table-with-pagination { position: relative; }
-.table-with-pagination .pagination-wrapper { margin: 0; padding: 6px 12px; position: absolute; bottom: 0; right: 0; z-index: 1; background: rgba(255,255,255,0.95); border-radius: 4px; }
-</style>

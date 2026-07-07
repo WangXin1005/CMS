@@ -96,7 +96,7 @@ public class ArticleService {
         if (hasFilters) {
             results = articleRepository.searchAllFilters(status, keyword, categoryId, tagId, authorId, pageable);
         } else {
-            results = articleRepository.findAll(pageable);
+            results = articleRepository.searchAllFilters(null, null, null, null, null, pageable);
         }
         // Filter PRIVATE articles: only author and admins can see them
         java.util.List<Article> content = new java.util.ArrayList<>(results.getContent());

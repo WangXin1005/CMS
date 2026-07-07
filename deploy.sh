@@ -61,7 +61,7 @@ deploy() {
 
     # 拉取基础镜像
     log_info "拉取基础镜像..."
-    $DOCKER_COMPOSE pull mysql nginx
+    $DOCKER_COMPOSE pull mysql nginx certbot
 
     # 逐序构建
     log_info "[1/3] 构建后端（约 5-10 分钟）..."

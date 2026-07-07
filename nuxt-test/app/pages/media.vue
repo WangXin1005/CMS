@@ -1,6 +1,8 @@
-<!-- media - 媒体管理页 -->
+<!-- media - 媒体管理页（分页 pageSize=7） -->
 <script lang="ts" setup>
 import { ref, computed, onMounted } from "vue";
+const { role } = useAuth();
+const isAdmin = computed(() => role.value === "ADMIN" || role.value === "SUPERADMIN");
 import { ElMessage, ElMessageBox } from "element-plus";
 import { Plus } from "@element-plus/icons-vue";
 definePageMeta({ middleware: "auth" });
@@ -9,6 +11,10 @@ const { upload, getList, remove } = useMedia();
 const mediaList = ref([]);
 const currentPage = ref(1);
 const pageSize = ref(7);
+
+// 使用 useTableHeight 测量 table-with-pagination 高度，预留 44px 给分页器
+const { wrapperRef, tableHeight } = useTableHeight(0);
+
 const pagedMedia = computed(() => {
   const start = (currentPage.value - 1) * pageSize.value;
   return mediaList.value.slice(start, start + pageSize.value);
@@ -56,16 +62,19 @@ onMounted(loadData);
 </script>
 
 <template>
-  <div>
+  <!-- 根容器：flex 填充 content-inner 剩余空间 -->
+  <div style="flex:1; min-height:0; display:flex; flex-direction:column">
     <div class="page-header">
       <h2>媒体管理</h2>
       <el-upload :show-file-list="false" :before-upload="beforeUpload" accept="image/*">
         <el-button type="primary" :icon="Plus" :loading="uploadLoading">上传文件</el-button>
       </el-upload>
     </div>
-    <div class="page-card">
-      <div class="table-with-pagination">
-      <el-table :data="pagedMedia" v-loading="loading" style="width: 100%" stripe>
+    <!-- page-card 填充剩余空间，底边距窗口 25px -->
+    <div class="page-card" style="flex:1; min-height:0">
+      <!-- table-with-pagination：表格+分页器外层容器 -->
+      <div ref="wrapperRef" class="table-with-pagination">
+        <el-table :data="pagedMedia" v-loading="loading" style="width: 100%" :max-height="tableHeight" stripe>
           <el-table-column type="index" label="序号" width="55" align="center" :index="(i) => (currentPage - 1) * pageSize + i + 1" />
           <el-table-column label="预览" width="70">
             <template #default="{ row }"><el-image :src="row.url" style="width: 42px; height: 42px; border-radius: 6px" fit="cover" :preview-src-list="[row.url]" preview-teleported /></template>
@@ -75,20 +84,16 @@ onMounted(loadData);
           <el-table-column label="大小" width="90"><template #default="{ row }">{{ formatSize(row.size) }}</template></el-table-column>
           <el-table-column prop="uploadedBy.username" label="上传者" width="100" />
           <el-table-column prop="createdAt" label="时间" width="170"><template #default="{ row }">{{ (row.createdAt || "").replace("T", " ").slice(0, 16) }}</template></el-table-column>
-          <el-table-column label="操作" width="100" fixed="right">
+          <el-table-column v-if="isAdmin" label="操作" width="100" fixed="right">
             <template #default="{ row }"><el-button link type="danger" size="small" @click="handleDelete(row.id)">删除</el-button></template>
           </el-table-column>
-                  <template #empty><div style="padding:40px 0;color:#909399">暂无数据</div></template>
+          <template #empty><div style="padding:40px 0;color:#909399">暂无数据</div></template>
         </el-table>
-      <div class="pagination-wrapper">
-        <el-pagination v-model:current-page="currentPage" :page-size="pageSize" :total="mediaList.length" layout="prev, pager, next, jumper, total" :hide-on-single-page="false" background />
-      </div>
+        <!-- 分页器：绝对定位固定在右下角 -->
+        <div class="pagination-wrapper">
+          <el-pagination v-model:current-page="currentPage" :page-size="pageSize" :total="mediaList.length" layout="prev, pager, next, jumper, total" :hide-on-single-page="false" background />
+        </div>
       </div>
     </div>
   </div>
 </template>
-<style scoped>.el-table { min-height: 350px; }
-.table-with-pagination { position: relative; }
-.table-with-pagination .pagination-wrapper { margin: 0; padding: 6px 12px; position: absolute; bottom: 0; right: 0; z-index: 1; background: rgba(255,255,255,0.95); border-radius: 4px; }
-.el-table { min-height: 350px; }
-</style>

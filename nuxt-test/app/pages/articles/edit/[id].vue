@@ -102,7 +102,7 @@ function insertTabInTextarea(e, field) {
 </script>
 
 <template>
-  <div v-loading="loading">
+  <div v-loading="loading" style="overflow-y: auto; height: 100%;">
     <div class="page-header">
       <h2>编辑文章</h2>
       <div>

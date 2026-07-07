@@ -7,7 +7,8 @@ export default defineNuxtConfig({
 
   app: {
     head: {
-      title: 'CMS',
+      title: 'CodeBlog',
+        link: [{ rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' }],
     },
   },
 

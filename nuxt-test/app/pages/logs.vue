@@ -1,7 +1,6 @@
-<!-- logs - 操作日志页 -->
+<!-- logs - 操作日志页（分页 pageSize=10） -->
 <script lang="ts" setup>
 import { ref, onMounted } from "vue";
-import { sanitizeHtml } from "~/utils/sanitize";
 definePageMeta({ middleware: "auth" });
 
 const { getLogs } = useLog();
@@ -20,6 +19,9 @@ const filterEntity = ref("");
 
 const catMap = ref({});
 const tagMap = ref({});
+
+// 使用 useTableHeight 测量 table-with-pagination 高度，预留 44px 给分页器
+const { wrapperRef, tableHeight } = useTableHeight(0);
 
 const actionWeight = {
   DELETE: { weight: 5, type: "danger", label: "删除" },
@@ -49,33 +51,6 @@ function parseData(details) {
   const idx = details.indexOf(" | 数据:");
   if (idx === -1) return { summary: details, data: "" };
   return { summary: details.substring(0, idx), data: details.substring(idx + 6).trim() };
-}
-
-function stripHtml(html) { if (!html) return html; return html.replace(/<[^>]*>/g, "").trim(); }
-
-function computeUnifiedDiff(oldStr, newStr) {
-  if (oldStr === newStr) return [{ type: "text", text: newStr }];
-  const m = oldStr.length, n = newStr.length;
-  const dp = Array.from({ length: m + 1 }, () => new Array(n + 1).fill(0));
-  for (let i = 1; i <= m; i++)
-    for (let j = 1; j <= n; j++)
-      dp[i][j] = oldStr[i - 1] === newStr[j - 1] ? dp[i - 1][j - 1] + 1 : Math.max(dp[i - 1][j], dp[i][j - 1]);
-  const segments = [];
-  let i = m, j = n;
-  const temp = [];
-  while (i > 0 || j > 0) {
-    if (i > 0 && j > 0 && oldStr[i - 1] === newStr[j - 1]) { temp.push({ type: "text", char: oldStr[i - 1] }); i--; j--; }
-    else if (j > 0 && (i === 0 || dp[i][j - 1] >= dp[i - 1][j])) { temp.push({ type: "add", char: newStr[j - 1] }); j--; }
-    else { temp.push({ type: "del", char: oldStr[i - 1] }); i--; }
-  }
-  temp.reverse();
-  let curType = temp[0]?.type, curText = "";
-  for (const item of temp) {
-    if (item.type === curType) curText += item.char;
-    else { if (curText) segments.push({ type: curType, text: curText }); curType = item.type; curText = item.char; }
-  }
-  if (curText) segments.push({ type: curType, text: curText });
-  return segments;
 }
 
 const fieldLabelMap = {
@@ -127,15 +102,17 @@ async function loadMaps() {
 function onFilter() { currentPage.value = 1; loadData(); }
 
 const resultStyle = { SUCCESS: "color: #67c23a; font-weight: bold;", FAIL: "color: #f56c6c; font-weight: bold;" };
-const resultIcon = { SUCCESS: "✓", FAIL: "✗" };
+const resultIcon = { SUCCESS: "\u2713", FAIL: "\u2717" };
 
 onMounted(() => { loadData(); loadMaps(); });
 </script>
 
 <template>
-  <div>
+  <!-- 根容器：flex 填充 content-inner 剩余空间 -->
+  <div style="flex:1; min-height:0; display:flex; flex-direction:column">
     <div class="page-header"><h2>操作日志</h2></div>
-    <div class="page-card">
+    <!-- page-card 填充剩余空间，底边距窗口 25px -->
+    <div class="page-card" style="flex:1; min-height:0">
       <div class="filter-bar" style="display:flex;gap:12px;flex-wrap:wrap;align-items:center">
         <el-input v-model="filterUsername" placeholder="用户名" clearable style="width:140px" @clear="onFilter" @keyup.enter="onFilter" />
         <el-select v-model="filterAction" placeholder="操作类型" clearable style="width:120px" @change="onFilter">
@@ -148,8 +125,9 @@ onMounted(() => { loadData(); loadMaps(); });
         <el-input v-model="filterEntity" placeholder="操作对象" clearable style="width:140px" @clear="onFilter" @keyup.enter="onFilter" />
         <el-button @click="onFilter">搜索</el-button>
       </div>
-      <div class="table-with-pagination">
-      <el-table style="width: 100%" :data="logs" v-loading="loading" stripe>
+      <!-- table-with-pagination：表格+分页器外层容器 -->
+      <div ref="wrapperRef" class="table-with-pagination">
+        <el-table style="width: 100%" :data="logs" v-loading="loading" :max-height="tableHeight" stripe>
           <el-table-column type="index" label="序号" width="55" align="center" :index="(i) => (currentPage - 1) * pageSize + i + 1" />
           <el-table-column prop="username" label="用户名" min-width="100" align="center" header-align="center" />
           <el-table-column label="操作类型" min-width="100" align="center" header-align="center">
@@ -171,11 +149,12 @@ onMounted(() => { loadData(); loadMaps(); });
           <el-table-column label="操作" width="80" fixed="right" align="center">
             <template #default="{ row }"><el-button link type="primary" size="small" @click="showDetail(row)">详情</el-button></template>
           </el-table-column>
-                  <template #empty><div style="padding:40px 0;color:#909399">暂无数据</div></template>
+          <template #empty><div style="padding:40px 0;color:#909399">暂无数据</div></template>
         </el-table>
-      <div class="pagination-wrapper">
-        <el-pagination v-model:current-page="currentPage" :page-size="pageSize" :total="total" layout="prev, pager, next, jumper, total" :hide-on-single-page="false" background @current-change="loadData" />
-      </div>
+        <!-- 分页器：绝对定位固定在右下角 -->
+        <div class="pagination-wrapper">
+          <el-pagination v-model:current-page="currentPage" :page-size="pageSize" :total="total" layout="prev, pager, next, jumper, total" :hide-on-single-page="false" background @current-change="loadData" />
+        </div>
       </div>
     </div>
 
@@ -213,9 +192,3 @@ onMounted(() => { loadData(); loadMaps(); });
     </el-dialog>
   </div>
 </template>
-<style>
-/* el-descriptions 标签列样式 */
-.el-descriptions__label { font-weight: 500; color: #606266; }.el-table { min-height: 500px; }.table-with-pagination { position: relative; }
-.table-with-pagination .pagination-wrapper { margin: 0; padding: 6px 12px; position: absolute; bottom: 0; right: 0; z-index: 1; background: rgba(255,255,255,0.95); border-radius: 4px; }
-.el-table { min-height: 500px; }
-</style>
