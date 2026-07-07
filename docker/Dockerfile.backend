@@ -1,31 +1,34 @@
-# ============================================================
-# CodeBlog 后端 Dockerfile — 本地 Maven 构建 + 服务器仅运行
-# 构建：cd java-backend && mvn package -DskipTests
-# 产物 target/*.jar 提交到仓库，服务器直接复制运行
-# ============================================================
+# ============================================
+# 后端 Spring Boot Dockerfile — 多阶段构建
+# 适配 2核2G 阿里云服务器，JVM 堆内存限制 256MB
+# ============================================
 
+# ---------- 阶段一：Maven 构建 ----------
+FROM maven:3.9-eclipse-temurin-21-alpine AS builder
+WORKDIR /app
+# 先复制 pom.xml 利用 Docker 缓存层加速
+COPY pom.xml .
+RUN mvn dependency:go-offline -B -q
+# 复制源码并构建
+COPY src ./src
+RUN mvn package -DskipTests -B -q
+
+# ---------- 阶段二：运行时镜像 ----------
 FROM eclipse-temurin:21-jre-alpine
-
 WORKDIR /app
 
-RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories && \
-    apk add --no-cache curl tzdata && \
-    cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && \
-    echo "Asia/Shanghai" > /etc/timezone
-
+# 创建非 root 用户运行服务
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
-RUN mkdir -p /app/uploads && chown -R appuser:appgroup /app
 
-# 直接复制本地预构建 JAR
-COPY target/*.jar app.jar
+# 复制构建产物
+COPY --from=builder /app/target/*.jar app.jar
+
+# JVM 参数（2G 内存服务器优化）
+# -Xms128m 初始堆, -Xmx256m 最大堆
+ENV JAVA_OPTS="-Xms128m -Xmx256m -XX:+UseContainerSupport -XX:MaxRAMPercentage=50.0 -XX:+UseG1GC -XX:MaxGCPauseMillis=200"
 
 USER appuser
-
-ENV JAVA_OPTS="-Xmx256m -Xms128m -XX:+UseSerialGC -XX:MaxRAM=300m -XX:+ExitOnOutOfMemoryError -Djava.security.egd=file:/dev/./urandom"
-
 EXPOSE 8080
-
-HEALTHCHECK --interval=30s --timeout=10s --retries=5 --start-period=60s \
-    CMD curl -f http://localhost:8080/api/users/check || exit 1
-
+HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
+  CMD wget -q -O /dev/null http://localhost:8080/api/health || exit 1
 ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]

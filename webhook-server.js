@@ -1,159 +1,86 @@
-// ============================================================
-// CodeBlog — Gitee Webhook 自动部署服务器
-// 接收 Gitee push 事件 → git pull → Docker 逐序构建 → 部署
-// 运行：node webhook-server.js
-// ============================================================
-
 const http = require('http');
 const crypto = require('crypto');
-const { exec } = require('child_process');
+const { execSync } = require('child_process');
 
-// ========== 配置（通过环境变量注入） ==========
-const PORT = parseInt(process.env.WEBHOOK_PORT || '9000', 10);
+const PORT = process.env.WEBHOOK_PORT || 9000;
 const SECRET = process.env.WEBHOOK_SECRET || '';
-const BRANCH = process.env.WEBHOOK_BRANCH || 'main';
-const WORKDIR = process.env.WEBHOOK_WORKDIR || '/opt/codeblog';
 
-// ========== 日志工具 ==========
-function log(level, msg) {
-  const time = new Date().toISOString().replace('T', ' ').substring(0, 19);
-  console.log(`[${time}] [${level}] ${msg}`);
-}
-
-// ========== 执行 Shell 命令 ==========
-function runCmd(cmd, timeout = 600000) {
-  return new Promise((resolve, reject) => {
-    log('CMD', cmd);
-    const proc = exec(cmd, { cwd: WORKDIR, timeout, maxBuffer: 10 * 1024 * 1024 });
-    let stdout = '';
-    let stderr = '';
-    proc.stdout.on('data', (d) => { stdout += d; process.stdout.write(d); });
-    proc.stderr.on('data', (d) => { stderr += d; process.stderr.write(d); });
-    proc.on('close', (code) => {
-      if (code === 0) resolve(stdout);
-      else reject(new Error(`Exit code ${code}: ${stderr}`));
-    });
-    proc.on('error', reject);
-  });
-}
-
-// ========== 验证 Gitee 签名 ==========
+// 验证 Gitee Webhook 签名
 function verifySignature(req, body) {
-  if (!SECRET) {
-    log('WARN', '未配置 WEBHOOK_SECRET，跳过签名验证（不安全！）');
-    return true;
-  }
-  const timestamp = req.headers['x-gitee-timestamp'];
-  const sign = req.headers['x-gitee-token'];
-  if (!sign) {
-    log('WARN', '请求缺少 X-Gitee-Token 头');
-    return false;
-  }
-  // Gitee 旧版密码验证
-  const expected = crypto.createHash('sha256').update(timestamp + SECRET).digest('hex');
-  const expectedLegacy = SECRET; // 旧版直接匹配密码
-  if (sign === expected || sign === expectedLegacy) return true;
-  log('WARN', '签名验证失败');
-  return false;
+  const timestamp = req.headers['x-gitee-token'] || req.headers['x-gitee-timestamp'] || '';
+  const signature = req.headers['x-gitee-signature'] || '';
+  const signStr = timestamp + '\n' + SECRET;
+  const expected = crypto.createHmac('sha256', SECRET).update(signStr).digest('base64');
+  return signature === expected;
 }
 
-// ========== 执行部署流程 ==========
-async function doDeploy() {
-  log('INFO', '========== 开始自动部署 ==========');
-
+// 执行部署脚本
+function deploy() {
+  console.log('[Webhook] 开始部署...');
   try {
-    // 1. 拉取最新代码
-    log('INFO', '[1/5] 拉取最新代码...');
-    await runCmd(`git pull origin ${BRANCH}`, 120000);
-
-    // 2. 停止旧服务（保留数据卷）
-    log('INFO', '[2/5] 停止旧服务...');
-    await runCmd('docker compose down', 60000);
-
-    // 3. 逐序构建后端（避免 OOM）
-    log('INFO', '[3/5] 构建后端镜像（约 5-10 分钟）...');
-    await runCmd('docker compose build --no-cache backend', 900000);
-
-    // 4. 逐序构建前端
-    log('INFO', '[4/5] 构建前端镜像（约 3-5 分钟）...');
-    await runCmd('docker compose build --no-cache frontend', 600000);
-
-    // 5. 启动所有服务
-    log('INFO', '[5/5] 启动所有服务...');
-    await runCmd('docker compose up -d --remove-orphans', 120000);
-
-    // 清理旧镜像
-    await runCmd('docker image prune -f', 30000).catch(() => {});
-
-    log('INFO', '========== 部署完成！ ==========');
+    const result = execSync('sh /app/deploy.sh', { timeout: 300000, encoding: 'utf-8' });
+    console.log('[Webhook] 部署成功:\n' + result);
     return true;
   } catch (err) {
-    log('ERROR', `部署失败: ${err.message}`);
+    console.error('[Webhook] 部署失败:', err.message);
+    if (err.stdout) console.error(err.stdout);
+    if (err.stderr) console.error(err.stderr);
     return false;
   }
 }
 
-// ========== HTTP 服务器 ==========
-const server = http.createServer(async (req, res) => {
+const server = http.createServer((req, res) => {
   // 健康检查
-  if (req.url === '/health') {
-    res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ status: 'ok', time: new Date().toISOString() }));
+  if (req.method === 'GET' && req.url === '/health') {
+    res.writeHead(200, { 'Content-Type': 'text/plain' });
+    res.end('webhook OK');
     return;
   }
 
-  // 只处理 POST /webhook
-  if (req.method !== 'POST' || req.url !== '/webhook') {
-    res.writeHead(404);
-    res.end('Not Found');
+  // 只接受 POST
+  if (req.method !== 'POST') {
+    res.writeHead(405);
+    res.end('Method Not Allowed');
     return;
   }
 
-  // 读取请求体
   let body = '';
-  req.on('data', (chunk) => { body += chunk; });
-  req.on('end', async () => {
+  req.on('data', chunk => { body += chunk; });
+  req.on('end', () => {
     // 验证签名
-    if (!verifySignature(req, body)) {
-      res.writeHead(403, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ error: '签名验证失败' }));
+    if (SECRET && !verifySignature(req, body)) {
+      console.log('[Webhook] 签名验证失败');
+      res.writeHead(403);
+      res.end('Forbidden');
       return;
     }
 
-    // 解析事件类型
-    let event = 'unknown';
+    // 解析 Gitee 推送事件
     try {
       const payload = JSON.parse(body);
-      event = payload.action || payload.hook_name || 'unknown';
       const ref = payload.ref || '';
-      log('INFO', `收到 Webhook: event=${event}, ref=${ref}`);
+      const pusher = (payload.pusher || {}).name || 'unknown';
+      
+      console.log('[Webhook] 收到推送: ' + ref + ' 来自 ' + pusher);
+
+      // 只响应 master/main 分支推送
+      if (ref === 'refs/heads/master' || ref === 'refs/heads/main') {
+        res.writeHead(200, { 'Content-Type': 'text/plain' });
+        res.end('Deploy started');
+
+        // 异步部署，避免请求超时
+        setTimeout(() => deploy(), 1000);
+      } else {
+        res.writeHead(200, { 'Content-Type': 'text/plain' });
+        res.end('Branch ignored: ' + ref);
+      }
     } catch (e) {
-      log('WARN', '无法解析 Webhook 请求体');
-    }
-
-    // 仅 Push Hook 且目标分支匹配时触发部署
-    if (event === 'Push Hook' || event === 'push_hooks') {
-      res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ message: '部署已触发' }));
-
-      // 异步执行部署（不阻塞响应）
-      setImmediate(() => doDeploy());
-    } else {
-      res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ message: `忽略事件: ${event}` }));
+      res.writeHead(400);
+      res.end('Invalid JSON');
     }
   });
 });
 
 server.listen(PORT, '0.0.0.0', () => {
-  log('INFO', `Webhook 服务器启动，监听端口 ${PORT}`);
-  log('INFO', `工作目录: ${WORKDIR}`);
-  log('INFO', `目标分支: ${BRANCH}`);
-  if (!SECRET) log('WARN', '未配置 WEBHOOK_SECRET！请在 .env 中设置');
-});
-
-// 优雅退出
-process.on('SIGTERM', () => {
-  log('INFO', '收到 SIGTERM，正在关闭...');
-  server.close(() => process.exit(0));
+  console.log('[Webhook] 服务已启动，端口 ' + PORT);
 });

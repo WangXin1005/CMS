@@ -1,28 +1,5 @@
-# ============================================================
-# CodeBlog Webhook 自动部署服务
-# 基于 Node.js，接收 Gitee Webhook → 自动构建部署
-# ============================================================
-
-FROM node:22-alpine
-
-RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories && \
-    apk add --no-cache git docker-cli docker-compose curl tzdata && \
-    cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && \
-    echo "Asia/Shanghai" > /etc/timezone
-
-RUN addgroup -S appgroup && adduser -S appuser -G appgroup
-
-WORKDIR /opt/codeblog
-
-COPY webhook-server.js ./
-
-RUN chown -R appuser:appgroup /opt/codeblog
-
-USER appuser
-
+FROM node:20-alpine
+WORKDIR /app
+COPY webhook-server.js .
 EXPOSE 9000
-
-HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
-    CMD curl -f http://localhost:9000/health || exit 1
-
 CMD ["node", "webhook-server.js"]
