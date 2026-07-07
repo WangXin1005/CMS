@@ -44,7 +44,7 @@ async function handleSubmit() {
     newComment.value = ''
     await loadComments()
   } catch {
-    ElMessage.error('提交失败，请重试')
+    /* 拦截器已处理 */
   } finally {
     submitting.value = false
   }

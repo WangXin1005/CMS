@@ -43,4 +43,13 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
 
     @Query("SELECT DISTINCT a FROM Article a LEFT JOIN a.tags t WHERE (:status IS NULL OR a.status = :status) AND (:keyword IS NULL OR a.title LIKE %:keyword%) AND (:categoryId IS NULL OR a.category.id = :categoryId) AND (:tagId IS NULL OR t.id = :tagId) AND (:authorId IS NULL OR a.author.id = :authorId) ORDER BY a.createdAt DESC")
     Page<Article> searchAllFilters(@Param("status") ArticleStatus status, @Param("keyword") String keyword, @Param("categoryId") Long categoryId, @Param("tagId") Long tagId, @Param("authorId") Long authorId, Pageable pageable);
+
+    /** 公开文章查询（无标签筛选） */
+    @Query("SELECT a FROM Article a WHERE a.visibility = 'PUBLIC' AND (:status IS NULL OR a.status = :status) AND (:keyword IS NULL OR a.title LIKE %:keyword%) AND (:categoryId IS NULL OR a.category.id = :categoryId) ORDER BY a.createdAt DESC")
+    Page<Article> findPublicArticles(@Param("status") ArticleStatus status, @Param("keyword") String keyword, @Param("categoryId") Long categoryId, Pageable pageable);
+
+    /** 公开文章查询（含标签筛选） */
+    @Query("SELECT DISTINCT a FROM Article a JOIN a.tags t WHERE a.visibility = 'PUBLIC' AND (:status IS NULL OR a.status = :status) AND (:keyword IS NULL OR a.title LIKE %:keyword%) AND (:categoryId IS NULL OR a.category.id = :categoryId) AND t.id = :tagId ORDER BY a.createdAt DESC")
+    Page<Article> findPublicArticlesByTag(@Param("status") ArticleStatus status, @Param("keyword") String keyword, @Param("categoryId") Long categoryId, @Param("tagId") Long tagId, Pageable pageable);
+
 }

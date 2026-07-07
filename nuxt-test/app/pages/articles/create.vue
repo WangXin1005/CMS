@@ -17,7 +17,6 @@ const tags = ref([])
 const submitting = ref(false)
 const form = ref({
   title: '',
-  slug: '',
   summary: '',
   content: '',
   coverImage: '',
@@ -36,10 +35,15 @@ onMounted(async () => {
   }
 })
 
+function genSlug(title) {
+    return title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9\u4e00-\u9fa5-]/g, '').substring(0, 80) || 'article-' + Date.now()
+  }
+
 async function handleSubmit(status) {
   form.value.status = status
-  if (!form.value.title || !form.value.slug) {
-    ElMessage.warning('标题和 Slug 不能为空')
+  form.value.slug = genSlug(form.value.title)
+  if (!form.value.title) {
+    ElMessage.warning('标题不能为空')
     return
   }
   submitting.value = true
@@ -52,7 +56,7 @@ async function handleSubmit(status) {
     ElMessage.success(status === 'PUBLISHED' ? '文章已发布' : '草稿已保存')
     navigateTo('/articles')
   } catch (e) {
-    ElMessage.error(e.response?.data?.message || '保存失败')
+    /* 拦截器已处理消息提示 */
   } finally {
     submitting.value = false
   }
@@ -85,13 +89,6 @@ function insertTabInTextarea(e, field) {
       <el-form label-width="80px">
         <el-form-item label="标题" required>
           <el-input v-model="form.title" placeholder="文章标题" maxlength="200" />
-        </el-form-item>
-        <el-form-item label="Slug" required>
-          <el-input
-            v-model="form.slug"
-            placeholder="文章标识（如 my-first-post）"
-            maxlength="200"
-          />
         </el-form-item>
         <el-form-item label="封面图">
           <el-input v-model="form.coverImage" placeholder="图片 URL（可选）" />

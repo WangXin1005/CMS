@@ -41,7 +41,7 @@ async function saveSetting(key: string) {
     await request.put(`/admin/settings/${key}`, { value: settings.value[key] })
     ElMessage.success('保存成功')
   } catch {
-    ElMessage.error('保存失败')
+    /* 拦截器已处理 */
   }
 }
 
@@ -55,7 +55,7 @@ async function saveAll() {
     )
     ElMessage.success('全部设置已保存')
   } catch {
-    ElMessage.error('保存失败')
+    /* 拦截器已处理 */
   } finally {
     loading.value = false
   }

@@ -12,6 +12,11 @@ public record UserPrincipal(
     @Schema(description = "角色名称（如 SUPERADMIN）") String role
 ) {
 
+    /** 返回角色枚举，用于角色层级比较 */
+    public Role roleEnum() {
+        return Role.valueOf(role);
+    }
+
     public String getRoleWithPrefix() {
         return "ROLE_" + role;
     }

@@ -217,13 +217,29 @@ public class LoggingAspect implements ApplicationContextAware {
                     || arg instanceof org.springframework.web.multipart.MultipartFile
                     || arg instanceof com.example.nuxtproject.entity.UserPrincipal) continue;
                 String json = objectMapper.writeValueAsString(arg);
-                if (json != null && !json.equals("{}")) return json;
+                if (json != null && !json.equals("{}")) { json = sanitizeSensitiveFields(json); return json; }
             }
         } catch (Exception ignored) {}
         return null;
     }
 
-    private String loadOldEntityJson(String entityName, Long entityId) {
+    
+    /** 移除 JSON 中的敏感字段（密码等） */
+    private String sanitizeSensitiveFields(String json) {
+        try {
+            @SuppressWarnings("unchecked")
+            Map<String, Object> map = objectMapper.readValue(json, Map.class);
+            map.remove("password");
+            map.remove("confirmPassword");
+            map.remove("oldPassword");
+            map.remove("newPassword");
+            return objectMapper.writeValueAsString(map);
+        } catch (Exception e) {
+            return json;
+        }
+    }
+
+private String loadOldEntityJson(String entityName, Long entityId) {
         try {
             String cleanName = entityName.contains("$") ? entityName.substring(0, entityName.indexOf("$")) : entityName;
             String repoName = cleanName.substring(0, 1).toLowerCase() + cleanName.substring(1) + "Repository";

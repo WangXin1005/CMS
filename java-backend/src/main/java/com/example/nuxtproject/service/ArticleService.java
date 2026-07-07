@@ -8,6 +8,7 @@ import com.example.nuxtproject.entity.Article.ArticleStatus;
 import com.example.nuxtproject.entity.Category;
 import com.example.nuxtproject.entity.Tag;
 import com.example.nuxtproject.entity.User;
+import com.example.nuxtproject.entity.Role;
 import com.example.nuxtproject.repository.ArticleRepository;
 import com.example.nuxtproject.repository.CategoryRepository;
 import com.example.nuxtproject.repository.TagRepository;
@@ -17,6 +18,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.Map;
+import java.util.stream.Collectors;
+import org.springframework.data.domain.PageImpl;
 import java.util.Set;
 
 @Service
@@ -66,6 +69,27 @@ public class ArticleService {
     }
 
     /** 鍚庡彴绠＄悊锛氳幏鍙栨墍鏈夋枃绔狅紙鍚崏绋匡級 */
+        /** 仪表盘近期文章：仅返回已发布且公开的文章 */
+    @Transactional(readOnly = true)
+    public Page<Article> listRecentForDashboard(Pageable pageable) {
+        return articleRepository.findByStatusAndVisibilityOrderByCreatedAtDesc(ArticleStatus.PUBLISHED, pageable);
+    }
+
+        /** 按角色层级返回可见文章：当前用户及下级角色的文章 + 上级的 PUBLIC 文章 */
+    @Transactional(readOnly = true)
+    public Page<Article> listVisibleToUser(Long userId, Role role, Pageable pageable, ArticleStatus status, String keyword, Long categoryId, Long tagId) {
+        // GUEST/普通用户：数据库层过滤仅 PUBLIC 文章，避免分页后过滤导致数量不足
+        boolean isGuestOrUser = role != null && (role.name().equals("GUEST") || role.name().equals("USER"));
+        if (isGuestOrUser) {
+            if (tagId != null) {
+                return articleRepository.findPublicArticlesByTag(status, keyword, categoryId, tagId, pageable);
+            }
+            return articleRepository.findPublicArticles(status, keyword, categoryId, pageable);
+        }
+        // ADMIN/SUPERADMIN：使用 listAll，内部会按角色过滤可见性
+        return listAll(pageable, status, keyword, categoryId, tagId, null, userId, role.name());
+    }
+
     public Page<Article> listAll(Pageable pageable, ArticleStatus status, String keyword, Long categoryId, Long tagId, Long authorId, Long currentUserId, String currentUserRole) {
         boolean hasFilters = status != null || (keyword != null && !keyword.isBlank()) || categoryId != null || tagId != null || authorId != null;
         Page<Article> results;
@@ -185,7 +209,7 @@ public class ArticleService {
         articleRepository.deleteById(id);
         return true;
     }
-    /** 缁熻鍚勭姸鎬佹枃绔犳暟 */
+    /** 统计各状态文章数 */
     public Map<String, Long> countByStatus() {
         long published = articleRepository.countByStatus(ArticleStatus.PUBLISHED);
         long draft = articleRepository.countByStatus(ArticleStatus.DRAFT);

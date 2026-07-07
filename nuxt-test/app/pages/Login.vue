@@ -162,8 +162,8 @@ async function handleLogin() {
     await login(loginForm.value)
     ElMessage.success('登录成功')
     navigateTo('/home')
-  } catch (e) {
-    ElMessage.error(e.response?.data?.message || '用户名或密码错误')
+  } catch {
+    /* 拦截器已处理消息提示 */
   } finally {
     loginLoading.value = false
   }
@@ -193,8 +193,8 @@ async function handleRegister() {
     await registerGuest(registerForm.value)
     ElMessage.success('注册成功')
     showRegister.value = false
-  } catch (e) {
-    ElMessage.error(e.response?.data?.message || '注册失败')
+  } catch {
+    /* 拦截器已处理消息提示 */
   } finally {
     registerLoading.value = false
   }
@@ -224,8 +224,8 @@ async function handleInit() {
     await initSuperAdmin(registerForm.value)
     ElMessage.success('超级管理员创建成功，请登录')
     mode.value = 'login'
-  } catch (e) {
-    ElMessage.error(e.response?.data?.message || '初始化失败')
+  } catch {
+    /* 拦截器已处理消息提示 */
   } finally {
     initLoading.value = false
   }

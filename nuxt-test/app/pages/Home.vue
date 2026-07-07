@@ -12,7 +12,8 @@ definePageMeta({ middleware: 'auth' })
 const { getStats, getRecent, getById } = useArticle()
 const { role } = useAuth()
 const isAdmin = computed(() => role.value === 'ADMIN' || role.value === 'SUPERADMIN')
-const canClick = computed(() => role.value !== 'GUEST')
+const isGuest = computed(() => role.value === 'GUEST')
+const canClick = computed(() => !isGuest.value)
 
 const dialogVisible = ref(false)
 const dialogArticle = ref<Record<string, unknown> | null>(null)
@@ -108,7 +109,7 @@ onMounted(async () => {
 
       <!-- 近期文章 + 快捷操作 -->
       <el-row :gutter="16">
-        <el-col :span="16">
+        <el-col :span="isGuest ? 24 : 16">
           <el-card shadow="never">
             <template #header>
               <span>近期文章</span>
@@ -143,7 +144,7 @@ onMounted(async () => {
             </div>
           </el-card>
         </el-col>
-        <el-col :span="8">
+        <el-col v-if="!isGuest" :span="8">
           <el-card shadow="never">
             <template #header>
               <span>快捷操作</span>
@@ -270,6 +271,7 @@ onMounted(async () => {
   font-size: 12px;
   color: #999;
   flex-shrink: 0;
+  margin-left: 32px;
 }
 
 .quick-actions {

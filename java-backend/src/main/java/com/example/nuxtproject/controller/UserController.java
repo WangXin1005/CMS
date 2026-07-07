@@ -57,10 +57,7 @@ public class UserController {
     public ResponseEntity<?> initSuperAdmin(@RequestBody @Valid InitUserRequest request) {
         Map<String, String> result = userService.initSuperAdmin(
                 request.getUsername(), request.getEmail(), request.getPassword());
-        if (result.containsKey("message") && result.get("message").contains("成功")) {
-            return ResponseEntity.ok(result);
-        }
-        return ResponseEntity.badRequest().body(result);
+        return ResponseEntity.ok(result);
     }
 
     @GetMapping
@@ -97,10 +94,7 @@ public class UserController {
                 operatorRole, request.getUsername(), request.getEmail(),
                 request.getPassword(), request.getRole());
 
-        if (result.containsKey("message") && ((String) result.get("message")).contains("成功")) {
-            return ResponseEntity.ok(result);
-        }
-        return ResponseEntity.badRequest().body(result);
+        return ResponseEntity.ok(result);
     }
 
     @PutMapping("/{id}")
@@ -116,10 +110,7 @@ public class UserController {
                 operatorRole, principal.userId(), id, request.getUsername(),
                 request.getEmail(), request.getRole());
 
-        if (result.containsKey("message") && result.get("message").contains("成功")) {
-            return ResponseEntity.ok(result);
-        }
-        return ResponseEntity.badRequest().body(result);
+        return ResponseEntity.ok(result);
     }
 
     @DeleteMapping("/{id}")
@@ -132,10 +123,7 @@ public class UserController {
         Role operatorRole = Role.valueOf(principal.role());
         Map<String, String> result = userService.deleteUser(operatorRole, principal.userId(), id);
 
-        if (result.containsKey("message") && result.get("message").contains("成功")) {
-            return ResponseEntity.ok(result);
-        }
-        return ResponseEntity.badRequest().body(result);
+        return ResponseEntity.ok(result);
     }
 
     // ===== 请求体 DTO 类 =====
@@ -204,10 +192,7 @@ public class UserController {
             @RequestBody @Valid ChangePasswordRequest request) {
         Map<String, String> result = userService.changePassword(
                 principal.userId(), request.getOldPassword(), request.getNewPassword());
-        if (result.containsKey("message") && result.get("message").contains("成功")) {
-            return ResponseEntity.ok(result);
-        }
-        return ResponseEntity.badRequest().body(result);
+        return ResponseEntity.ok(result);
     }
 
     public static class ChangePasswordRequest {

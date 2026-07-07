@@ -65,10 +65,7 @@ public class AuthController {
     public ResponseEntity<?> register(@RequestBody @Valid RegisterRequest request) {
         Map<String, String> result = userService.registerGuest(
                 request.getUsername(), request.getEmail(), request.getPassword());
-        if (result.containsKey("message") && result.get("message").contains("成功")) {
-            return ResponseEntity.ok(result);
-        }
-        return ResponseEntity.badRequest().body(result);
+        return ResponseEntity.ok(result);
     }
 
     // ===== 请求体 DTO 类 =====

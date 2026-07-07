@@ -72,7 +72,7 @@ public class ArticleController {
             @Parameter(description = "页码", required = true) @RequestParam(defaultValue = "1") int page,
             @Parameter(description = "每页条数", required = false) @RequestParam(defaultValue = "5") int size,
             @AuthenticationPrincipal UserPrincipal principal) {
-        return ResponseEntity.ok(articleService.listAll(PageRequest.of(page - 1, size), null, null, null, null, null, principal == null ? null : principal.userId(), principal == null ? null : principal.role()));
+        return ResponseEntity.ok(articleService.listRecentForDashboard(PageRequest.of(page - 1, size)));
     }
 
     // ===== 用户个人接口（USER 角色可用） =====
@@ -88,7 +88,12 @@ public class ArticleController {
       @Parameter(description = "标题关键词搜索") @RequestParam(required = false) String keyword,
       @Parameter(description = "分类 ID") @RequestParam(required = false) Long categoryId,
       @Parameter(description = "标签 ID") @RequestParam(required = false) Long tagId) {
-        return ResponseEntity.ok(articleService.listByAuthor(principal.userId(), PageRequest.of(page - 1, size), status, keyword, categoryId, tagId, principal == null ? null : principal.userId()));
+        // 按角色层级返回可见文章：本人+下级全部，上级仅 PUBLIC
+        return ResponseEntity.ok(articleService.listVisibleToUser(
+            principal.userId(), 
+            principal.roleEnum(),
+            PageRequest.of(page - 1, size), 
+            status, keyword, categoryId, tagId));
     }
 
     @GetMapping("/api/articles/my/{id}")

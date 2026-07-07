@@ -160,7 +160,7 @@ onMounted(async () => {
           v-model:current-page="currentPage"
           :page-size="pageSize"
           :total="total"
-          layout="prev, pager, next, total"
+          layout="prev, pager, next, jumper, total" :hide-on-single-page="false"
           background
           @current-change="loadArticles"
         />
@@ -258,7 +258,7 @@ onMounted(async () => {
   margin-top: 40px;
 }
 
-// ===== 侧边栏 =====
+/* ===== 侧边栏 ===== */
 .sidebar {
   width: 280px;
   flex-shrink: 0;

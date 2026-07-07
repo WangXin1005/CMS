@@ -1,456 +1,256 @@
-<!-- articles/index — 文章管理页（ADMIN/SUPERADMIN）：分页列表、筛选、预览、编辑、删除 -->
-
+<!-- articles/index - 文章管理页 -->
 <script lang="ts" setup>
-/**
- * articles - 文章管理列表页
- * 分页展示所有文章（含草稿），支持按状态筛选。需 auth 中间件保护。
- * - ADMIN/SUPERADMIN 角色：查看所有文章
- * - USER/GUEST 角色：仅查看自己为作者的文章
- */
-import { ref, onMounted, computed, nextTick } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
-import { sanitizeHtml } from '~/utils/sanitize'
-import { Plus } from '@element-plus/icons-vue'
-definePageMeta({ middleware: 'auth' })
+import { ref, onMounted, computed, nextTick } from "vue";
+import { ElMessage, ElMessageBox } from "element-plus";
+import { sanitizeHtml } from "~/utils/sanitize";
+import { Plus } from "@element-plus/icons-vue";
+definePageMeta({ middleware: "auth" });
 
-const { getAdminList, getMyArticles, update, updateMyArticle, remove, removeMyArticle } =
-  useArticle()
-const { role } = useAuth()
+const { getAdminList, getMyArticles, update, updateMyArticle, remove, removeMyArticle } = useArticle();
+const { role } = useAuth();
 
-const isAdmin = computed(() => role.value === 'ADMIN' || role.value === 'SUPERADMIN')
-const isGuest = computed(() => role.value === 'GUEST')
+const isAdmin = computed(() => role.value === "ADMIN" || role.value === "SUPERADMIN");
+const isGuest = computed(() => role.value === "GUEST");
 
-const articles = ref([])
-const loading = ref(false)
-const currentPage = ref(1)
-const pageSize = ref(10)
-const total = ref(0)
-const statusFilter = ref(undefined)
+const articles = ref([]);
+const { wrapperRef, tableHeight } = useTableHeight();
+const loading = ref(false);
+const currentPage = ref(1);
+const pageSize = ref(20);
+const total = ref(0);
+const statusFilter = ref(undefined);
 
-const keyword = ref('')
-const searchKeyword = ref('')
+const keyword = ref("");
+const searchKeyword = ref("");
 
-const filterCategoryId = ref<number | undefined>()
-const filterTagId = ref<number | undefined>()
-const filterAuthorId = ref<number | undefined>()
+const filterCategoryId = ref(undefined);
+const filterTagId = ref(undefined);
+const filterAuthorId = ref(undefined);
 
-const categories = ref<Record<string, unknown>[]>([])
-const tags = ref<Record<string, unknown>[]>([])
-const users = ref<Record<string, unknown>[]>([])
+const categories = ref([]);
+const tags = ref([]);
+const users = ref([]);
 
-const dialogVisible = ref(false)
-const dialogArticle = ref(null)
-const allLoaded = ref(false)
-const loadingMore = ref(false)
-const loadLocked = ref(false)
-const tableRef = ref<{ doLayout: () => void }>()
-const tableHeight = ref<number | undefined>(undefined)
+const dialogVisible = ref(false);
+const dialogArticle = ref(null);
+const allLoaded = ref(false);
+const loadingMore = ref(false);
+const loadLocked = ref(false);
+const tableRef = ref();
 
-// 哨兵行：全部加载后在表格末尾显示
 const displayArticles = computed(() => {
-  if (allLoaded.value && articles.value.length > 0) {
-    return [...articles.value, { _isEndMarker: true }]
-  }
-  return articles.value
-})
+  if (allLoaded.value && articles.value.length > 0) return [...articles.value, { _isEndMarker: true }];
+  return articles.value;
+});
 
-const columnCount = computed(() => (isAdmin.value ? 10 : 9))
+const columnCount = computed(() => (isAdmin.value ? 10 : 9));
 
-function tableSpanMethod({
-  row,
-  columnIndex,
-}: {
-  row: Record<string, unknown>
-  columnIndex: number
-}) {
+function tableSpanMethod({ row, columnIndex }) {
   if (row._isEndMarker) {
-    if (columnIndex === 0) {
-      return [1, columnCount.value]
-    }
-    return [0, 0]
+    if (columnIndex === 0) return [1, columnCount.value];
+    return [0, 0];
   }
 }
 
-function viewArticle(row) {
-  dialogArticle.value = row
-  dialogVisible.value = true
-}
+function viewArticle(row) { dialogArticle.value = row; dialogVisible.value = true; }
 
-function onSearch() {
-  searchKeyword.value = keyword.value.trim()
-  loadData()
-}
+function onSearch() { searchKeyword.value = keyword.value.trim(); loadData(); }
 
-function handleTableScroll(_scroll: unknown) {
-  if (allLoaded.value || loadingMore.value || loadLocked.value) return
-  // el-table @scroll emits {scrollLeft, scrollTop}, not DOM Event
-  // Access the body wrapper directly from table ref
-  const el = tableRef.value?.$el?.querySelector('.el-table__body-wrapper')
-  if (!el) return
-  const dist = el.scrollHeight - el.scrollTop - el.clientHeight
-  if (dist <= 50) {
-    loadingMore.value = true
-    loadLocked.value = true
-    currentPage.value++
-    loadData(true)
+function handleTableScroll() {
+  if (allLoaded.value || loading.value || loadingMore.value || loadLocked.value) return;
+  const el = tableRef.value?.$el?.querySelector(".el-table__body-wrapper");
+  if (!el) return;
+  const dist = el.scrollHeight - el.scrollTop - el.clientHeight;
+  if (dist <= 60) {
+    loadLocked.value = true;
+    currentPage.value++;
+    loadData(true);
   }
 }
 
-const statusLabel = { PUBLISHED: '已发布', DRAFT: '草稿' }
-const statusType = { PUBLISHED: 'success', DRAFT: 'warning' }
+const statusLabel = { PUBLISHED: "已发布", DRAFT: "草稿" };
+const statusType = { PUBLISHED: "success", DRAFT: "warning" };
 
 async function loadFilters() {
   try {
-    const { getList: getCatList } = useCategory()
-    const { getList: getTagList } = useTag()
-    const [catRes, tagRes] = await Promise.all([getCatList(), getTagList()])
-    categories.value = catRes ?? []
-    tags.value = tagRes ?? []
+    const { getList: getCatList } = useCategory();
+    const { getList: getTagList } = useTag();
+    const [catRes, tagRes] = await Promise.all([getCatList(), getTagList()]);
+    categories.value = catRes ?? [];
+    tags.value = tagRes ?? [];
     if (isAdmin.value) {
-      const { getUserList } = useAuth()
-      try {
-        const userRes = await getUserList(1, 999)
-        users.value = (userRes.content ?? []).filter(function (u) {
-          return u.role !== 'GUEST'
-        })
-      } catch {
-        /* 忽略错误 */
-      }
+      const { getUserList } = useAuth();
+      try { const userRes = await getUserList(1, 999); users.value = (userRes.content ?? []).filter(u => u.role !== "GUEST"); }
+      catch { /* ignore */ }
     }
-  } catch {
-    /* 忽略错误 */
-  }
+  } catch { /* ignore */ }
 }
 
 async function loadData(append = false) {
-  if (append) {
-    loadingMore.value = true
-  } else {
-    loading.value = true
-    currentPage.value = 1
-    allLoaded.value = false
-  }
+  if (append) { loadingMore.value = true; }
+  else { loading.value = true; currentPage.value = 1; allLoaded.value = false; }
   try {
-    let res
+    let res;
     if (isAdmin.value) {
-      res = await getAdminList(
-        currentPage.value,
-        pageSize.value,
-        statusFilter.value,
-        searchKeyword.value || undefined,
-        filterCategoryId.value,
-        filterTagId.value,
-        filterAuthorId.value,
-      )
+      res = await getAdminList(currentPage.value, pageSize.value, statusFilter.value, searchKeyword.value || undefined, filterCategoryId.value, filterTagId.value, filterAuthorId.value);
     } else {
-      res = await getMyArticles(
-        currentPage.value,
-        pageSize.value,
-        statusFilter.value,
-        searchKeyword.value || undefined,
-        filterCategoryId.value,
-        filterTagId.value,
-      )
+      res = await getMyArticles(currentPage.value, pageSize.value, statusFilter.value, searchKeyword.value || undefined, filterCategoryId.value, filterTagId.value);
     }
-    const items = res.content ?? []
+    const items = res.content ?? [];
     if (append) {
-      articles.value = articles.value.concat(items)
+      articles.value = articles.value.concat(items);
     } else {
-      articles.value = items
+      articles.value = items;
     }
-    total.value = res.totalElements ?? 0
+    total.value = res.totalElements ?? 0;
     if (items.length === 0 || items.length < pageSize.value) {
-      allLoaded.value = true
+      allLoaded.value = true;
     }
-  } catch {
-    if (!append) {
-      articles.value = []
-      total.value = 0
+    // GUEST 使用 findPublicArticles 查询，totalElements 可能因 DISTINCT+LEFT JOIN 偏高，用实际累计数判断
+    if (articles.value.length >= (res.totalElements ?? 0)) {
+      allLoaded.value = true;
     }
-  } finally {
-    loading.value = false
-    loadingMore.value = false
-    nextTick(() => {
-      loadLocked.value = false
-    })
-  }
+  } catch { if (!append) { articles.value = []; total.value = 0; } }
+  finally { loading.value = false; loadingMore.value = false; nextTick(() => { loadLocked.value = false; }); }
 }
 
-function onStatusChange(val) {
-  statusFilter.value = val
-  loadData()
-}
+function onStatusChange(val) { statusFilter.value = val; loadData(); }
 
 async function handleDelete(id) {
   try {
-    await ElMessageBox.confirm('确定删除此文章？此操作不可恢复', '确认删除', {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-      type: 'warning',
-    })
-    if (isAdmin.value) {
-      await remove(id)
-    } else {
-      await removeMyArticle(id)
-    }
-    ElMessage.success('删除成功')
-    await loadData()
-  } catch {
-    /* cancelled */
-  }
+    await ElMessageBox.confirm("确定删除此文章？此操作不可恢复", "确认删除", { confirmButtonText: "确定", cancelButtonText: "取消", type: "warning" });
+    if (isAdmin.value) await remove(id);
+    else await removeMyArticle(id);
+    ElMessage.success("删除成功"); await loadData();
+  } catch { /* cancelled */ }
 }
 
 async function handleVisibilityChange(row) {
   try {
-    const targetVis = row.visibility
-    if (isAdmin.value) {
-      await update(row.id, { visibility: targetVis })
-    } else {
-      await updateMyArticle(row.id, { visibility: targetVis })
-    }
-    ElMessage.success(targetVis === 'PRIVATE' ? '已设为私密' : '已设为公开')
-  } catch (e) {
-    ElMessage.error(e.response?.data?.message || '操作失败')
-  }
+    const targetVis = row.visibility;
+    if (isAdmin.value) await update(row.id, { visibility: targetVis });
+    else await updateMyArticle(row.id, { visibility: targetVis });
+    // 更新本地数据，让开关状态正确切换
+    const item = articles.value.find(a => a.id === row.id);
+    if (item) item.visibility = targetVis;
+    ElMessage.success(targetVis === "PRIVATE" ? "已设为私密" : "已设为公开");
+  } catch { /* 拦截器已处理消息提示 */ }
 }
 
-function goCreate() {
-  navigateTo('/articles/create')
-}
-// 对话框内点击编辑：关闭弹窗后跳转
-function handleDialogEdit() {
-  dialogVisible.value = false
-  goEdit(dialogArticle.value.id)
-}
-function goEdit(id) {
-  navigateTo('/articles/edit/' + id)
-}
+function goCreate() { navigateTo("/articles/create"); }
 
-onMounted(async () => {
-  await loadFilters()
-  await loadData()
-  tableHeight.value = window.innerHeight - 260
-  window.addEventListener('resize', () => {
-    tableHeight.value = window.innerHeight - 260
-  })
-})
+function handleDialogEdit() { dialogVisible.value = false; goEdit(dialogArticle.value.id); }
+function goEdit(id) { navigateTo("/articles/edit/" + id); }
+
+onMounted(async () => { await loadFilters(); await loadData(); });
 </script>
 
 <template>
   <div>
     <div class="page-header">
       <h2>文章管理</h2>
-      <el-button type="primary" :icon="Plus" @click="goCreate()">写文章</el-button>
+      <el-button v-if="!isGuest" type="primary" :icon="Plus" @click="goCreate()">写文章</el-button>
     </div>
 
     <div class="page-card">
-      <div
-        class="filter-bar"
-        style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap"
-      >
+      <div class="filter-bar" style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap">
         <div style="display: flex; align-items: center">
-          <el-input
-            v-model="keyword"
-            placeholder="搜索标题..."
-            clearable
-            style="width: 220px"
-            @keyup.enter="onSearch"
-            @clear="onSearch"
-          >
-            <template #prefix>
-              <svg viewBox="0 0 24 24" width="16" height="16">
-                <path
-                  fill="#999"
-                  d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"
-                />
-              </svg>
-            </template>
+          <el-input v-model="keyword" placeholder="搜索标题..." clearable style="width: 220px" @keyup.enter="onSearch">
+            <template #prefix><el-icon><svg viewBox="0 0 1024 1024" width="1em" height="1em"><path d="M945.067 898.134l-189.3-189.3c-38.4-38.4-38.4-100.7 0-139.1l9.3-9.3c38.4-38.4 100.7-38.4 139.1 0l189.3 189.3c38.4 38.4 38.4 100.7 0 139.1l-9.3 9.3c-38.4 38.4-100.7 38.4-139.1 0zM426.667 768C238.933 768 85.333 614.4 85.333 426.667S238.933 85.333 426.667 85.333 768 238.933 768 426.667 614.4 768 426.667 768z m0-85.333c140.8 0 256-115.2 256-256S567.467 170.667 426.667 170.667 170.667 285.867 170.667 426.667 285.867 682.667 426.667 682.667z" fill="currentColor"/></svg></el-icon></template>
           </el-input>
-          <el-button type="primary" style="margin-left: 8px" @click="onSearch">搜索</el-button>
+          <el-button type="primary" @click="onSearch" style="margin-left: 8px">搜索</el-button>
         </div>
-        <div style="display: flex; align-items: center; margin-left: auto; gap: 12px">
-          <el-select
-            v-model="statusFilter"
-            placeholder="全部"
-            clearable
-            style="width: 100px"
-            @change="onStatusChange"
-          >
-            <el-option label="已发布" value="PUBLISHED" />
-            <el-option label="草稿" value="DRAFT" />
-          </el-select>
-          <el-select
-            v-model="filterCategoryId"
-            placeholder="分类"
-            clearable
-            style="width: 120px"
-            @change="loadData()"
-          >
-            <el-option v-for="cat in categories" :key="cat.id" :label="cat.name" :value="cat.id" />
-          </el-select>
-          <el-select
-            v-model="filterTagId"
-            placeholder="标签"
-            clearable
-            style="width: 120px"
-            @change="loadData()"
-          >
-            <el-option v-for="tag in tags" :key="tag.id" :label="tag.name" :value="tag.id" />
-          </el-select>
-          <el-select
-            v-if="isAdmin"
-            v-model="filterAuthorId"
-            placeholder="作者"
-            clearable
-            style="width: 120px"
-            @change="loadData()"
-          >
-            <el-option v-for="u in users" :key="u.id" :label="u.username" :value="u.id" />
-          </el-select>
-        </div>
+
+        <el-select v-model="filterCategoryId" placeholder="分类筛选" clearable style="width: 140px" @change="loadData()">
+          <el-option v-for="c in categories" :key="c.id" :label="c.name" :value="c.id" />
+        </el-select>
+
+        <el-select v-model="filterTagId" placeholder="标签筛选" clearable style="width: 140px" @change="loadData()">
+          <el-option v-for="t in tags" :key="t.id" :label="t.name" :value="t.id" />
+        </el-select>
+
+        <el-select v-model="statusFilter" placeholder="发布状态" clearable style="width: 120px" @change="onStatusChange">
+          <el-option label="已发布" value="PUBLISHED" />
+          <el-option label="草稿" value="DRAFT" />
+        </el-select>
+
+        <el-select v-if="isAdmin" v-model="filterAuthorId" placeholder="作者筛选" clearable style="width: 140px" @change="loadData()">
+          <el-option v-for="u in users" :key="u.id" :label="u.username" :value="u.id" />
+        </el-select>
       </div>
 
-      <el-table
-        ref="tableRef"
-        v-loading="loading"
-        :data="displayArticles"
-        stripe
-        :max-height="tableHeight"
-        :span-method="tableSpanMethod"
-        @scroll="handleTableScroll"
-      >
-        <el-table-column label="序号" width="55">
-          <template #default="{ row, $index }">
-            <div
-              v-if="row._isEndMarker"
-              style="
-                text-align: center;
-                color: #999;
-                font-size: 13px;
-                padding: 2px 0;
-                line-height: 1.2;
-                width: 100%;
-              "
-            >
-              已加载全部
-            </div>
-            <span v-else>{{ $index + 1 }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column label="标题" min-width="200">
-          <template #default="{ row }">
-            <el-button
-              link
-              type="primary"
-              style="
-                text-align: left;
-                word-break: break-word;
-                white-space: normal;
-                height: auto;
-                line-height: 1.4;
-                padding: 0;
-              "
-              @click="viewArticle(row)"
-              >{{ row.title }}</el-button
-            >
-          </template>
-        </el-table-column>
-        <el-table-column label="分类" width="80">
-          <template #default="{ row }">
-            {{ row.category?.name || '-' }}
-          </template>
-        </el-table-column>
-        <el-table-column label="标签" width="150">
-          <template #default="{ row }">
-            <el-tag
-              v-for="tag in row.tags || []"
-              :key="tag.id"
-              size="small"
-              style="margin-right: 4px; margin-bottom: 2px"
-              >{{ tag.name }}</el-tag
-            >
-            <span v-if="!row.tags?.length" style="color: #999">-</span>
-          </template>
-        </el-table-column>
-        <el-table-column label="状态" width="90">
-          <template #default="{ row }">
-            <el-tag :type="statusType[row.status] || 'info'" size="small" effect="dark">{{
-              statusLabel[row.status] || row.status
-            }}</el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column v-if="isAdmin" prop="author.username" label="作者" width="100" />
-        <el-table-column label="可见性" width="80" align="center">
-          <template #default="{ row }">
-            <el-switch
-              v-model="row.visibility"
-              active-value="PRIVATE"
-              inactive-value="PUBLIC"
-              active-text="私"
-              inactive-text="公"
-              size="small"
-              inline-prompt
-              @change="handleVisibilityChange(row)"
-            />
-          </template>
-        </el-table-column>
-        <el-table-column prop="viewCount" label="阅读" width="70" />
-        <el-table-column label="创建时间" width="160" align="center">
-          <template #default="{ row }">
-            <span style="white-space: normal; word-break: break-word; line-height: 1.4"
-              >{{ (row.createdAt || '').replace('T', ' ').slice(0, 10) }}<br />{{
-                (row.createdAt || '').replace('T', ' ').slice(11, 16)
-              }}</span
-            >
-          </template>
-        </el-table-column>
-        <el-table-column label="操作" width="130" fixed="right">
-          <template #default="{ row }">
-            <el-button v-if="!isGuest" link type="primary" size="small" @click="goEdit(row.id)"
-              >编辑</el-button
-            >
-            <el-button v-if="!isGuest" link type="danger" size="small" @click="handleDelete(row.id)"
-              >删除</el-button
-            >
-          </template>
-        </el-table-column>
-      </el-table>
+      <el-table ref="tableRef" :data="displayArticles" v-loading="loading" :span-method="tableSpanMethod" style="width: 100%" :max-height="tableHeight" @scroll="handleTableScroll" stripe>
+          <el-table-column label="序号" width="55">
+            <template #default="{ row, $index }">
+              <div v-if="row._isEndMarker" style="text-align:center;color:#999;font-size:13px;padding:2px 0;line-height:1.2;width:100%">已加载全部</div>
+              <span v-else>{{ $index + 1 }}</span>
+            </template>
+          </el-table-column>
+
+          <el-table-column label="标题" min-width="300">
+            <template #default="{ row }">
+              <div v-if="!row._isEndMarker" style="display:flex;align-items:center;gap:6px;cursor:pointer" @click="viewArticle(row)">
+                <span style="color:#409eff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ row.title }}</span>
+              </div>
+            </template>
+          </el-table-column>
+
+          <el-table-column label="分类" width="80">
+            <template #default="{ row }">{{ row.category?.name || "-" }}</template>
+          </el-table-column>
+
+          <el-table-column label="标签" width="150">
+            <template #default="{ row }">
+              <div v-if="!row._isEndMarker" style="display:flex;gap:4px;flex-wrap:wrap">
+                <el-tag v-for="t in (row.tags || [])" :key="t.id" size="small" type="info">{{ t.name }}</el-tag>
+              </div>
+            </template>
+          </el-table-column>
+
+          <el-table-column label="状态" width="90">
+            <template #default="{ row }">
+              <el-tag v-if="!row._isEndMarker" :type="statusType[row.status] || 'info'" size="small">{{ statusLabel[row.status] || row.status }}</el-tag>
+            </template>
+          </el-table-column>
+
+          <el-table-column v-if="isAdmin" prop="author.username" label="作者" width="100" />
+
+          <el-table-column v-if="!isGuest" label="可见性" width="80" align="center">
+            <template #default="{ row }">
+              <el-switch v-if="!row._isEndMarker" :model-value="row.visibility === 'PUBLIC'" active-text="公" inactive-text="私" inline-prompt size="small" @change="handleVisibilityChange({ ...row, visibility: row.visibility === 'PUBLIC' ? 'PRIVATE' : 'PUBLIC' })" />
+            </template>
+          </el-table-column>
+
+          <el-table-column prop="viewCount" label="阅读" width="70" />
+          <el-table-column label="创建时间" width="160" align="center">
+            <template #default="{ row }">{{ (row.createdAt || "").replace("T", " ").slice(0, 16) }}</template>
+          </el-table-column>
+
+          <el-table-column v-if="!isGuest" label="操作" width="130" fixed="right">
+            <template #default="{ row }">
+              <div v-if="!row._isEndMarker" style="display:flex;gap:4px">
+                <el-button link type="primary" size="small" @click="goEdit(row.id)">编辑</el-button>
+                <el-button link type="danger" size="small" @click="handleDelete(row.id)">删除</el-button>
+              </div>
+            </template>
+          </el-table-column>
+                  <template #empty><div style="padding:40px 0;color:#909399">暂无数据</div></template>
+        </el-table>
     </div>
 
     <!-- 文章预览对话框 -->
-    <el-dialog v-model="dialogVisible" title="文章预览" width="700px" :close-on-click-modal="false">
+    <el-dialog v-model="dialogVisible" title="文章预览" width="800" destroy-on-close top="5vh">
       <template v-if="dialogArticle">
-        <h2 style="font-size: 20px; margin: 0 0 12px; color: #1a1a1a">{{ dialogArticle.title }}</h2>
-        <div style="font-size: 13px; color: #999; margin-bottom: 16px">
-          <span>✔ {{ dialogArticle.author?.username }}</span>
-          <span style="margin-left: 16px">{{
-            (dialogArticle.createdAt || '').replace('T', ' ').slice(0, 16)
-          }}</span>
-          <el-tag v-if="dialogArticle.category" size="small" style="margin-left: 12px">{{
-            dialogArticle.category.name
-          }}</el-tag>
+        <div style="margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid #ebeef5">
+          <h3 style="margin:0 0 8px 0;font-size:20px">{{ dialogArticle.title }}</h3>
+          <div style="display:flex;gap:16px;color:#909399;font-size:13px">
+            <span>作者: {{ dialogArticle.author?.username }}</span>
+            <span>分类: {{ dialogArticle.category?.name || "-" }}</span>
+            <span>{{ (dialogArticle.createdAt || "").replace("T", " ").slice(0, 16) }}</span>
+            <span>阅读: {{ dialogArticle.viewCount || 0 }}</span>
+          </div>
         </div>
-        <div v-if="dialogArticle.tags?.length" style="margin-bottom: 12px">
-          <el-tag
-            v-for="tag in dialogArticle.tags"
-            :key="tag.id"
-            size="small"
-            style="margin-right: 6px"
-            >{{ tag.name }}</el-tag
-          >
-        </div>
-        <el-divider style="margin: 12px 0" />
-        <div
-          style="
-            max-height: 400px;
-            overflow-y: auto;
-            font-size: 15px;
-            line-height: 1.8;
-            color: #333;
-          "
-          class="article-content-render"
-          v-html="sanitizeHtml(dialogArticle.content)"
-        ></div>
+        <div class="article-preview-content" v-html="sanitizeHtml(dialogArticle.content || '')" style="max-height:60vh;overflow:auto;line-height:1.8"></div>
       </template>
       <template #footer>
         <el-button @click="dialogVisible = false">关闭</el-button>
@@ -459,3 +259,5 @@ onMounted(async () => {
     </el-dialog>
   </div>
 </template>
+
+

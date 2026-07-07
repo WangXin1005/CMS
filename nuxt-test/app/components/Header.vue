@@ -55,7 +55,7 @@ async function handleChangePassword() {
     ElMessage.success('密码修改成功')
     dialogVisible.value = false
   } catch (e) {
-    ElMessage.error(e.response?.data?.message || '密码修改失败')
+    /* 拦截器已处理消息提示 */
   } finally {
     passwordLoading.value = false
   }
