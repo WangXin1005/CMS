@@ -37,7 +37,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 384M
+          memory: 320M
         reservations:
           memory: 128M
 
@@ -53,7 +53,7 @@ services:
       SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
       JWT_SECRET: ${JWT_SECRET}
       JWT_EXPIRATION: ${JWT_EXPIRATION:-86400000}
-      JAVA_OPTS: "-Xms64m -Xmx128m -XX:+UseSerialGC -XX:MaxRAMPercentage=40.0"
+      JAVA_OPTS: "-Xms64m -Xmx128m -XX:+UseSerialGC -XX:MaxMetaspaceSize=64m -XX:ReservedCodeCacheSize=32m -Xss256k -XX:+ExitOnOutOfMemoryError"
       APP_UPLOAD_DIR: /tmp/uploads
     depends_on:
       mysql:
@@ -63,9 +63,9 @@ services:
     deploy:
       resources:
         limits:
-          memory: 256M
+          memory: 384M
         reservations:
-          memory: 128M
+          memory: 192M
 
   frontend:
     build:
