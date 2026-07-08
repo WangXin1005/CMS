@@ -31,7 +31,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     /** 允许的跨域来源，多个用逗号分隔 */
-    @Value("${app.cors.allowed-origins:http://localhost:3000}")
+    @Value("${app.cors.allowed-origins:http://localhost:3000,https://gocms.top}")
     private String allowedOrigins;
 
     /** Swagger 是否启用（生产环境应关闭） */
