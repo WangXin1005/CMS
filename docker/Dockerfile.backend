@@ -10,7 +10,7 @@ RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 # 复制本地构建好的 jar（需先在本地执行 npm run build:backend）
 COPY java-backend/target/*.jar app.jar
 
-ENV JAVA_OPTS="-Xms64m -Xmx128m -XX:+UseSerialGC -XX:MaxMetaspaceSize=64m -XX:ReservedCodeCacheSize=32m -Xss256k -XX:+ExitOnOutOfMemoryError -XX:+UseContainerSupport"
+ENV JAVA_OPTS="-Xms64m -Xmx128m -XX:+UseSerialGC -XX:MaxMetaspaceSize=128m -XX:ReservedCodeCacheSize=32m -Xss256k -XX:+ExitOnOutOfMemoryError -XX:+UseContainerSupport"
 
 USER appuser
 EXPOSE 8080
