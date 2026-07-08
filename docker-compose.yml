@@ -54,6 +54,7 @@ services:
       JWT_SECRET: ${JWT_SECRET}
       JWT_EXPIRATION: ${JWT_EXPIRATION:-86400000}
       JAVA_OPTS: "-Xms64m -Xmx128m -XX:+UseSerialGC -XX:MaxRAMPercentage=40.0"
+      APP_UPLOAD_DIR: /tmp/uploads
     depends_on:
       mysql:
         condition: service_healthy

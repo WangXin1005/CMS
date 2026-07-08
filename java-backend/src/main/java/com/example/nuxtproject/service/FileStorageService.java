@@ -26,7 +26,7 @@ import java.util.UUID;
 @Service
 public class FileStorageService {
 
-    @Value("${app.upload.dir:./uploads}")
+    @Value("${app.upload.dir:/tmp/uploads}")
     private String uploadDir;
 
     private final MediaRepository mediaRepository;

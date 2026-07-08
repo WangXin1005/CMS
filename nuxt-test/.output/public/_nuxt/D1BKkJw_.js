@@ -1,1 +1,0 @@
-import{aI as n,aJ as r,n as t}from"./Cgqg96Wx.js";const l=n(()=>{const e=r("auth_token");if(!e.value)return t("/login");try{const a=e.value.split(".");if(a.length!==3)return e.value="",t("/login");const o=JSON.parse(atob(a[1]));if(o.exp&&o.exp*1e3<Date.now())return e.value="",t("/login")}catch{return e.value="",t("/login")}});export{l as default};
