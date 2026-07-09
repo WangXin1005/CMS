@@ -120,7 +120,7 @@ services:
     container_name: blog-webhook
     restart: always
     ports:
-      - "9000:9000"
+      - "127.0.0.1:9000:9000"
     environment:
       WEBHOOK_SECRET: ${WEBHOOK_SECRET}
       WEBHOOK_PORT: "9000"
