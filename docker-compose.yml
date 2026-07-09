@@ -129,6 +129,7 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./deploy.sh:/app/deploy.sh:ro
+      - /opt/codeblog:/opt/codeblog
     networks:
       - blog-net
     deploy:
