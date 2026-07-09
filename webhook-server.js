@@ -5,13 +5,10 @@ const { execSync } = require('child_process');
 const PORT = process.env.WEBHOOK_PORT || 9000;
 const SECRET = process.env.WEBHOOK_SECRET || '';
 
-// 验证 Gitee Webhook 签名
-function verifySignature(req, body) {
-  const timestamp = req.headers['x-gitee-token'] || req.headers['x-gitee-timestamp'] || '';
-  const signature = req.headers['x-gitee-signature'] || '';
-  const signStr = timestamp + '\n' + SECRET;
-  const expected = crypto.createHmac('sha256', SECRET).update(signStr).digest('base64');
-  return signature === expected;
+// 验证 Gitee Webhook 签名（X-Gitee-Token 即密码）
+function verifySignature(req) {
+  const token = req.headers['x-gitee-token'] || '';
+  return token === SECRET;
 }
 
 // 执行部署脚本
@@ -48,7 +45,7 @@ const server = http.createServer((req, res) => {
   req.on('data', chunk => { body += chunk; });
   req.on('end', () => {
     // 验证签名
-    if (SECRET && !verifySignature(req, body)) {
+    if (SECRET && !verifySignature(req)) {
       console.log('[Webhook] 签名验证失败');
       res.writeHead(403);
       res.end('Forbidden');
