@@ -642,7 +642,7 @@ const _routes = [
     name: "articles",
     path: "/articles",
     meta: { "middleware": "auth" },
-    component: () => import('./index-DMGTiiGk.mjs')
+    component: () => import('./index-BtFD0Wmi.mjs')
   },
   {
     name: "categories",
