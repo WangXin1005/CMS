@@ -186,22 +186,24 @@ onMounted(async () => { await loadFilters(); await loadData(); });
           <el-button type="primary" @click="onSearch" style="margin-left: 8px">搜索</el-button>
         </div>
 
-        <el-select v-model="filterCategoryId" placeholder="分类筛选" clearable style="width: 140px" @change="loadData()">
-          <el-option v-for="c in categories" :key="c.id" :label="c.name" :value="c.id" />
-        </el-select>
+        <div style="display: flex; align-items: center; gap: 12px; margin-left: auto">
+          <el-select v-model="filterCategoryId" placeholder="分类筛选" clearable style="width: 140px" @change="loadData()">
+            <el-option v-for="c in categories" :key="c.id" :label="c.name" :value="c.id" />
+          </el-select>
 
-        <el-select v-model="filterTagId" placeholder="标签筛选" clearable style="width: 140px" @change="loadData()">
-          <el-option v-for="t in tags" :key="t.id" :label="t.name" :value="t.id" />
-        </el-select>
+          <el-select v-model="filterTagId" placeholder="标签筛选" clearable style="width: 140px" @change="loadData()">
+            <el-option v-for="t in tags" :key="t.id" :label="t.name" :value="t.id" />
+          </el-select>
 
-        <el-select v-model="statusFilter" placeholder="发布状态" clearable style="width: 120px" @change="onStatusChange">
-          <el-option label="已发布" value="PUBLISHED" />
-          <el-option label="草稿" value="DRAFT" />
-        </el-select>
+          <el-select v-model="statusFilter" placeholder="发布状态" clearable style="width: 120px" @change="onStatusChange">
+            <el-option label="已发布" value="PUBLISHED" />
+            <el-option label="草稿" value="DRAFT" />
+          </el-select>
 
-        <el-select v-if="isAdmin" v-model="filterAuthorId" placeholder="作者筛选" clearable style="width: 140px" @change="loadData()">
-          <el-option v-for="u in users" :key="u.id" :label="u.username" :value="u.id" />
-        </el-select>
+          <el-select v-if="isAdmin" v-model="filterAuthorId" placeholder="作者筛选" clearable style="width: 140px" @change="loadData()">
+            <el-option v-for="u in users" :key="u.id" :label="u.username" :value="u.id" />
+          </el-select>
+        </div>
       </div>
 
       <!-- 懒加载表格：max-height 由 useTableHeight 动态计算 -->
