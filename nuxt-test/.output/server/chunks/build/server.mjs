@@ -642,13 +642,13 @@ const _routes = [
     name: "articles",
     path: "/articles",
     meta: { "middleware": "auth" },
-    component: () => import('./index-BtFD0Wmi.mjs')
+    component: () => import('./index-BKkiucpP.mjs')
   },
   {
     name: "categories",
     path: "/categories",
     meta: { "middleware": "auth" },
-    component: () => import('./categories-DsKZcKLO.mjs')
+    component: () => import('./categories-CCBRd6xZ.mjs')
   },
   {
     name: "comments",

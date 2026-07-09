@@ -14,14 +14,15 @@ const categories = ref([]);
 // 使用 useTableHeight 测量 page-card 高度（懒加载无分页器，offset=0）
 const { wrapperRef, tableHeight } = useTableHeight(0);
 const loading = ref(false);
-const displayCount = ref(5);
+const displayCount = ref(15);
 const allLoaded = ref(false);
+const showEndMarker = computed(() => allLoaded.value && categories.value.length * 42 > (tableHeight.value || 400));
 const loadingMore = ref(false);
 const tableRef = ref();
 
 const displayCategories = computed(() => {
   const items = categories.value.slice(0, displayCount.value);
-  if (allLoaded.value && items.length > 0) return [...items, { _isEndMarker: true }];
+  if (showEndMarker.value) return [...items, { _isEndMarker: true }];
   return items;
 });
 
@@ -39,7 +40,7 @@ const form = ref({ name: "", description: "" });
 let sortableInstance = null;
 
 async function loadData(append = false) {
-  if (!append) { loading.value = true; displayCount.value = 5; allLoaded.value = false; }
+  if (!append) { loading.value = true; displayCount.value = 15; allLoaded.value = false; }
   else { loadingMore.value = true; }
   try {
     const res = await getList();

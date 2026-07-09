@@ -39,7 +39,7 @@ const articles = ref([]);
 const { wrapperRef, tableHeight } = useTableHeight(0);
 const loading = ref(false);
 const currentPage = ref(1);
-const pageSize = ref(20);
+const pageSize = ref(15);
 const total = ref(0);
 const statusFilter = ref(undefined);
 
@@ -57,12 +57,13 @@ const users = ref([]);
 const dialogVisible = ref(false);
 const dialogArticle = ref(null);
 const allLoaded = ref(false);
+const showEndMarker = computed(() => allLoaded.value && articles.value.length * 48 > (tableHeight.value || 600));
 const loadingMore = ref(false);
 const loadLocked = ref(false);
 const tableRef = ref();
 
 const displayArticles = computed(() => {
-  if (allLoaded.value && articles.value.length > 0) return [...articles.value, { _isEndMarker: true }];
+  if (showEndMarker.value) return [...articles.value, { _isEndMarker: true }];
   return articles.value;
 });
 
