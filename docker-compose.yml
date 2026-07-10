@@ -130,6 +130,8 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./deploy.sh:/app/deploy.sh:ro
       - /opt/codeblog:/opt/codeblog
+      - /root/.git-credentials:/root/.git-credentials:ro
+      - /root/.gitconfig:/root/.gitconfig:ro
     networks:
       - blog-net
     deploy:
