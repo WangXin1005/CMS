@@ -6,6 +6,11 @@ let _initialized: boolean | null = null
 let _pending: Promise<void> | null = null
 
 export default defineNuxtRouteMiddleware(async (to) => {
+  // 公开页面无需初始化检查
+  if (to.path === '/' || to.path.startsWith('/article/')) {
+    return
+  }
+
   // 进入 /login 时重置缓存，确保初始化后能正确识别
   if (to.path === '/login') {
     _initialized = null;

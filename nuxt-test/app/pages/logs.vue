@@ -170,7 +170,7 @@ onMounted(() => { loadData(); loadMaps(); });
           </el-descriptions-item>
           <el-descriptions-item label="IP地址">{{ detailRow.clientIp }}</el-descriptions-item>
           <el-descriptions-item label="操作描述" :span="2">{{ detailRow.details }}</el-descriptions-item>
-          <el-descriptions-item label="时间">{{ detailRow.createdAt }}</el-descriptions-item>
+          <el-descriptions-item label="时间">{{ (detailRow.createdAt || "").replace("T", " ").slice(0, 16) }}</el-descriptions-item>
           <el-descriptions-item label="请求路径" :span="2">{{ detailRow.path }}</el-descriptions-item>
         </el-descriptions>
         <div v-if="detailRow.oldData || detailRow.newData" style="margin-top:16px">

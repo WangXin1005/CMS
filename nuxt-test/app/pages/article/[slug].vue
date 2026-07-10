@@ -208,91 +208,79 @@ onMounted(async () => {
   font-size: 16px;
   line-height: 1.9;
   color: #2c3e50;
-
-  h2 {
-    font-size: 24px;
-    font-weight: 700;
-    margin: 36px 0 16px;
-    padding-bottom: 10px;
-    border-bottom: 1px solid #f0f0f0;
-    color: #1a1a1a;
-  }
-
-  h3 {
-    font-size: 20px;
-    font-weight: 600;
-    margin: 28px 0 12px;
-    color: #1a1a1a;
-  }
-
-  p {
-    margin: 0 0 16px;
-  }
-
-  ul,
-  ol {
-    padding-left: 24px;
-    margin: 12px 0 16px;
-
-    li {
-      margin: 6px 0;
-    }
-  }
-
-  code {
-    background: #f0f2f5;
-    padding: 2px 8px;
-    border-radius: 4px;
-    font-size: 14px;
-    color: #e74c3c;
-  }
-
-  pre {
-    background: #1e1e2e;
-    color: #cdd6f4;
-    padding: 20px;
-    border-radius: 8px;
-    overflow-x: auto;
-    margin: 16px 0 24px;
-    font-size: 14px;
-    line-height: 1.6;
-
-    code {
-      background: none;
-      padding: 0;
-      color: inherit;
-      font-size: inherit;
-    }
-  }
-
-  blockquote {
-    border-left: 4px solid #667eea;
-    margin: 16px 0 24px;
-    padding: 14px 20px;
-    background: #f8f9ff;
-    border-radius: 0 8px 8px 0;
-    color: #555;
-
-    p {
-      margin: 0;
-    }
-  }
-
-  img {
-    max-width: 100%;
-    border-radius: 8px;
-    margin: 16px 0;
-    display: block;
-  }
-
-  strong {
-    font-weight: 700;
-    color: #1a1a1a;
-  }
-  a {
-    color: #667eea;
-    text-decoration: underline;
-  }
+}
+.article-content :deep(h2) {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 36px 0 16px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #f0f0f0;
+  color: #1a1a1a;
+}
+.article-content :deep(h3) {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 28px 0 12px;
+  color: #1a1a1a;
+}
+.article-content :deep(p) {
+  margin: 0 0 16px;
+}
+.article-content :deep(ul),
+.article-content :deep(ol) {
+  padding-left: 24px;
+  margin: 12px 0 16px;
+}
+.article-content :deep(li) {
+  margin: 6px 0;
+}
+.article-content :deep(code) {
+  background: #f0f2f5;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 14px;
+  color: #e74c3c;
+}
+.article-content :deep(pre) {
+  background: #1e1e2e;
+  color: #cdd6f4;
+  padding: 20px;
+  border-radius: 8px;
+  overflow-x: auto;
+  margin: 16px 0 24px;
+  font-size: 14px;
+  line-height: 1.6;
+}
+.article-content :deep(pre code) {
+  background: none;
+  padding: 0;
+  color: inherit;
+  font-size: inherit;
+}
+.article-content :deep(blockquote) {
+  border-left: 4px solid #667eea;
+  margin: 16px 0 24px;
+  padding: 14px 20px;
+  background: #f8f9ff;
+  border-radius: 0 8px 8px 0;
+  color: #555;
+}
+.article-content :deep(blockquote p) {
+  margin: 0;
+}
+.article-content :deep(img) {
+  max-width: 100%;
+  border-radius: 8px;
+  margin: 16px 0;
+  display: block;
+}
+.article-content :deep(strong) {
+  font-weight: 700;
+  color: #1a1a1a;
+}
+.article-content :deep(a) {
+  color: #667eea;
+  text-decoration: underline;
 }
 
 // ===== 标签 =====
