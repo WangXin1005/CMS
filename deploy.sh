@@ -2,7 +2,7 @@
 set -e
 
 echo "=============================="
-echo " Webhook 自动部署 $(date +%Y-%m-%d %H:%M:%S)"
+echo " Webhook 自动部署"
 echo "=============================="
 
 cd /opt/codeblog || exit 1
