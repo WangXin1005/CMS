@@ -126,12 +126,11 @@ services:
       WEBHOOK_PORT: "9000"
       GITEE_REPO_OWNER: ${GITEE_REPO_OWNER}
       GITEE_REPO_NAME: ${GITEE_REPO_NAME}
+      GIT_TOKEN: ${GIT_TOKEN:-}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./deploy.sh:/app/deploy.sh:ro
       - /opt/codeblog:/opt/codeblog
-      - /root/.git-credentials:/root/.git-credentials:ro
-      - /root/.gitconfig:/root/.gitconfig:ro
     networks:
       - blog-net
     deploy:
