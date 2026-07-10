@@ -80,6 +80,8 @@ public class LoggingAspect implements ApplicationContextAware {
             "|| execution(* com.example.nuxtproject.controller.*.delete*(..)) " +
             "|| execution(* com.example.nuxtproject.controller.*.remove*(..)) " +
             "|| execution(* com.example.nuxtproject.controller.*.login*(..)) " +
+            "|| execution(* com.example.nuxtproject.controller.*.logout*(..)) " +
+            "|| execution(* com.example.nuxtproject.controller.*.upload*(..)) " +
             ")")
     public Object logOperation(ProceedingJoinPoint joinPoint) throws Throwable {
         System.out.println("[ASPECT] intercepted: " + joinPoint.getSignature().getName());
@@ -90,6 +92,8 @@ public class LoggingAspect implements ApplicationContextAware {
         if (methodName.startsWith("create") || methodName.startsWith("add") || methodName.startsWith("register") || methodName.startsWith("init")) action = "CREATE";
         else if (methodName.startsWith("update") || methodName.startsWith("edit") || methodName.startsWith("change")) action = "UPDATE";
         else if (methodName.startsWith("delete") || methodName.startsWith("remove")) action = "DELETE";
+        else if (methodName.startsWith("upload")) action = "UPLOAD";
+        else if (methodName.startsWith("logout")) action = "LOGOUT";
         else if (methodName.startsWith("login")) action = "LOGIN";
         else action = "OTHER";
 
@@ -105,6 +109,15 @@ public class LoggingAspect implements ApplicationContextAware {
         String errorMsg = null;
         try {
             proceed = joinPoint.proceed();
+            // 登录操作：检查响应体判断成功/失败
+            if ("LOGIN".equals(action) && proceed instanceof org.springframework.http.ResponseEntity) {
+                org.springframework.http.ResponseEntity<?> resp = (org.springframework.http.ResponseEntity<?>) proceed;
+                if (resp.getStatusCode().isError()) {
+                    result = "FAIL";
+                    Object body = resp.getBody();
+                    if (body instanceof Map) errorMsg = (String) ((Map<?,?>) body).get("message");
+                }
+            }
         } catch (Throwable t) {
             result = "FAIL";
             errorMsg = t.getMessage();
@@ -134,7 +147,20 @@ public class LoggingAspect implements ApplicationContextAware {
 
                 // 构建含新旧数据的数据字段
                 String newDataJson = captureArgsAsJson(joinPoint);
+                // 上传操作：从 MultipartFile 提取文件名
+                if ("UPLOAD".equals(action) && newDataJson == null) {
+                    for (Object arg : joinPoint.getArgs()) {
+                        if (arg instanceof org.springframework.web.multipart.MultipartFile) {
+                            String origName = ((org.springframework.web.multipart.MultipartFile) arg).getOriginalFilename();
+                            if (origName != null) {
+                                newDataJson = "{\"originalName\":\"" + origName.replace("\"", "\\\"") + "\"}";
+                            }
+                            break;
+                        }
+                    }
+                }
                 String dataStr = buildDataString(action, oldDataJson, newDataJson);
+                System.out.println("[LOG_ASPECT] action=" + action + " oldData=" + (oldDataJson != null ? "present(" + oldDataJson.length() + ")" : "null") + " newData=" + (newDataJson != null ? "present(" + newDataJson.length() + ")" : "null") + " dataStr=" + (dataStr != null ? "present(" + dataStr.length() + ")" : "null"));
                 if (dataStr != null) {
                     details = details + " | 数据: " + dataStr;
                 }
@@ -171,6 +197,9 @@ public class LoggingAspect implements ApplicationContextAware {
                 return result.length() > 30000 ? result.substring(0, 30000) + "..." : result;
             } else if (newDataJson != null && !newDataJson.isEmpty()) {
                 return newDataJson.length() > 30000 ? newDataJson.substring(0, 30000) + "..." : newDataJson;
+            } else if ("DELETE".equals(action) && oldDataJson != null && !oldDataJson.isEmpty()) {
+                // 删除操作保留旧数据，供前端显示名称/标题
+                return oldDataJson.length() > 30000 ? oldDataJson.substring(0, 30000) + "..." : oldDataJson;
             }
         } catch (Exception ignored) {}
         return null;
@@ -243,6 +272,7 @@ private String loadOldEntityJson(String entityName, Long entityId) {
         try {
             String cleanName = entityName.contains("$") ? entityName.substring(0, entityName.indexOf("$")) : entityName;
             String repoName = cleanName.substring(0, 1).toLowerCase() + cleanName.substring(1) + "Repository";
+            System.out.println("[LOG_OLD] entityName=" + entityName + " cleanName=" + cleanName + " repoName=" + repoName + " entityId=" + entityId);
             Object repo = applicationContext.getBean(repoName);
             Optional<?> result = (Optional<?>) repo.getClass().getMethod("findById", Object.class).invoke(repo, entityId);
             if (result.isPresent()) {
@@ -255,15 +285,24 @@ private String loadOldEntityJson(String entityName, Long entityId) {
                         if (field.equals("hibernateLazyInitializer") || field.equals("handler")) continue;
                         try {
                             Object val = m.invoke(entity);
-                            if (val != null && !(val instanceof java.util.Collection) && !val.getClass().getName().contains("$$")) {
+                            if (val != null && !(val instanceof java.util.Collection) && !val.getClass().getName().contains("$")) {
                                 fields.put(field, val);
                             }
                         } catch (Exception ignored) {}
                     }
                 }
-                if (!fields.isEmpty()) return objectMapper.writeValueAsString(fields);
+                if (!fields.isEmpty()) {
+                    String json = objectMapper.writeValueAsString(fields);
+                    System.out.println("[LOG_OLD] captured " + fields.size() + " fields: " + (json.length() > 200 ? json.substring(0, 200) + "..." : json));
+                    return json;
+                }
+                System.out.println("[LOG_OLD] fields empty for " + cleanName);
+            } else {
+                System.out.println("[LOG_OLD] entity not found for " + cleanName + " id=" + entityId);
             }
-        } catch (Exception ignored) {}
+        } catch (Exception e) {
+            System.out.println("[LOG_OLD] error: " + e.getMessage());
+        }
         return null;
     }
 

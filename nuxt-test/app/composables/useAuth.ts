@@ -86,7 +86,8 @@ export const useAuth = () => {
    * 退出登录
    * 清除 Cookie 中的 token、用户名和角色，重置响应式状态
    */
-  const logout = () => {
+  const logout = async () => {
+    try { await $fetch('/api/auth/logout', { method: 'POST', credentials: 'include' }); } catch {}
     token.value = ''
     username.value = ''
     role.value = ''

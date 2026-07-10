@@ -60,6 +60,12 @@ public class AuthController {
         return ResponseEntity.ok(result);
     }
 
+    @PostMapping("/logout")
+    @Operation(summary = "用户退出", description = "记录用户退出操作")
+    public ResponseEntity<?> logout() {
+        return ResponseEntity.ok(Map.of("message", "已退出"));
+    }
+
     @PostMapping("/register")
     @Operation(summary = "访客注册", description = "访客自助注册账号，注册后自动获得 GUEST 角色（只读权限）")
     public ResponseEntity<?> register(@RequestBody @Valid RegisterRequest request) {

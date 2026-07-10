@@ -26,15 +26,9 @@ public class OperationLogService {
 
     public Page<OperationLog> list(int page, int size, String username, String action, String entity) {
         Pageable pageable = PageRequest.of(page - 1, size, Sort.by(Sort.Direction.DESC, "createdAt"));
-        if (username != null && !username.isEmpty()) {
-            return repository.findByUsernameOrderByCreatedAtDesc(username, pageable);
-        }
-        if (action != null && !action.isEmpty()) {
-            return repository.findByActionOrderByCreatedAtDesc(action, pageable);
-        }
-        if (entity != null && !entity.isEmpty()) {
-            return repository.findByEntityOrderByCreatedAtDesc(entity, pageable);
-        }
-        return repository.findByOrderByCreatedAtDesc(pageable);
+        String u = (username != null && !username.isEmpty()) ? username : null;
+        String a = (action != null && !action.isEmpty()) ? action : null;
+        String e = (entity != null && !entity.isEmpty()) ? entity : null;
+        return repository.findByFilters(u, a, e, pageable);
     }
 }
