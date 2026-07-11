@@ -16,6 +16,8 @@ import { validateUsername } from '~/utils/username'
 import { validateEmail } from '~/utils/email'
 
 import { Loading, User, Lock, Message } from '@element-plus/icons-vue'
+const route = useRoute()
+const router = useRouter()
 definePageMeta({ layout: 'blank' })
 
 const { login, registerGuest, checkSuperAdmin, initSuperAdmin, hasSuperAdmin, checkUsername } =
@@ -161,8 +163,10 @@ async function handleLogin() {
     }
     await login(loginForm.value)
     ElMessage.success('登录成功')
-    navigateTo('/home')
+    const redirectPath = route.query.redirect as string
+    router.push(redirectPath || '/home')
   } catch {
+    loginLoading.value = false
     /* 拦截器已处理消息提示 */
   } finally {
     loginLoading.value = false
@@ -194,6 +198,7 @@ async function handleRegister() {
     ElMessage.success('注册成功')
     showRegister.value = false
   } catch {
+    loginLoading.value = false
     /* 拦截器已处理消息提示 */
   } finally {
     registerLoading.value = false
@@ -225,6 +230,7 @@ async function handleInit() {
     ElMessage.success('超级管理员创建成功，请登录')
     mode.value = 'login'
   } catch {
+    loginLoading.value = false
     /* 拦截器已处理消息提示 */
   } finally {
     initLoading.value = false

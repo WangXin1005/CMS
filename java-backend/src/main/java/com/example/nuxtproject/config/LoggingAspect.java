@@ -81,6 +81,9 @@ public class LoggingAspect implements ApplicationContextAware {
             "|| execution(* com.example.nuxtproject.controller.*.remove*(..)) " +
             "|| execution(* com.example.nuxtproject.controller.*.login*(..)) " +
             "|| execution(* com.example.nuxtproject.controller.*.logout*(..)) " +
+            "|| execution(* com.example.nuxtproject.controller.*.submit*(..)) " +
+            "|| execution(* com.example.nuxtproject.controller.*.approve*(..)) " +
+            "|| execution(* com.example.nuxtproject.controller.*.reject*(..)) " +
             "|| execution(* com.example.nuxtproject.controller.*.upload*(..)) " +
             ")")
     public Object logOperation(ProceedingJoinPoint joinPoint) throws Throwable {
@@ -93,6 +96,9 @@ public class LoggingAspect implements ApplicationContextAware {
         else if (methodName.startsWith("update") || methodName.startsWith("edit") || methodName.startsWith("change")) action = "UPDATE";
         else if (methodName.startsWith("delete") || methodName.startsWith("remove")) action = "DELETE";
         else if (methodName.startsWith("upload")) action = "UPLOAD";
+        else if (methodName.startsWith("submit")) action = "CREATE";
+        else if (methodName.startsWith("approve")) action = "APPROVE";
+        else if (methodName.startsWith("reject")) action = "REJECT";
         else if (methodName.startsWith("logout")) action = "LOGOUT";
         else if (methodName.startsWith("login")) action = "LOGIN";
         else action = "OTHER";
@@ -100,7 +106,7 @@ public class LoggingAspect implements ApplicationContextAware {
         // 前置加载原始数据（仅获取基本字段，避免懒加载异常）
         String oldDataJson = null;
         Long entityId = extractEntityId(joinPoint.getArgs());
-        if ("UPDATE".equals(action) || "DELETE".equals(action)) {
+        if ("UPDATE".equals(action) || "DELETE".equals(action) || "APPROVE".equals(action) || "REJECT".equals(action)) {
             if (entityId != null) oldDataJson = loadOldEntityJson(className, entityId);
         }
 
@@ -197,7 +203,7 @@ public class LoggingAspect implements ApplicationContextAware {
                 return result.length() > 30000 ? result.substring(0, 30000) + "..." : result;
             } else if (newDataJson != null && !newDataJson.isEmpty()) {
                 return newDataJson.length() > 30000 ? newDataJson.substring(0, 30000) + "..." : newDataJson;
-            } else if ("DELETE".equals(action) && oldDataJson != null && !oldDataJson.isEmpty()) {
+            } else if (("DELETE".equals(action) || "APPROVE".equals(action) || "REJECT".equals(action)) && oldDataJson != null && !oldDataJson.isEmpty()) {
                 // 删除操作保留旧数据，供前端显示名称/标题
                 return oldDataJson.length() > 30000 ? oldDataJson.substring(0, 30000) + "..." : oldDataJson;
             }

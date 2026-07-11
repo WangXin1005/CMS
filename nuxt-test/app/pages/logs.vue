@@ -25,6 +25,8 @@ const { wrapperRef, tableHeight } = useTableHeight(0);
 
 const actionWeight = {
   DELETE: { weight: 5, type: "danger", label: "删除" },
+  APPROVE: { weight: 3, type: "success", label: "通过" },
+  REJECT: { weight: 3, type: "warning", label: "驳回" },
   UPLOAD: { weight: 4, type: "success", label: "上传" },
   CREATE: { weight: 4, type: "success", label: "创建" },
   UPDATE: { weight: 3, type: "warning", label: "修改" },
@@ -40,7 +42,8 @@ function actionStyle(action) {
   return { opacity, fontWeight };
 }
 
-const actionMap = { CREATE: "创建", UPDATE: "修改", DELETE: "删除", UPLOAD: "上传", LOGIN: "登录", LOGOUT: "退出", OTHER: "其他" };
+const actionMap = { CREATE: "创建", UPDATE: "修改", DELETE: "删除", UPLOAD: "上传", APPROVE: "通过", REJECT: "驳回", LOGIN: "登录", LOGOUT: "退出", OTHER: "其他" };
+const roleMap = { SUPERADMIN: "超级管理员", ADMIN: "管理员", USER: "用户", GUEST: "访客" };
 const entityMap = { Article: "文章", Category: "分类", Tag: "标签", User: "用户", Comment: "评论", Media: "媒体", SiteSetting: "站点设置", Auth: "认证" };
 const entityOptions = Object.entries(entityMap).map(([value, label]) => ({ value, label }));
 
@@ -83,6 +86,20 @@ function formatOpDesc(row) {
   
   const entityLabel = entityMap[row.entity] || row.entity;
 
+  // 评论操作：提取内容（截断长文本）
+  if (row.entity === "Comment") {
+    const text = parsed ? (parsed.content || "").substring(0, 30) + (parsed.content && parsed.content.length > 30 ? "..." : "") : "";
+    const idPart = row.entityId ? "，ID：" + row.entityId : "";
+    if (row.action === "CREATE") {
+      return { prefix: "创建评论 ", name: text, nameColor: "#67c23a", suffix: "", suffixColor: "" };
+    }
+    if (row.action === "DELETE" || row.action === "APPROVE" || row.action === "REJECT") {
+      const color = row.action === "APPROVE" ? "#67c23a" : "#f56c6c";
+      return { prefix: (row.action === "DELETE" ? "删除评论 " : row.action === "APPROVE" ? "通过评论 " : "驳回评论 "), name: text, nameColor: color, suffix: idPart, suffixColor: "" };
+    }
+    return null;
+  }
+
   if (row.action === "UPLOAD") {
     if (parsed && (parsed.originalName || parsed.filename)) return { prefix: "上传" + entityLabel, name: parsed.originalName || parsed.filename, nameColor: "#67c23a", suffix: "" };
     return null;
@@ -91,7 +108,7 @@ function formatOpDesc(row) {
   if (row.action === "CREATE") {
     if (parsed) {
       if (row.entity === "Article" && parsed.title) return { prefix: "创建" + entityLabel, name: parsed.title, nameColor: "#67c23a", suffix: "" };
-      if (row.entity === "User" && parsed.username) return { prefix: "创建" + entityLabel, name: parsed.username, nameColor: "#67c23a", suffix: "" };
+      if (row.entity === "User" && parsed.username) { const roleLabel = roleMap[parsed.role] || "用户"; return { prefix: "创建" + roleLabel + " ", name: parsed.username, nameColor: "#67c23a", suffix: "" }; }
       if (row.entity === "Media" && (parsed.originalName || parsed.filename)) return { prefix: "创建" + entityLabel, name: parsed.originalName || parsed.filename, nameColor: "#67c23a", suffix: "" };
       if (parsed.name) return { prefix: "创建" + entityLabel, name: parsed.name, nameColor: "#67c23a", suffix: "" };
     }
@@ -101,7 +118,7 @@ function formatOpDesc(row) {
   if (row.action === "DELETE") {
     if (parsed) {
       if (row.entity === "Article" && parsed.title) return { prefix: "删除" + entityLabel, name: parsed.title, nameColor: "#f56c6c", suffixLabel: "，ID：", suffixValue: row.entityId ? String(row.entityId) : "", suffixColor: "#f56c6c" };
-      if (row.entity === "User" && parsed.username) return { prefix: "删除" + entityLabel, name: parsed.username, nameColor: "#f56c6c", suffixLabel: "，ID：", suffixValue: row.entityId ? String(row.entityId) : "", suffixColor: "#f56c6c" };
+      if (row.entity === "User" && parsed.username) { const roleLabel = roleMap[parsed.role] || "用户"; return { prefix: "删除" + roleLabel + " ", name: parsed.username, nameColor: "#f56c6c", suffixLabel: "，ID：", suffixValue: row.entityId ? String(row.entityId) : "", suffixColor: "#f56c6c" }; }
       if (row.entity === "Media" && (parsed.originalName || parsed.filename)) return { prefix: "删除" + entityLabel, name: parsed.originalName || parsed.filename, nameColor: "#f56c6c", suffixLabel: "，ID：", suffixValue: row.entityId ? String(row.entityId) : "", suffixColor: "#f56c6c" };
       if (parsed.name) return { prefix: "删除" + entityLabel, name: parsed.name, nameColor: "#f56c6c", suffixLabel: "，ID：", suffixValue: row.entityId ? String(row.entityId) : "", suffixColor: "#f56c6c" };
     }
@@ -192,6 +209,8 @@ onMounted(() => { loadData(); loadMaps(); });
             <el-option label="创建" value="CREATE" />
             <el-option label="修改" value="UPDATE" />
             <el-option label="删除" value="DELETE" />
+            <el-option label="通过" value="APPROVE" />
+            <el-option label="驳回" value="REJECT" />
           </el-select>
           <el-select v-model="filterEntity" placeholder="操作对象" clearable style="width:140px" @change="onFilter"><el-option v-for="e in entityOptions" :key="e.value" :label="e.label" :value="e.value" /></el-select>
         </div>

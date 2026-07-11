@@ -27,7 +27,7 @@ request.interceptors.response.use(
       if (
         !url.includes('/users/check') &&
         !url.includes('/users/init') &&
-        !url.includes('/auth/register')
+        !url.includes('/auth/register') && !url.includes('/auth/login')
       ) {
         window.location.href = '/login'
       }

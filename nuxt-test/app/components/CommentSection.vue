@@ -10,7 +10,9 @@
  * 评论区组件
  * 展示已审核评论 + 提交评论表单
  */
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+const route = useRoute()
+const loginUrl = computed(() => `/login?redirect=${encodeURIComponent(route.fullPath)}`)
 import { ElMessage } from 'element-plus'
 
 const props = defineProps<{ articleId: number }>()
@@ -79,7 +81,7 @@ onMounted(loadComments)
       </div>
     </div>
     <div v-else class="login-hint">
-      <p>请 <NuxtLink to="/login" class="login-link">登录</NuxtLink> 后发表评论</p>
+      <p>请 <NuxtLink :to="loginUrl" class="login-link">登录</NuxtLink> 后发表评论</p>
     </div>
 
     <el-divider />
