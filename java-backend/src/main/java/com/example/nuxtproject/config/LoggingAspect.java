@@ -55,6 +55,32 @@ public class LoggingAspect implements ApplicationContextAware {
         ENTITY_MAP.put("Media", com.example.nuxtproject.entity.Media.class);
         ENTITY_MAP.put("SiteSetting", com.example.nuxtproject.entity.SiteSetting.class);
     }
+    /** 实体类显示名称 */
+    private static final java.util.Map<String, String> ENTITY_NAME_MAP = new java.util.HashMap<>();
+    static {
+        ENTITY_NAME_MAP.put("Article", "文章");
+        ENTITY_NAME_MAP.put("Category", "分类");
+        ENTITY_NAME_MAP.put("Tag", "标签");
+        ENTITY_NAME_MAP.put("User", "用户");
+        ENTITY_NAME_MAP.put("Comment", "评论");
+        ENTITY_NAME_MAP.put("Media", "文件");
+        ENTITY_NAME_MAP.put("SiteSetting", "站点设置");
+    }
+
+    /** 操作类型显示名称 */
+    private static final java.util.Map<String, String> ACTION_NAME_MAP = new java.util.HashMap<>();
+    static {
+        ACTION_NAME_MAP.put("CREATE", "创建");
+        ACTION_NAME_MAP.put("UPDATE", "修改");
+        ACTION_NAME_MAP.put("DELETE", "删除");
+        ACTION_NAME_MAP.put("UPLOAD", "上传");
+        ACTION_NAME_MAP.put("APPROVE", "审核通过");
+        ACTION_NAME_MAP.put("REJECT", "驳回");
+        ACTION_NAME_MAP.put("LOGIN", "登录");
+        ACTION_NAME_MAP.put("LOGOUT", "退出");
+        ACTION_NAME_MAP.put("OTHER", "其他操作");
+    }
+
 
     public LoggingAspect(OperationLogService logService, ObjectMapper objectMapper, EntityManager entityManager) {
         this.logService = logService;
@@ -107,6 +133,47 @@ public class LoggingAspect implements ApplicationContextAware {
         String oldDataJson = null;
         Long entityId = extractEntityId(joinPoint.getArgs());
         if ("UPDATE".equals(action) || "DELETE".equals(action) || "APPROVE".equals(action) || "REJECT".equals(action)) {
+        // SiteSetting 特殊处理：按 key 查找旧数据（entityId 为 null 因为参数中无 Number 类型 ID）
+        if (oldDataJson == null && "SiteSetting".equals(className) && "UPDATE".equals(action)) {
+            System.out.println("[SITE_SETTING_LOG] attempting old data lookup");
+            for (Object arg : joinPoint.getArgs()) {
+                if (arg instanceof String && ((String) arg).length() < 100) {
+                    try {
+                        String repoName = "siteSettingRepository";
+                        Object repo = applicationContext.getBean(repoName);
+                        java.lang.reflect.Method findByKey = repo.getClass().getMethod("findBySettingKey", String.class);
+                        Optional<?> result = (Optional<?>) findByKey.invoke(repo, (String) arg);
+                        if (result.isPresent()) {
+                            Object setting = result.get();
+                            java.util.Map<String, Object> fields = new java.util.LinkedHashMap<>();
+                            for (java.lang.reflect.Method m : setting.getClass().getMethods()) {
+                                String mn = m.getName();
+                                if (mn.startsWith("get") && m.getParameterCount() == 0 && !mn.equals("getClass")) {
+                                    String fn = Character.toLowerCase(mn.charAt(3)) + mn.substring(4);
+                                    if (fn.equals("hibernateLazyInitializer") || fn.equals("handler")) continue;
+                                    try {
+                                        Object v = m.invoke(setting);
+                                        if (v != null && !(v instanceof java.util.Collection) && !v.getClass().getName().contains("$")) {
+                                            fields.put(fn, v);
+                                        }
+                                    } catch (Exception ignored) {}
+                                }
+                            }
+                            // 统一 key 命名为 key/value 以匹配新数据
+                            if (fields.containsKey("settingKey")) { fields.put("key", fields.remove("settingKey")); }
+                            if (fields.containsKey("settingValue")) { fields.put("value", fields.remove("settingValue")); }
+                            fields.remove("id");
+                            if (!fields.isEmpty()) {
+                                oldDataJson = objectMapper.writeValueAsString(fields);
+                                System.out.println("[SITE_SETTING_LOG] old data captured: " + oldDataJson);
+                            }
+                        }
+                    } catch (Exception e) { System.out.println("[SITE_SETTING_LOG] error: " + e.getMessage()); }
+                    break;
+                }
+            }
+        }
+        
             if (entityId != null) oldDataJson = loadOldEntityJson(className, entityId);
         }
 
@@ -149,7 +216,9 @@ public class LoggingAspect implements ApplicationContextAware {
                 String path = request.getRequestURI();
 
                 String clientIp = request.getRemoteAddr(); if (clientIp != null && clientIp.length() > 50) clientIp = clientIp.substring(0, 50);
-                String details = className + " " + action + " " + path;
+                String entityDisplayName = ENTITY_NAME_MAP.getOrDefault(className, className);
+                String actionDisplayName = ACTION_NAME_MAP.getOrDefault(action, action);
+                String details = actionDisplayName + entityDisplayName + " " + path;
 
                 // 构建含新旧数据的数据字段
                 String newDataJson = captureArgsAsJson(joinPoint);
@@ -161,6 +230,21 @@ public class LoggingAspect implements ApplicationContextAware {
                             if (origName != null) {
                                 newDataJson = "{\"originalName\":\"" + origName.replace("\"", "\\\"") + "\"}";
                             }
+                            break;
+                        }
+                    }
+                }
+                // SiteSetting 特殊处理：从路径参数提取 key 注入数据
+                if ("SiteSetting".equals(className) && newDataJson != null) {
+                    for (Object arg : joinPoint.getArgs()) {
+                        if (arg instanceof String && ((String) arg).length() < 100) {
+                            try {
+                                Map<String, Object> siteData = new java.util.HashMap<>();
+                                siteData.put("key", arg);
+                                Map<String, Object> bodyMap = objectMapper.readValue(newDataJson, Map.class);
+                                siteData.putAll(bodyMap);
+                                newDataJson = objectMapper.writeValueAsString(siteData);
+                            } catch (Exception ignored) {}
                             break;
                         }
                     }
@@ -184,8 +268,11 @@ public class LoggingAspect implements ApplicationContextAware {
                     }
                 }
 
-                final OperationLog log = new OperationLog(username, role, action, className, entityId, details, path, result, errorMsg, clientIp);
-                logService.save(log);
+                // UPDATE 无实际变更时 dataStr 为 null，跳过日志记录
+                if (!"UPDATE".equals(action) || dataStr != null) {
+                    final OperationLog log = new OperationLog(username, role, action, className, entityId, details, path, result, errorMsg, clientIp);
+                    logService.save(log);
+                }
             } catch (Exception logEx) { System.err.println("[LOG_ERROR] " + logEx.getMessage()); logEx.printStackTrace(); }
         }
         return proceed;
@@ -194,11 +281,22 @@ public class LoggingAspect implements ApplicationContextAware {
     /** 构建含新旧数据对比的 JSON 字符串 */
     private String buildDataString(String action, String oldDataJson, String newDataJson) {
         try {
-            if ("UPDATE".equals(action) && oldDataJson != null && newDataJson != null) {
-                // {o: {old data}, n: {new data}}
+            if ("UPDATE".equals(action) && newDataJson != null) {
+                // 比较新旧数据，无实际变更则返回 null（跳过日志记录）
+                Map<String, Object> newMap = objectMapper.readValue(newDataJson, new com.fasterxml.jackson.core.type.TypeReference<Map<String, Object>>() {});
+                if (oldDataJson != null) {
+                    Map<String, Object> oldMap = objectMapper.readValue(oldDataJson, new com.fasterxml.jackson.core.type.TypeReference<Map<String, Object>>() {});
+                    // 移除忽略字段后比较，若无差异则不记录日志
+                    Map<String, Object> oldFiltered = new HashMap<>(oldMap);
+                    Map<String, Object> newFiltered = new HashMap<>(newMap);
+                    String[] ignoredFields = {"id", "createdAt", "updatedAt", "slug", "password", "viewCount", "key"};
+                    for (String f : ignoredFields) { oldFiltered.remove(f); newFiltered.remove(f); }
+                    if (oldFiltered.equals(newFiltered)) return null;
+                }
+                // {o: {old data}, n: {new data}}，旧数据可能为 null（如 SiteSetting 按 key 更新无 entityId）
                 Map<String, Object> wrapper = new HashMap<>();
-                wrapper.put("o", objectMapper.readValue(oldDataJson, Object.class));
-                wrapper.put("n", objectMapper.readValue(newDataJson, Object.class));
+                if (oldDataJson != null) wrapper.put("o", objectMapper.readValue(oldDataJson, Object.class));
+                wrapper.put("n", newMap);
                 String result = objectMapper.writeValueAsString(wrapper);
                 return result.length() > 30000 ? result.substring(0, 30000) + "..." : result;
             } else if (newDataJson != null && !newDataJson.isEmpty()) {
@@ -297,6 +395,52 @@ private String loadOldEntityJson(String entityName, Long entityId) {
                         } catch (Exception ignored) {}
                     }
                 }
+                                // 为 Article 实体捕获分类ID和标签ID（JPA 关系字段被反射循环跳过）
+                if ("Article".equals(cleanName)) {
+                    try {
+                        java.lang.reflect.Method getCategory = entity.getClass().getMethod("getCategory");
+                        Object category = getCategory.invoke(entity);
+                        if (category != null) {
+                            java.lang.reflect.Method getId = category.getClass().getMethod("getId");
+                            Object catId = getId.invoke(category);
+                            if (catId != null) fields.put("categoryId", catId);
+                        }
+                    } catch (Exception ignored) {}
+                    try {
+                        java.lang.reflect.Method getTags = entity.getClass().getMethod("getTags");
+                        Object tags = getTags.invoke(entity);
+                        if (tags instanceof java.util.Collection<?> tagCollection) {
+                            java.util.List<Long> tagIds = new java.util.ArrayList<>();
+                            for (Object tag : tagCollection) {
+                                java.lang.reflect.Method getId = tag.getClass().getMethod("getId");
+                                Object tid = getId.invoke(tag);
+                                if (tid != null) tagIds.add(((Number) tid).longValue());
+                            }
+                            fields.put("tagIds", tagIds);
+                        }
+                    } catch (Exception ignored) {}
+                    // 捕获 status 和 visibility（内部枚举类型含 $ 被反射循环跳过）
+                    try {
+                        java.lang.reflect.Method getStatus = entity.getClass().getMethod("getStatus");
+                        Object status = getStatus.invoke(entity);
+                        if (status != null) fields.put("status", status.toString());
+                    } catch (Exception ignored) {}
+                    try {
+                        java.lang.reflect.Method getVisibility = entity.getClass().getMethod("getVisibility");
+                        Object visibility = getVisibility.invoke(entity);
+                        if (visibility != null) fields.put("visibility", visibility.toString());
+                    } catch (Exception ignored) {}
+                }
+
+                                // 为 Comment 实体捕获 status（内部枚举类型含 $ 被反射循环跳过）
+                if ("Comment".equals(cleanName)) {
+                    try {
+                        java.lang.reflect.Method getStatus = entity.getClass().getMethod("getStatus");
+                        Object status = getStatus.invoke(entity);
+                        if (status != null) fields.put("status", status.toString());
+                    } catch (Exception ignored) {}
+                }
+
                 if (!fields.isEmpty()) {
                     String json = objectMapper.writeValueAsString(fields);
                     System.out.println("[LOG_OLD] captured " + fields.size() + " fields: " + (json.length() > 200 ? json.substring(0, 200) + "..." : json));

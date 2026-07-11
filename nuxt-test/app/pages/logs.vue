@@ -44,6 +44,8 @@ function actionStyle(action) {
 
 const actionMap = { CREATE: "创建", UPDATE: "修改", DELETE: "删除", UPLOAD: "上传", APPROVE: "通过", REJECT: "驳回", LOGIN: "登录", LOGOUT: "退出", OTHER: "其他" };
 const roleMap = { SUPERADMIN: "超级管理员", ADMIN: "管理员", USER: "用户", GUEST: "访客" };
+// 站点设置 key 到中文标签映射
+const settingLabelMap = { site_name: "网站名称", site_description: "网站描述", site_logo: "Logo URL", icp_number: "备案号" };
 const entityMap = { Article: "文章", Category: "分类", Tag: "标签", User: "用户", Comment: "评论", Media: "媒体", SiteSetting: "站点设置", Auth: "认证" };
 const entityOptions = Object.entries(entityMap).map(([value, label]) => ({ value, label }));
 
@@ -52,24 +54,10 @@ const detailRow = ref(null);
 
 function showDetail(row) { detailRow.value = row; detailDialogVisible.value = true; }
 
-// 详情差异计算（computed 避免重复解析）
-const detailDiff = computed(() => {
-  if (!detailRow.value || detailRow.value.action !== "UPDATE") return { oldObj: null, newObj: null, changes: [] };
-  const { data } = parseData(detailRow.value.details);
-  if (!data) return { oldObj: null, newObj: null, changes: [] };
-  try {
-    const parsed = JSON.parse(data);
-    const oldObj = parsed.o || {};
-    const newObj = parsed.n || {};
-    const changes = [];
-    for (const key of Object.keys(oldObj)) {
-      if (newObj[key] !== undefined && String(newObj[key]) !== String(oldObj[key])) {
-        changes.push({ key, oldVal: oldObj[key], newVal: newObj[key] });
-      }
-    }
-    return { oldObj, newObj, changes };
-  } catch { return { oldObj: null, newObj: null, changes: [] }; }
-});
+// computed 缓存，避免模板中重复计算
+const logDesc = computed(() => detailRow.value ? formatLogDesc(detailRow.value) : null);
+const updateDiff = computed(() => detailRow.value ? getUpdateDiff(detailRow.value) : null);
+
 
 function parseData(details) {
   if (!details) return { summary: "", data: "" };
@@ -78,62 +66,59 @@ function parseData(details) {
   return { summary: details.substring(0, idx), data: details.substring(idx + 6).trim() };
 }
 
-// 格式化新增/删除操作描述
-function formatOpDesc(row) {
-  const { data } = parseData(row.details);
-  let parsed = null;
-  if (data) { try { parsed = JSON.parse(data); } catch {} }
-  
-  const entityLabel = entityMap[row.entity] || row.entity;
-
-  // 评论操作：提取内容（截断长文本）
-  if (row.entity === "Comment") {
-    const text = parsed ? (parsed.content || "").substring(0, 30) + (parsed.content && parsed.content.length > 30 ? "..." : "") : "";
-    const idPart = row.entityId ? "，ID：" + row.entityId : "";
-    if (row.action === "CREATE") {
-      return { prefix: "创建评论 ", name: text, nameColor: "#67c23a", suffix: "", suffixColor: "" };
-    }
-    if (row.action === "DELETE" || row.action === "APPROVE" || row.action === "REJECT") {
-      const color = row.action === "APPROVE" ? "#67c23a" : "#f56c6c";
-      return { prefix: (row.action === "DELETE" ? "删除评论 " : row.action === "APPROVE" ? "通过评论 " : "驳回评论 "), name: text, nameColor: color, suffix: idPart, suffixColor: "" };
-    }
-    return null;
-  }
-
-  if (row.action === "UPLOAD") {
-    if (parsed && (parsed.originalName || parsed.filename)) return { prefix: "上传" + entityLabel, name: parsed.originalName || parsed.filename, nameColor: "#67c23a", suffix: "" };
-    return null;
-  }
-
-  if (row.action === "CREATE") {
-    if (parsed) {
-      if (row.entity === "Article" && parsed.title) return { prefix: "创建" + entityLabel, name: parsed.title, nameColor: "#67c23a", suffix: "" };
-      if (row.entity === "User" && parsed.username) { const roleLabel = roleMap[parsed.role] || "用户"; return { prefix: "创建" + roleLabel + " ", name: parsed.username, nameColor: "#67c23a", suffix: "" }; }
-      if (row.entity === "Media" && (parsed.originalName || parsed.filename)) return { prefix: "创建" + entityLabel, name: parsed.originalName || parsed.filename, nameColor: "#67c23a", suffix: "" };
-      if (parsed.name) return { prefix: "创建" + entityLabel, name: parsed.name, nameColor: "#67c23a", suffix: "" };
-    }
-    return null;
-  }
-  
-  if (row.action === "DELETE") {
-    if (parsed) {
-      if (row.entity === "Article" && parsed.title) return { prefix: "删除" + entityLabel, name: parsed.title, nameColor: "#f56c6c", suffixLabel: "，ID：", suffixValue: row.entityId ? String(row.entityId) : "", suffixColor: "#f56c6c" };
-      if (row.entity === "User" && parsed.username) { const roleLabel = roleMap[parsed.role] || "用户"; return { prefix: "删除" + roleLabel + " ", name: parsed.username, nameColor: "#f56c6c", suffixLabel: "，ID：", suffixValue: row.entityId ? String(row.entityId) : "", suffixColor: "#f56c6c" }; }
-      if (row.entity === "Media" && (parsed.originalName || parsed.filename)) return { prefix: "删除" + entityLabel, name: parsed.originalName || parsed.filename, nameColor: "#f56c6c", suffixLabel: "，ID：", suffixValue: row.entityId ? String(row.entityId) : "", suffixColor: "#f56c6c" };
-      if (parsed.name) return { prefix: "删除" + entityLabel, name: parsed.name, nameColor: "#f56c6c", suffixLabel: "，ID：", suffixValue: row.entityId ? String(row.entityId) : "", suffixColor: "#f56c6c" };
-    }
-    return { prefix: "删除" + entityLabel, name: "", nameColor: "", suffixLabel: " ID：", suffixValue: row.entityId ? String(row.entityId) : "", suffixColor: "#f56c6c" };
-  }
-  
-  return null;
-}
-
 const fieldLabelMap = {
   username: "用户名", email: "邮箱", role: "角色", password: "密码",
   title: "标题", content: "内容", categoryId: "分类", tagIds: "标签",
   status: "状态", visibility: "可见性", name: "名称", description: "描述",
-  oldPassword: "原密码", newPassword: "新密码",
+  oldPassword: "原密码", newPassword: "新密码", value: "值",
 };
+
+// 格式化 CREATE/DELETE/UPLOAD 的操作描述
+function formatLogDesc(row) {
+  if (row.action === "UPDATE") return null;
+  const { data } = parseData(row.details);
+  let parsed = null;
+  if (data) { try { parsed = JSON.parse(data); } catch {} }
+  const entityLabel = entityMap[row.entity] || row.entity;
+  const idStr = row.entityId ? "，ID：" + row.entityId : "";
+
+  // 提取名称：按实体类型匹配对应字段
+  function getName(obj) {
+    if (!obj) return "";
+    if (row.entity === "Article") return obj.title || "";
+    if (row.entity === "User") { const rl = roleMap[obj.role] || "用户"; return rl + " " + (obj.username || ""); }
+    if (row.entity === "Media") return obj.originalName || obj.filename || "";
+    if (row.entity === "Comment") return (obj.content || "").substring(0, 30) + (obj.content && obj.content.length > 30 ? "..." : "");
+    if (row.entity === "Auth") return obj.username || "";
+    return obj.name || obj.title || "";
+  }
+
+  if (row.action === "CREATE") {
+    const name = getName(parsed);
+    if (name) return { prefix: "创建" + entityLabel + " ", name, nameColor: "#67c23a", suffix: "" };
+  }
+  if (row.action === "DELETE") {
+    const name = getName(parsed);
+    if (name) return { prefix: "删除" + entityLabel + " ", name, nameColor: "#f56c6c", suffixLabel: idStr ? "，ID：" : "", suffixValue: row.entityId ? String(row.entityId) : "", suffixColor: "#f56c6c" };
+    return { prefix: "删除" + entityLabel, name: "", nameColor: "", suffixLabel: " ID：", suffixValue: row.entityId ? String(row.entityId) : "", suffixColor: "#f56c6c" };
+  }
+  if (row.action === "UPLOAD") {
+    const name = getName(parsed);
+    if (name) return { prefix: "上传" + entityLabel + " ", name, nameColor: "#67c23a", suffix: "" };
+  }
+  if (row.action === "APPROVE" || row.action === "REJECT") {
+    const name = getName(parsed);
+    const actLabel = row.action === "APPROVE" ? "通过" : "驳回";
+    const color = row.action === "APPROVE" ? "#67c23a" : "#f56c6c";
+    if (name) return { prefix: actLabel + entityLabel + " ", name, nameColor: color, suffixLabel: row.entityId ? "，ID：" : "", suffixValue: row.entityId ? String(row.entityId) : "", suffixColor: color };
+  }
+  if (row.action === "LOGIN" || row.action === "LOGOUT") {
+    const name = parsed ? (parsed.username || "") : (row.username || "");
+    const loginColor = row.result === "FAIL" ? "#f56c6c" : (row.action === "LOGIN" ? "#67c23a" : "#f56c6c");
+    return { prefix: "用户 ", name, nameColor: loginColor, suffix: row.action === "LOGIN" ? " 登录" : " 退出", suffixColor: "" };
+  }
+  return null;
+}
 
 // 从 details 数据中提取 o(旧数据) 和 n(新数据)
 function parseOldNewData(row) {
@@ -144,6 +129,137 @@ function parseOldNewData(row) {
     const parsed = JSON.parse(data);
     return { oldObj: parsed.o || null, newObj: parsed.n || null };
   } catch { return { oldObj: null, newObj: null }; }
+}
+// 为 UPDATE 操作生成变更字段列表
+function getUpdateDiff(row) {
+  if (row.action !== "UPDATE") return null;
+  const { oldObj, newObj } = parseOldNewData(row);
+  if (!newObj) return null;
+  // 无旧数据时（如 SiteSetting 按 key 更新），将所有新字段显示为新增
+  // SiteSetting 特殊处理：将 key 解析为可读标签
+  const isSiteSetting = row.entity === "SiteSetting";
+  const settingKeyLabel = isSiteSetting && newObj.key ? (settingLabelMap[newObj.key] || newObj.key) : null;
+  if (!oldObj) {
+    const changes = [];
+    for (const key of Object.keys(newObj)) {
+      if (key === "id" || key === "createdAt" || key === "updatedAt" || key === "password" || key === "viewCount" || key === "slug") continue;
+      if (isSiteSetting && key === "key") continue;
+      const displayKey2 = isSiteSetting && key === "value" && settingKeyLabel ? settingKeyLabel : key;
+      changes.push({ key: displayKey2, oldVal: null, newVal: newObj[key] });
+    }
+    return changes.length > 0 ? changes : null;
+  }
+  const changes = [];
+  const oldKeys = Object.keys(oldObj);
+  const newKeys = Object.keys(newObj);
+  const allKeys = oldKeys.filter(k => newKeys.includes(k));
+  for (const key of allKeys) {
+    if (key === "id" || key === "createdAt" || key === "updatedAt" || key === "password" || key === "viewCount" || key === "slug") continue;
+    if (isSiteSetting && key === "key") continue; // key 已解析为标签
+    const oldVal = oldObj[key];
+    const newVal = newObj[key];
+    if (JSON.stringify(oldVal) !== JSON.stringify(newVal)) {
+      const displayKey = isSiteSetting && key === "value" && settingKeyLabel ? settingKeyLabel : key;
+      changes.push({ key: displayKey, oldVal, newVal });
+    }
+  }
+  return changes.length > 0 ? changes : null;
+}
+
+// 去除 HTML 标签，保留换行结构
+function stripHtml(html) {
+  if (!html || typeof html !== "string") return String(html ?? "");
+  return html
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<\/?(p|div|h[1-6]|li|blockquote|pre|hr|table|tr|ul|ol)[^>]*>/gi, "\n")
+    .replace(/<[^>]*>/g, "")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&amp;/g, "&")
+    .replace(/&quot;/g, '"')
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
+function computeCharDiff(oldStr, newStr) {
+  const o = stripHtml(String(oldStr ?? ""));
+  const n = stripHtml(String(newStr ?? ""));
+  if (o === n) return [{ type: "same", text: o }];
+
+  // 短文本：完整 LCS 逐字 diff
+  if (o.length <= 100 && n.length <= 100) {
+    const m = o.length, len = n.length;
+    const dp = Array.from({ length: m + 1 }, () => new Uint16Array(len + 1));
+    for (let i = 1; i <= m; i++) {
+      for (let j = 1; j <= len; j++) {
+        dp[i][j] = o[i-1] === n[j-1] ? dp[i-1][j-1] + 1 : Math.max(dp[i-1][j], dp[i][j-1]);
+      }
+    }
+    const temp = [];
+    let i = m, j = len;
+    while (i > 0 || j > 0) {
+      if (i > 0 && j > 0 && o[i-1] === n[j-1]) {
+        temp.push({ type: "same", char: o[i-1] }); i--; j--;
+      } else if (j > 0 && (i === 0 || dp[i][j-1] >= dp[i-1][j])) {
+        temp.push({ type: "insert", char: n[j-1] }); j--;
+      } else {
+        temp.push({ type: "delete", char: o[i-1] }); i--;
+      }
+    }
+    temp.reverse();
+    const segs = [];
+    for (const s of temp) {
+      const last = segs[segs.length - 1];
+      if (last && last.type === s.type) last.text += s.char;
+      else segs.push({ type: s.type, text: s.char });
+    }
+    return segs;
+  }
+
+  // 长文本：截取差异区域前后各 50 字符上下文
+  const CTX = 50;
+  let samePrefix = 0;
+  while (samePrefix < o.length && samePrefix < n.length && o[samePrefix] === n[samePrefix]) samePrefix++;
+  let sameSuffix = 0;
+  while (sameSuffix < o.length - samePrefix && sameSuffix < n.length - samePrefix &&
+         o[o.length - 1 - sameSuffix] === n[n.length - 1 - sameSuffix]) sameSuffix++;
+
+  const prefixStart = Math.max(0, samePrefix - CTX);
+  const suffixEndOld = Math.min(o.length, o.length - sameSuffix + CTX);
+  const suffixEndNew = Math.min(n.length, n.length - sameSuffix + CTX);
+  const hasMoreLeft = prefixStart > 0;
+  const hasMoreRight = o.length - sameSuffix + CTX < o.length || n.length - sameSuffix + CTX < n.length;
+
+  const oldMid = o.slice(samePrefix, o.length - sameSuffix);
+  const newMid = n.slice(samePrefix, n.length - sameSuffix);
+
+  const result = [];
+  if (samePrefix > 0) {
+    const pre = o.slice(prefixStart, samePrefix);
+    result.push({ type: "same", text: (hasMoreLeft ? "…" : "") + pre });
+  }
+  if (oldMid) result.push({ type: "delete", text: oldMid });
+  if (newMid) result.push({ type: "insert", text: newMid });
+  if (sameSuffix > 0) {
+    const suf = o.slice(o.length - sameSuffix, suffixEndOld);
+    result.push({ type: "same", text: suf + (hasMoreRight ? "…" : "") });
+  }
+  return result;
+}
+// 判断值是否为字符串类型（适合逐字 diff）
+// 下拉选择类字段，使用删除+新增格式而非逐字 diff
+const selectFields = new Set(["status", "visibility", "role", "categoryId", "tagIds"]);
+
+function isDiffable(val) {
+  if (val === null || val === undefined) return false;
+  const s = String(val);
+  return s.length > 0 && typeof val !== "object";
+}
+function formatDiffVal(val) {
+  if (val === null || val === undefined) return "(空)";
+  if (typeof val === "object") return JSON.stringify(val);
+  return String(val);
 }
 
 function parseDataFields(detailsStr) {
@@ -260,32 +376,34 @@ onMounted(() => { loadData(); loadMaps(); });
           </el-descriptions-item>
           <el-descriptions-item label="IP地址">{{ detailRow.clientIp }}</el-descriptions-item>
           <el-descriptions-item label="操作描述" :span="2">
-            <template v-if="formatOpDesc(detailRow)">
-              {{ formatOpDesc(detailRow).prefix }}<span :style="{color:formatOpDesc(detailRow).nameColor,fontWeight:'bold'}">{{ formatOpDesc(detailRow).name }}</span><template v-if="formatOpDesc(detailRow).suffixLabel">{{ formatOpDesc(detailRow).suffixLabel }}<span :style="{color:formatOpDesc(detailRow).suffixColor,fontWeight:'bold'}">{{ formatOpDesc(detailRow).suffixValue }}</span></template>
-              <span v-if="detailRow.result==='FAIL' && detailRow.errorMsg" style="color:#f56c6c;font-weight:bold">（失败原因：{{ detailRow.errorMsg }}）</span>
+            <template v-if="detailRow.action === 'UPDATE'">
+              <div v-if="updateDiff" style="font-size:13px;line-height:1.8;white-space:pre-wrap">
+                <div v-for="c in updateDiff" :key="c.key" style="margin-bottom:4px">
+                  <strong>{{ getFieldLabel(c.key) }}：</strong>
+                  <template v-if="c.oldVal != null && c.newVal != null && (isDiffable(c.oldVal) || isDiffable(c.newVal)) && !selectFields.has(c.key) && c.key !== 'Logo URL'">
+                    <template v-for="seg in computeCharDiff(String(c.oldVal ?? ''), String(c.newVal ?? ''))" :key="seg.type + seg.text">
+                      <span v-if="seg.type === 'same'">{{ seg.text }}</span>
+                      <span v-else-if="seg.type === 'delete'" style="color:#f56c6c;text-decoration:line-through">{{ seg.text }}</span>
+                      <span v-else style="color:#67c23a;font-weight:bold">{{ seg.text }}</span>
+                    </template>
+                  </template>
+                  <template v-else>
+                    <span style="color:#f56c6c;text-decoration:line-through">{{ formatDiffVal(c.oldVal) }}</span>
+                    <span style="margin:0 6px;color:#909399">→</span>
+                    <span style="color:#67c23a;font-weight:bold">{{ formatDiffVal(c.newVal) }}</span>
+                  </template>
+                </div>
+              </div>
+              <div v-else style="color:#909399;font-size:13px">无字段变更</div>
             </template>
-            <template v-else-if="detailRow.action==='LOGIN'">
-              用户 {{ detailRow.username }} 登录系统
-              <span v-if="detailRow.result==='FAIL' && detailRow.errorMsg" style="color:#f56c6c;font-weight:bold">（失败原因：{{ detailRow.errorMsg }}）</span>
+            <template v-else-if="logDesc">
+              <span>{{ logDesc.prefix }}</span><span :style="{color:logDesc.nameColor,fontWeight:'bold'}">{{ logDesc.name }}</span>
+              <template v-if="logDesc.suffixLabel">{{ logDesc.suffixLabel }}<span :style="{color:logDesc.suffixColor,fontWeight:'bold'}">{{ logDesc.suffixValue }}</span></template><span>{{ logDesc.suffix }}</span>
             </template>
-            <template v-else>{{ detailRow.details }}</template>
-          </el-descriptions-item>
-          <el-descriptions-item label="时间">{{ (detailRow.createdAt || "").replace("T", " ").slice(0, 16) }}</el-descriptions-item>
+            <pre v-else style="background:#f5f7fa;padding:10px 12px;border-radius:4px;font-size:13px;white-space:pre-wrap;word-break:break-all;max-height:200px;overflow:auto;margin:0">{{ detailRow.details || "无" }}</pre>
+          </el-descriptions-item>          <el-descriptions-item label="时间">{{ (detailRow.createdAt || "").replace("T", " ").slice(0, 16) }}</el-descriptions-item>
           <el-descriptions-item label="请求路径" :span="2">{{ detailRow.path }}</el-descriptions-item>
         </el-descriptions>
-        <div v-if="detailRow.action==='UPDATE'" style="margin-top:16px">
-          <h4 style="margin-bottom:8px;color:#303133">操作数据</h4>
-          <div style="background:#f5f7fa;padding:12px;border-radius:4px;max-height:300px;overflow:auto">
-            <template v-if="detailDiff.changes.length">
-              <div v-for="ch in detailDiff.changes" :key="ch.key" style="font-family:monospace;font-size:13px;line-height:1.8;margin-bottom:4px">
-                <strong>{{ getFieldLabel(ch.key) }}:</strong>
-                <span style="color:#f56c6c;text-decoration:line-through;margin-right:6px">{{ ch.oldVal }}</span>
-                <span style="color:#67c23a">{{ ch.newVal }}</span>
-              </div>
-            </template>
-            <div v-else style="font-family:monospace;font-size:13px;white-space:pre-wrap;word-break:break-all">暂无修改数据，原始记录：{{ parseData(detailRow.details).data || detailRow.details || "无" }}</div>
-          </div>
-        </div>
       </template>
     </el-dialog>
   </div>
