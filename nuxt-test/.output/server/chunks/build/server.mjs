@@ -624,85 +624,85 @@ const _routes = [
     name: "articles-edit-id",
     path: "/articles/edit/:id()",
     meta: { "middleware": "auth" },
-    component: () => import('./_id_-C_VFat98.mjs')
+    component: () => import('./_id_-CIIsELXR.mjs')
   },
   {
     name: "articles-create",
     path: "/articles/create",
     meta: { "middleware": "auth" },
-    component: () => import('./create-BLXuMSOr.mjs')
+    component: () => import('./create-BNUvJeOW.mjs')
   },
   {
     name: "article-slug",
     path: "/article/:slug()",
     meta: __nuxt_page_meta$2 || {},
-    component: () => import('./_slug_-BJ3uK4EF.mjs')
+    component: () => import('./_slug_-BelVVwm-.mjs')
   },
   {
     name: "articles",
     path: "/articles",
     meta: { "middleware": "auth" },
-    component: () => import('./index-D913ZTXg.mjs')
+    component: () => import('./index-CL4qKjdE.mjs')
   },
   {
     name: "categories",
     path: "/categories",
     meta: { "middleware": "auth" },
-    component: () => import('./categories-D-Ecp0m8.mjs')
+    component: () => import('./categories-Dmm2rBy2.mjs')
   },
   {
     name: "comments",
     path: "/comments",
     meta: { "middleware": "auth" },
-    component: () => import('./comments-CqK4fwQt.mjs')
+    component: () => import('./comments-CDUlBjoE.mjs')
   },
   {
     name: "home",
     path: "/home",
     meta: { "middleware": "auth" },
-    component: () => import('./home-DrSuypXO.mjs')
+    component: () => import('./home-C3jJRNKQ.mjs')
   },
   {
     name: "login",
     path: "/login",
     meta: __nuxt_page_meta$1 || {},
-    component: () => import('./login-CPeAOn1G.mjs')
+    component: () => import('./login-CXom99Wj.mjs')
   },
   {
     name: "logs",
     path: "/logs",
     meta: { "middleware": "auth" },
-    component: () => import('./logs-DobUN_Nd.mjs')
+    component: () => import('./logs-5kFuhZqw.mjs')
   },
   {
     name: "media",
     path: "/media",
     meta: { "middleware": "auth" },
-    component: () => import('./media-CkK6upUA.mjs')
+    component: () => import('./media-DN0nwaEh.mjs')
   },
   {
     name: "setting",
     path: "/setting",
     meta: { "middleware": "auth" },
-    component: () => import('./setting-DtrlLLM1.mjs')
+    component: () => import('./setting-CPjbLION.mjs')
   },
   {
     name: "tags",
     path: "/tags",
     meta: { "middleware": "auth" },
-    component: () => import('./tags-CcN24OAc.mjs')
+    component: () => import('./tags-W9DbWfcl.mjs')
   },
   {
     name: "user",
     path: "/user",
     meta: { "middleware": "auth" },
-    component: () => import('./user-DP8vPfQq.mjs')
+    component: () => import('./user-5qRBTjeG.mjs')
   },
   {
     name: "index",
     path: "/",
     meta: __nuxt_page_meta || {},
-    component: () => import('./index-sDhk5nXi.mjs')
+    component: () => import('./index-B8GV16rU.mjs')
   }
 ];
 const _wrapInTransition = (props, children) => {
@@ -1283,8 +1283,8 @@ const plugins = [
 ];
 const layouts = {
   blank: defineAsyncComponent(() => import('./blank-D0MnAPB6.mjs').then((m) => m.default || m)),
-  default: defineAsyncComponent(() => import('./default-DbF0nNDp.mjs').then((m) => m.default || m)),
-  public: defineAsyncComponent(() => import('./public-DTHwV8Vx.mjs').then((m) => m.default || m))
+  default: defineAsyncComponent(() => import('./default-BV-3WGab.mjs').then((m) => m.default || m)),
+  public: defineAsyncComponent(() => import('./public-Dnl1Rsxk.mjs').then((m) => m.default || m))
 };
 const routeRulesMatcher = _routeRulesMatcher;
 const LayoutLoader = defineComponent({

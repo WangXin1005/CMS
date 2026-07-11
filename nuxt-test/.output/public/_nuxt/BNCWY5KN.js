@@ -1,0 +1,1 @@
+import{g as t}from"./_3N40KHN.js";const i=()=>({upload:async a=>{const e=new FormData;return e.append("file",a),(await t.post("/admin/media/upload",e,{headers:{"Content-Type":"multipart/form-data"}})).data},getList:async()=>(await t.get("/admin/media")).data,remove:async a=>(await t.delete(`/admin/media/${a}`)).data});export{i as u};
