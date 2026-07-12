@@ -1,31 +1,30 @@
 <!-- Header — 管理后台顶部导航栏，显示用户信息和退出按钮 -->
 <script lang="ts" setup>
-import { ArrowDown } from '@element-plus/icons-vue'
-import { ref } from 'vue'
+import { ArrowDown, ArrowLeft } from '@element-plus/icons-vue'
+import { ref, computed } from 'vue'
 import { ElMessage } from 'element-plus'
 
 const { username, role, logout, changePassword } = useAuth()
 const route = useRoute()
-
-const pageTitleMap: Record<string, string> = {
-  '/home': '仪表盘',
-  '/articles': '文章管理',
-  '/articles/create': '创建文章',
-  '/categories': '分类管理',
-  '/tags': '标签管理',
-  '/comments': '评论管理',
-  '/media': '媒体管理',
-  '/user': '用户管理',
-  '/setting': '站点设置',
-  '/logs': '操作日志',
+// 面包屑路径→名称映射
+const breadcrumbMap: Record<string, string> = {
+  '/home': '仪表盘', '/articles': '文章管理', '/categories': '分类管理',
+  '/tags': '标签管理', '/comments': '评论管理', '/media': '媒体管理',
+  '/users': '用户管理', '/settings': '站点设置', '/logs': '操作日志',
 }
-
-const currentTitle = computed(() => {
+const breadcrumbs = computed(() => {
   const path = route.path
-  if (pageTitleMap[path]) return pageTitleMap[path]
-  if (path.startsWith('/articles/edit/')) return '编辑文章'
-  return '系统管理'
+  const items: { name: string; path: string }[] = [{ name: '首页', path: '/' }]
+  if (path === '/') return items
+  if (path === '/home') { items.push({ name: '仪表盘', path: '' }); return items }
+  if (path.startsWith('/articles/create')) { items.push({ name: '文章管理', path: '/articles' }); items.push({ name: '创建文章', path: '' }); return items }
+  const label = breadcrumbMap[path]
+  if (label) items.push({ name: label, path: '' })
+  return items
 })
+
+
+
 
 // 修改密码弹窗
 const dialogVisible = ref(false)
@@ -75,7 +74,10 @@ function handleCommand(command: string) {
 <template>
   <el-header class="admin-header">
     <div class="header-left">
-      <span class="header-title">{{ currentTitle }}</span>
+      <NuxtLink to="/" class="back-blog-btn">
+        <el-icon class="back-icon"><ArrowLeft /></el-icon>
+        <span>返回博客</span>
+      </NuxtLink>
     </div>
     <div class="header-right">
       <el-dropdown trigger="click" @command="handleCommand">
@@ -151,6 +153,31 @@ function handleCommand(command: string) {
   z-index: 10;
 }
 
+.header-logo { display:flex;align-items:center;margin-right:8px }
+.header-logo img { height:24px;width:auto }
+.logo-emoji { font-size:22px;line-height:1 }
+.gradient-text { background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text }
+.back-blog-btn {
+  text-decoration: none;
+  font-size: 15px;
+  color: #555;
+  padding: 6px 14px;
+  border-radius: 6px;
+  transition: all 0.2s;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+
+  &:hover {
+    color: #409eff;
+    background: #ecf5ff;
+  }
+}
+
+.back-icon {
+  font-size: 17px
+}
 .header-left {
   display: flex;
   align-items: center;

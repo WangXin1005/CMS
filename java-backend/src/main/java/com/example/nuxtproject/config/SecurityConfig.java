@@ -104,6 +104,7 @@ public class SecurityConfig {
                 ).permitAll()
                 // Spring 内部错误转发路径
                 .requestMatchers("/api/health").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/public/settings").permitAll()
                 .requestMatchers("/error").permitAll()
                 // 除上述路径外，所有请求均需认证
                 .anyRequest().authenticated()

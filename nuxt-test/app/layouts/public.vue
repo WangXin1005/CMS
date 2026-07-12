@@ -1,11 +1,10 @@
-<!-- public 布局 — 公开博客布局：顶栏导航 + 内容 + 页脚 -->
 <template>
   <div class="public-layout">
     <header class="public-header">
       <div class="header-inner">
         <NuxtLink to="/" class="logo">
-          <span class="logo-icon">📝</span>
-          <span class="logo-text">CodeBlog</span>
+          <span class="logo-icon"><img v-if="siteLogo" :src="siteLogo" class="logo-img" alt="logo" /><span v-else class="logo-emoji">📝</span></span>
+          <span class="logo-text">{{ siteName }}</span>
         </NuxtLink>
         <nav class="nav-links">
           <ClientOnly>
@@ -20,17 +19,42 @@
         </nav>
       </div>
     </header>
-    <main class="main-area">
-      <slot />
-    </main>
+    <main class="main-area"><slot /></main>
     <footer class="public-footer">
-      <p>&copy; 2026 CodeBlog. Powered by Nuxt &amp; Spring Boot.</p>
+      <p>&copy; 2026 {{ siteName }}. Powered by Nuxt &amp; Spring Boot.</p>
+      <p v-if="icpNumber" style="margin-top:4px;font-size:12px;color:#bbb">{{ icpNumber }}</p>
     </footer>
   </div>
 </template>
 
 <script lang="ts" setup>
+import { ref, computed, onMounted } from 'vue'
 const { username, isLoggedIn } = useAuth()
+
+const siteLogo = ref('')
+const siteName = ref('CodeBlog')
+const siteDesc = ref('基于 Nuxt + Spring Boot 构建的博客 CMS 系统')
+const icpNumber = ref('蒙ICP备2026006795号-1')
+
+onMounted(async () => {
+  try {
+    const res = await fetch('/api/public/settings')
+    const list = await res.json()
+    if (Array.isArray(list)) {
+      list.forEach((item: any) => {
+        if (item.settingKey === 'site_logo') siteLogo.value = item.settingValue || ''
+        if (item.settingKey === 'site_name') siteName.value = item.settingValue || 'CodeBlog'
+        if (item.settingKey === 'site_description') siteDesc.value = item.settingValue || ''
+        if (item.settingKey === 'icp_number') icpNumber.value = item.settingValue || ''
+      })
+    }
+  } catch { /* keep defaults */ }
+})
+
+useHead({
+  title: computed(() => siteName.value),
+  meta: [{ name: 'description', content: computed(() => siteDesc.value) }]
+})
 </script>
 
 <style lang="less" scoped>
@@ -64,6 +88,16 @@ const { username, isLoggedIn } = useAuth()
 }
 .logo-icon {
   font-size: 24px;
+  display: flex;
+  align-items: center;
+}
+.logo-img {
+  height: 28px;
+  width: auto;
+  object-fit: contain;
+}
+.logo-emoji {
+  line-height: 1;
 }
 .logo-text {
   font-size: 22px;

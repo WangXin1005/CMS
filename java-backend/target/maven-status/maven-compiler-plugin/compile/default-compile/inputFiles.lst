@@ -4,6 +4,7 @@ D:\projects\nuxtProject\java-backend\src\main\java\com\example\nuxtproject\confi
 D:\projects\nuxtProject\java-backend\src\main\java\com\example\nuxtproject\config\LoggingAspect.java
 D:\projects\nuxtProject\java-backend\src\main\java\com\example\nuxtproject\config\RateLimitFilter.java
 D:\projects\nuxtProject\java-backend\src\main\java\com\example\nuxtproject\config\SecurityConfig.java
+D:\projects\nuxtProject\java-backend\src\main\java\com\example\nuxtproject\config\SiteSettingInitializer.java
 D:\projects\nuxtProject\java-backend\src\main\java\com\example\nuxtproject\config\WebConfig.java
 D:\projects\nuxtProject\java-backend\src\main\java\com\example\nuxtproject\controller\ArticleController.java
 D:\projects\nuxtProject\java-backend\src\main\java\com\example\nuxtproject\controller\AuthController.java
@@ -12,6 +13,7 @@ D:\projects\nuxtProject\java-backend\src\main\java\com\example\nuxtproject\contr
 D:\projects\nuxtProject\java-backend\src\main\java\com\example\nuxtproject\controller\HealthController.java
 D:\projects\nuxtProject\java-backend\src\main\java\com\example\nuxtproject\controller\MediaController.java
 D:\projects\nuxtProject\java-backend\src\main\java\com\example\nuxtproject\controller\OperationLogController.java
+D:\projects\nuxtProject\java-backend\src\main\java\com\example\nuxtproject\controller\PublicSiteSettingController.java
 D:\projects\nuxtProject\java-backend\src\main\java\com\example\nuxtproject\controller\SiteSettingController.java
 D:\projects\nuxtProject\java-backend\src\main\java\com\example\nuxtproject\controller\TagController.java
 D:\projects\nuxtProject\java-backend\src\main\java\com\example\nuxtproject\controller\UserController.java

@@ -2,8 +2,8 @@
 <template>
   <div class="menu-container">
     <div class="menu-logo">
-      <span class="logo-icon">📝</span>
-      <span class="logo-text">CodeBlog</span>
+      <span class="logo-icon"><img v-if="siteLogo" :src="siteLogo" class="logo-img" alt="logo" /><span v-else class="logo-emoji">📝</span></span>
+      <span class="logo-text">{{ siteName }}</span>
     </div>
     <el-menu
       :router="true"
@@ -11,7 +11,7 @@
       background-color="#1e1e2d"
       text-color="#a2a3b7"
       active-text-color="#fff"
-      class="side-menu"
+      class="side-menu" style="width:100%;border-right:none"
     >
       <el-menu-item index="/home">
         <el-icon><HomeFilled /></el-icon>
@@ -50,14 +50,7 @@
         <span>操作日志</span>
       </el-menu-item>
     </el-menu>
-    <!-- 返回博客首页 — 固定在菜单底部 -->
-    <div class="menu-footer">
-      <el-divider style="margin: 8px 16px; border-color: #2a2a3d" />
-      <div class="back-to-site" @click="navigateTo('/')">
-        <el-icon><View /></el-icon>
-        <span>返回博客</span>
-      </div>
-    </div>
+    
   </div>
 </template>
 
@@ -74,8 +67,25 @@ import {
   View,
   List,
 } from '@element-plus/icons-vue'
-import { computed } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 const route = useRoute()
+
+// 站点设置
+const siteLogo = ref('')
+const siteName = ref('CodeBlog')
+
+onMounted(async () => {
+  try {
+    const res = await fetch('/api/public/settings')
+    const list = await res.json()
+    if (Array.isArray(list)) {
+      list.forEach((item: any) => {
+        if (item.settingKey === 'site_logo') siteLogo.value = item.settingValue || ''
+        if (item.settingKey === 'site_name') siteName.value = item.settingValue || 'CodeBlog'
+      })
+    }
+  } catch { /* keep defaults */ }
+})
 const { role } = useAuth()
 const isAdmin = computed(() => role.value === 'SUPERADMIN' || role.value === 'ADMIN')
 const isNotGuest = computed(() => role.value !== 'GUEST')
@@ -85,6 +95,7 @@ const isSuperAdmin = computed(() => role.value === 'SUPERADMIN')
 <style lang="less" scoped>
 .menu-container {
   width: 220px;
+  min-width: 220px;
   height: 100%;
   background: #1e1e2d;
   display: flex;
@@ -95,63 +106,31 @@ const isSuperAdmin = computed(() => role.value === 'SUPERADMIN')
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 20px 20px 16px;
+  padding: 14px 18px;
   border-bottom: 1px solid #2a2a3d;
+  flex-shrink: 0;
 }
 .logo-icon {
-  font-size: 22px;
-}
-.logo-text {
-  font-size: 18px;
-  font-weight: 700;
-  color: #fff;
-}
-.side-menu {
-  flex: 1;
-  overflow-y: auto;
-  border-right: none !important;
-  padding: 8px 0;
-}
-.side-menu .el-menu-item {
-  height: 44px;
-  line-height: 44px;
-  margin: 2px 8px;
-  border-radius: 8px;
-  padding: 0 12px !important;
-
-  &:hover {
-    background: #2a2a3d !important;
-    color: #fff !important;
-  }
-
-  &.is-active {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-    color: #fff !important;
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-  }
-}
-.menu-footer {
-  margin-top: auto;
-  padding-bottom: 8px;
-}
-.back-to-site {
+  font-size: 24px;
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 0 12px;
-  height: 44px;
-  line-height: 44px;
-  margin: 2px 8px;
-  border-radius: 8px;
-  color: #a2a3b7;
-  cursor: pointer;
-  transition: all 0.2s;
 }
-.back-to-site:hover {
-  background: #2a2a3d !important;
-  color: #fff !important;
+.logo-img {
+  height: 28px;
+  width: auto;
 }
-.side-menu::-webkit-scrollbar {
+.logo-emoji {
+  line-height: 1;
+}
+.logo-text {
+  font-size: 20px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  white-space: nowrap;
+}.side-menu::-webkit-scrollbar {
   width: 4px;
 }
 .side-menu::-webkit-scrollbar-thumb {

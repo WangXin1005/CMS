@@ -25,7 +25,7 @@ public class SiteSettingController {
         this.siteSettingRepository = siteSettingRepository;
     }
 
-    @GetMapping
+@GetMapping
     @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN')")
     @Operation(summary = "获取所有设置", description = "返回所有站点配置项")
     public ResponseEntity<List<SiteSetting>> listAll() {
