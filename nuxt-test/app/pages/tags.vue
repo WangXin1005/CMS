@@ -79,7 +79,7 @@ onMounted(loadData);
       </div>
     </div>
     <el-dialog v-model="dialogVisible" :title="editingId ? '编辑标签' : '新增标签'" width="480" destroy-on-close>
-      <el-form :model="form" label-width="80px"><el-form-item label="名称" required><el-input v-model="form.name" placeholder="标签名称" /></el-form-item></el-form>
+      <el-form :model="form" label-width="80px" @submit.prevent><el-form-item label="名称" required><el-input v-model="form.name" placeholder="标签名称" /></el-form-item></el-form>
       <template #footer><el-button @click="dialogVisible = false">取消</el-button><el-button type="primary" @click="handleSave">保存</el-button></template>
     </el-dialog>
   </div>

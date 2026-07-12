@@ -36,7 +36,9 @@ onMounted(async () => {
 })
 
 function genSlug(title) {
-    return title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9\u4e00-\u9fa5-]/g, '').substring(0, 80) || 'article-' + Date.now()
+    const base = title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9\u4e00-\u9fa5-]/g, '').substring(0, 60) || 'article';
+    // 添加时间戳后缀保证唯一性，避免同标题文章 slug 冲突
+    return base + '-' + Date.now();
   }
 
 async function handleSubmit(status) {

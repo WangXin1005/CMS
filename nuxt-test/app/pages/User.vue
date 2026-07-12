@@ -130,7 +130,7 @@ onMounted(loadData);
     </div>
 
     <el-dialog v-model="dialogVisible" :title="dialogTitle" width="520" destroy-on-close>
-      <el-form :model="form" label-width="80px">
+      <el-form :model="form" label-width="80px" @submit.prevent>
         <el-form-item label="用户名" required :error="nameError">
           <el-input v-model="form.username" placeholder="4~15位，字母和数字" maxlength="15" @blur="onNameBlur(form.username)" />
         </el-form-item>

@@ -246,7 +246,7 @@ onMounted(async () => { await loadFilters(); await loadData(); });
 
           <el-table-column v-if="!isGuest" label="可见性" width="80" align="center">
             <template #default="{ row }">
-              <el-switch v-if="!row._isEndMarker" :disabled="!canEdit(row)" :model-value="row.visibility === 'PUBLIC'" active-text="公" inactive-text="私" inline-prompt size="small" @change="handleVisibilityChange({ ...row, visibility: row.visibility === 'PUBLIC' ? 'PRIVATE' : 'PUBLIC' })" />
+              <el-switch v-if="!row._isEndMarker" :disabled="!canEdit(row) || row.status === 'DRAFT'" :model-value="row.visibility === 'PUBLIC'" active-text="公" inactive-text="私" inline-prompt size="small" @change="handleVisibilityChange({ ...row, visibility: row.visibility === 'PUBLIC' ? 'PRIVATE' : 'PUBLIC' })" />
             </template>
           </el-table-column>
 

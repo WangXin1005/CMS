@@ -624,13 +624,13 @@ const _routes = [
     name: "articles-edit-id",
     path: "/articles/edit/:id()",
     meta: { "middleware": "auth" },
-    component: () => import('./_id_-CIIsELXR.mjs')
+    component: () => import('./_id_-Btf0vzfv.mjs')
   },
   {
     name: "articles-create",
     path: "/articles/create",
     meta: { "middleware": "auth" },
-    component: () => import('./create-BNUvJeOW.mjs')
+    component: () => import('./create-BgKbQxxU.mjs')
   },
   {
     name: "article-slug",
@@ -642,13 +642,13 @@ const _routes = [
     name: "articles",
     path: "/articles",
     meta: { "middleware": "auth" },
-    component: () => import('./index-CL4qKjdE.mjs')
+    component: () => import('./index-D-swBhAK.mjs')
   },
   {
     name: "categories",
     path: "/categories",
     meta: { "middleware": "auth" },
-    component: () => import('./categories-Dmm2rBy2.mjs')
+    component: () => import('./categories-CCbRz93n.mjs')
   },
   {
     name: "comments",
@@ -672,7 +672,7 @@ const _routes = [
     name: "logs",
     path: "/logs",
     meta: { "middleware": "auth" },
-    component: () => import('./logs-5kFuhZqw.mjs')
+    component: () => import('./logs-ZlLE08Xo.mjs')
   },
   {
     name: "media",
@@ -690,13 +690,13 @@ const _routes = [
     name: "tags",
     path: "/tags",
     meta: { "middleware": "auth" },
-    component: () => import('./tags-W9DbWfcl.mjs')
+    component: () => import('./tags-BN5Mrfqn.mjs')
   },
   {
     name: "user",
     path: "/user",
     meta: { "middleware": "auth" },
-    component: () => import('./user-5qRBTjeG.mjs')
+    component: () => import('./user-D6heBKYs.mjs')
   },
   {
     name: "index",

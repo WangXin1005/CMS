@@ -289,6 +289,11 @@ public class LoggingAspect implements ApplicationContextAware {
                     // 移除忽略字段后比较，若无差异则不记录日志
                     Map<String, Object> oldFiltered = new HashMap<>(oldMap);
                     Map<String, Object> newFiltered = new HashMap<>(newMap);
+                    // 标准化 tagIds 排序，避免顺序不同导致误判变更
+                    normalizeTagIdsOrder(oldFiltered);
+                    normalizeTagIdsOrder(newFiltered);
+                    // 移除新数据中不存在的 key（未在请求中发送，不算变更）
+                    oldFiltered.keySet().retainAll(newFiltered.keySet());
                     String[] ignoredFields = {"id", "createdAt", "updatedAt", "slug", "password", "viewCount", "key"};
                     for (String f : ignoredFields) { oldFiltered.remove(f); newFiltered.remove(f); }
                     if (oldFiltered.equals(newFiltered)) return null;
@@ -309,7 +314,19 @@ public class LoggingAspect implements ApplicationContextAware {
         return null;
     }
 
-    /** 通过 EntityManager 加载旧实体数据并序列化为 JSON（排除 content 等长文本字段） */
+    /** 标准化 tagIds 排序，避免顺序不同导致误判变更 */
+    @SuppressWarnings("unchecked")
+    private void normalizeTagIdsOrder(Map<String, Object> data) {
+        Object tagIds = data.get("tagIds");
+        if (tagIds instanceof java.util.List) {
+            ((java.util.List<Object>) tagIds).sort((a, b) -> {
+                if (a instanceof Number && b instanceof Number) return Long.compare(((Number) a).longValue(), ((Number) b).longValue());
+                return String.valueOf(a).compareTo(String.valueOf(b));
+            });
+        }
+    }
+
+/** 通过 EntityManager 加载旧实体数据并序列化为 JSON（排除 content 等长文本字段） */
     private String captureOldEntityJson(String className, Long entityId) {
         try {
             Class<?> entityClass = ENTITY_MAP.get(className);

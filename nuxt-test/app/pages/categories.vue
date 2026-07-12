@@ -137,7 +137,7 @@ onMounted(async () => { await nextTick(); await loadData(); initSortable(); });
         </el-table>
     </div>
     <el-dialog v-model="dialogVisible" :title="editingId ? '编辑分类' : '新增分类'" width="480" destroy-on-close>
-      <el-form :model="form" label-width="80px">
+      <el-form :model="form" label-width="80px" @submit.prevent>
         <el-form-item label="名称" required><el-input v-model="form.name" placeholder="分类名称" /></el-form-item>
         <el-form-item label="描述"><el-input v-model="form.description" type="textarea" placeholder="分类描述" /></el-form-item>
       </el-form>

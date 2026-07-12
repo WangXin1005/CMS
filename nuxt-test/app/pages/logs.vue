@@ -70,8 +70,13 @@ const fieldLabelMap = {
   username: "用户名", email: "邮箱", role: "角色", password: "密码",
   title: "标题", content: "内容", categoryId: "分类", tagIds: "标签",
   status: "状态", visibility: "可见性", name: "名称", description: "描述",
-  oldPassword: "原密码", newPassword: "新密码", value: "值",
+  oldPassword: "原密码", newPassword: "新密码", value: "值", summary: "摘要",
 };
+
+const visibilityLabelMap = { PUBLIC: "公开", PRIVATE: "私密" };
+const statusLabelMap = { DRAFT: "草稿", PUBLISHED: "已发布" };
+const roleLabelMap = { SUPERADMIN: "超级管理员", ADMIN: "管理员", USER: "普通用户", GUEST: "访客" };
+
 
 // 格式化 CREATE/DELETE/UPLOAD 的操作描述
 function formatLogDesc(row) {
@@ -95,7 +100,10 @@ function formatLogDesc(row) {
 
   if (row.action === "CREATE") {
     const name = getName(parsed);
-    if (name) return { prefix: "创建" + entityLabel + " ", name, nameColor: "#67c23a", suffix: "" };
+    // 文章草稿状态在操作描述中标注
+    const isArticleDraft = row.entity === "Article" && parsed && parsed.status === "DRAFT";
+    const prefix = isArticleDraft ? "创建草稿" + entityLabel + " " : "创建" + entityLabel + " ";
+    if (name) return { prefix, name, nameColor: "#67c23a", suffix: "" };
   }
   if (row.action === "DELETE") {
     const name = getName(parsed);
@@ -139,28 +147,42 @@ function getUpdateDiff(row) {
   // SiteSetting 特殊处理：将 key 解析为可读标签
   const isSiteSetting = row.entity === "SiteSetting";
   const settingKeyLabel = isSiteSetting && newObj.key ? (settingLabelMap[newObj.key] || newObj.key) : null;
+  // 标准化 tagIds 排序，避免顺序不同导致误判变更
+  function normalizeTagIds(val) {
+    if (Array.isArray(val)) return [...val].sort((a,b) => Number(a)-Number(b));
+    if (typeof val === "string" && val.includes(",")) return val.split(",").map(Number).sort((a,b)=>a-b);
+    return val;
+  }
+  // 统一标准化某个 key 的值（tagIds 排序）
+  function normalizeVal(key, val) {
+    if (key === "tagIds") return normalizeTagIds(val);
+    return val;
+  }
+  // 跳过字段
+  function skipKey(key) {
+    return key === "id" || key === "createdAt" || key === "updatedAt" || key === "password" || key === "viewCount" || key === "slug" || (isSiteSetting && key === "key");
+  }
+  // 获取显示 key
+  function displayKey(key) {
+    if (isSiteSetting && key === "value" && settingKeyLabel) return settingKeyLabel;
+    return key;
+  }
   if (!oldObj) {
     const changes = [];
     for (const key of Object.keys(newObj)) {
-      if (key === "id" || key === "createdAt" || key === "updatedAt" || key === "password" || key === "viewCount" || key === "slug") continue;
-      if (isSiteSetting && key === "key") continue;
-      const displayKey2 = isSiteSetting && key === "value" && settingKeyLabel ? settingKeyLabel : key;
-      changes.push({ key: displayKey2, oldVal: null, newVal: newObj[key] });
+      if (skipKey(key)) continue;
+      changes.push({ key: displayKey(key), oldVal: null, newVal: normalizeVal(key, newObj[key]) });
     }
     return changes.length > 0 ? changes : null;
   }
   const changes = [];
-  const oldKeys = Object.keys(oldObj);
-  const newKeys = Object.keys(newObj);
-  const allKeys = oldKeys.filter(k => newKeys.includes(k));
-  for (const key of allKeys) {
-    if (key === "id" || key === "createdAt" || key === "updatedAt" || key === "password" || key === "viewCount" || key === "slug") continue;
-    if (isSiteSetting && key === "key") continue; // key 已解析为标签
-    const oldVal = oldObj[key];
-    const newVal = newObj[key];
+  // 只遍历新数据中的 key：新独有（null→值）算新增，旧独有（未在请求中发送）直接跳过
+  const newKeys = Object.keys(newObj).filter(k => !skipKey(k));
+  for (const key of newKeys) {
+    const oldVal = normalizeVal(key, oldObj[key]);
+    const newVal = normalizeVal(key, newObj[key]);
     if (JSON.stringify(oldVal) !== JSON.stringify(newVal)) {
-      const displayKey = isSiteSetting && key === "value" && settingKeyLabel ? settingKeyLabel : key;
-      changes.push({ key: displayKey, oldVal, newVal });
+      changes.push({ key: displayKey(key), oldVal: oldObj[key], newVal: newObj[key] });
     }
   }
   return changes.length > 0 ? changes : null;
@@ -256,8 +278,23 @@ function isDiffable(val) {
   const s = String(val);
   return s.length > 0 && typeof val !== "object";
 }
-function formatDiffVal(val) {
+function formatDiffVal(val, key) {
   if (val === null || val === undefined) return "(空)";
+  // categoryId/tagIds 解析为名称
+  if (key === "categoryId" && val != null) {
+    const id = typeof val === "object" ? val.id : Number(val);
+    if (catMap.value[id]) return catMap.value[id];
+  }
+  if (key === "tagIds" && val != null) {
+    // tagIds 可能是数组或逗号分隔的字符串
+    const ids = Array.isArray(val) ? val : String(val).split(",").map(Number);
+    const names = ids.map(id => tagMap.value[id] || id).filter(Boolean);
+    return names.join(", ");
+  }
+  // visibility/status/role 值中文化
+  if (key === "visibility") return visibilityLabelMap[String(val)] || String(val);
+  if (key === "status") return statusLabelMap[String(val)] || String(val);
+  if (key === "role") return roleLabelMap[String(val)] || String(val);
   if (typeof val === "object") return JSON.stringify(val);
   return String(val);
 }
@@ -388,9 +425,9 @@ onMounted(() => { loadData(); loadMaps(); });
                     </template>
                   </template>
                   <template v-else>
-                    <span style="color:#f56c6c;text-decoration:line-through">{{ formatDiffVal(c.oldVal) }}</span>
+                    <span style="color:#f56c6c;text-decoration:line-through">{{ formatDiffVal(c.oldVal, c.key) }}</span>
                     <span style="margin:0 6px;color:#909399">→</span>
-                    <span style="color:#67c23a;font-weight:bold">{{ formatDiffVal(c.newVal) }}</span>
+                    <span style="color:#67c23a;font-weight:bold">{{ formatDiffVal(c.newVal, c.key) }}</span>
                   </template>
                 </div>
               </div>

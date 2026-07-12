@@ -150,7 +150,8 @@ public class ArticleService {
         article.setSummary(summary);
         article.setCoverImage(coverImage);
         article.setStatus(status != null ? status : ArticleStatus.DRAFT);
-        article.setVisibility(Article.ArticleVisibility.PUBLIC);
+        // 草稿状态强制设为私密
+        article.setVisibility(status == ArticleStatus.DRAFT ? Article.ArticleVisibility.PRIVATE : Article.ArticleVisibility.PUBLIC);
         article.setAuthor(author);
 
         if (categoryId != null) {
@@ -179,6 +180,8 @@ public class ArticleService {
         if (coverImage != null) article.setCoverImage(coverImage);
         if (status != null) article.setStatus(status);
         if (visibility != null) article.setVisibility(visibility);
+        // 草稿状态强制设为私密
+        if (article.getStatus() == ArticleStatus.DRAFT) article.setVisibility(Article.ArticleVisibility.PRIVATE);
 
         if (categoryId != null) {
             article.setCategory(categoryRepository.findById(categoryId).orElse(null));
