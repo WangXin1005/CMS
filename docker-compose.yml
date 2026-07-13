@@ -136,9 +136,9 @@ services:
     deploy:
       resources:
         limits:
-          memory: 48M
+          memory: 128M
         reservations:
-          memory: 16M
+          memory: 64M
 
 networks:
   blog-net:
