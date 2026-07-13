@@ -76,7 +76,7 @@ function handleCommand(command: string) {
     <div class="header-left">
       <NuxtLink to="/" class="back-blog-btn">
         <el-icon class="back-icon"><ArrowLeft /></el-icon>
-        <span>返回博客</span>
+        <span>返 回 博 客</span>
       </NuxtLink>
     </div>
     <div class="header-right">
@@ -148,7 +148,7 @@ function handleCommand(command: string) {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 24px !important;
+  padding: 0 16px !important;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
   z-index: 10;
 }
@@ -159,24 +159,25 @@ function handleCommand(command: string) {
 .gradient-text { background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text }
 .back-blog-btn {
   text-decoration: none;
-  font-size: 15px;
-  color: #555;
+  font-size: 16px;
+  font-weight: 600;
+  color: #606266;
   padding: 6px 14px;
   border-radius: 6px;
   transition: all 0.2s;
   white-space: nowrap;
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: 8px;
 
   &:hover {
-    color: #409eff;
-    background: #ecf5ff;
+    color: #667eea;
+    background: #f5f5f5;
   }
 }
 
 .back-icon {
-  font-size: 17px
+  font-size: 18px
 }
 .header-left {
   display: flex;
