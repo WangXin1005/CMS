@@ -1283,7 +1283,7 @@ const plugins = [
 ];
 const layouts = {
   blank: defineAsyncComponent(() => import('./blank-D0MnAPB6.mjs').then((m) => m.default || m)),
-  default: defineAsyncComponent(() => import('./default-5CuP6tf3.mjs').then((m) => m.default || m)),
+  default: defineAsyncComponent(() => import('./default-B2tNUc6V.mjs').then((m) => m.default || m)),
   public: defineAsyncComponent(() => import('./public-BHmPhZjl.mjs').then((m) => m.default || m))
 };
 const routeRulesMatcher = _routeRulesMatcher;
