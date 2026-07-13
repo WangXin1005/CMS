@@ -10,7 +10,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Map;
@@ -62,13 +61,11 @@ public class UserService {
         return Map.of("message", "超级管理员初始化成功");
     }
 
-    /**
     /** 分页查询用户列表 */
     public Page<User> listUsers(Pageable pageable) {
         return userRepository.findAllByOrderByCreatedAtDesc(pageable);
     }
 
-    /**
     /** 根据 ID 查询用户 */
     public Optional<User> findById(Long id) {
         return userRepository.findById(id);

@@ -14,7 +14,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -42,6 +41,7 @@ public class UserController {
         boolean exists = userService.existsSuperAdmin();
         return ResponseEntity.ok(Map.of("exists", exists));
     }
+
     @GetMapping("/check-username")
     @Operation(summary = "检查用户名是否已存在", description = "用于注册时校验用户名是否重复")
     public ResponseEntity<Map<String, Boolean>> checkUsername(
@@ -211,7 +211,7 @@ public class UserController {
         public void setNewPassword(String newPassword) { this.newPassword = newPassword; }
     }
 
-public static class UpdateUserRequest {
+    public static class UpdateUserRequest {
         @Schema(description = "用户名", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
         private String username;
 

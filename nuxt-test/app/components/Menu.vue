@@ -106,7 +106,7 @@ const isSuperAdmin = computed(() => role.value === 'SUPERADMIN')
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 14px 18px;
+  padding: 22px 20px;
   border-bottom: 1px solid #2a2a3d;
   flex-shrink: 0;
 }

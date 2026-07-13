@@ -1,4 +1,3 @@
-com\example\nuxtproject\service\AdminServiceTest.class
 com\example\nuxtproject\service\AuthServiceTest.class
 com\example\nuxtproject\NuxtProjectApplicationTests.class
 com\example\nuxtproject\util\JwtUtilTest.class
