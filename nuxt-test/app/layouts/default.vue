@@ -87,7 +87,7 @@
 }
 
 /* 分页器：固定于表格容器右下角 */
-.pagination-wrapper {
+.admin-content .pagination-wrapper {
   position: absolute;
   bottom: -15px;
   right: 0;

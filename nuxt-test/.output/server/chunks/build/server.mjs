@@ -657,10 +657,10 @@ const _routes = [
     component: () => import('./comments-5PSuq3CB.mjs')
   },
   {
-    name: "home",
-    path: "/home",
+    name: "Home",
+    path: "/Home",
     meta: { "middleware": "auth" },
-    component: () => import('./home-BiLAEW-E.mjs')
+    component: () => import('./Home-BHq915im.mjs')
   },
   {
     name: "login",
@@ -702,7 +702,7 @@ const _routes = [
     name: "index",
     path: "/",
     meta: __nuxt_page_meta || {},
-    component: () => import('./index-g4-MO4uP.mjs')
+    component: () => import('./index-BqnGxo4h.mjs')
   }
 ];
 const _wrapInTransition = (props, children) => {
@@ -1283,8 +1283,8 @@ const plugins = [
 ];
 const layouts = {
   blank: defineAsyncComponent(() => import('./blank-D0MnAPB6.mjs').then((m) => m.default || m)),
-  default: defineAsyncComponent(() => import('./default-B2tNUc6V.mjs').then((m) => m.default || m)),
-  public: defineAsyncComponent(() => import('./public-BHmPhZjl.mjs').then((m) => m.default || m))
+  default: defineAsyncComponent(() => import('./default-CXKbS5Nm.mjs').then((m) => m.default || m)),
+  public: defineAsyncComponent(() => import('./public-Dol2to-L.mjs').then((m) => m.default || m))
 };
 const routeRulesMatcher = _routeRulesMatcher;
 const LayoutLoader = defineComponent({

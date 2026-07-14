@@ -100,25 +100,15 @@ onMounted(async () => {
   <div class="blog-layout">
     <div class="main-content">
       <div class="search-bar">
-        <el-input
-          v-model="searchKeyword"
-          placeholder="搜索文章..."
-          clearable
-          :prefix-icon="Search"
-          size="large"
-          @clear="handleSearch"
-          @keyup.enter="handleSearch"
-        />
+        <el-input v-model="searchKeyword" placeholder="搜索文章..." clearable :prefix-icon="Search" size="large"
+          @clear="handleSearch" @keyup.enter="handleSearch" />
       </div>
 
       <div v-if="loading" class="skeleton-grid">
         <el-skeleton v-for="i in 4" :key="i" :count="1" style="--el-skeleton-color: #f0f0f0">
           <template #template>
             <div style="padding: 0">
-              <el-skeleton-item
-                variant="image"
-                style="width: 100%; height: 180px; border-radius: 8px 8px 0 0"
-              />
+              <el-skeleton-item variant="image" style="width: 100%; height: 180px; border-radius: 8px 8px 0 0" />
               <div style="padding: 14px">
                 <el-skeleton-item variant="text" style="width: 40%" />
                 <el-skeleton-item variant="h3" style="width: 80%; margin-top: 8px" />
@@ -131,40 +121,27 @@ onMounted(async () => {
       </div>
 
       <el-empty v-else-if="articles.length === 0" description="暂无文章">
-        <el-button
-          v-if="activeCategoryId || activeTagId || searchKeyword"
-          type="primary"
-          @click="
-            () => {
-              activeCategoryId = null
-              activeTagId = null
-              searchKeyword = ''
-              handleSearch()
-            }
-          "
-        >
+        <el-button v-if="activeCategoryId || activeTagId || searchKeyword" type="primary" @click="
+          () => {
+            activeCategoryId = null
+            activeTagId = null
+            searchKeyword = ''
+            handleSearch()
+          }
+        ">
           清空筛选条件
         </el-button>
       </el-empty>
 
       <div v-else class="article-grid">
-        <ArticleCard
-          v-for="article in articles"
-          :key="article.id"
-          :article="article"
-          @click="navigateToArticle(article.slug)"
-        />
+        <ArticleCard v-for="article in articles" :key="article.id" :article="article"
+          @click="navigateToArticle(article.slug)" />
       </div>
 
       <div v-if="total > pageSize" class="pagination-wrapper">
-        <el-pagination
-          v-model:current-page="currentPage"
-          :page-size="pageSize"
-          :total="total"
-          layout="prev, pager, next, jumper, total" :hide-on-single-page="false"
-          background
-          @current-change="loadArticles"
-        />
+        <el-pagination v-model:current-page="currentPage" :page-size="pageSize" :total="total"
+          layout="prev, pager, next, jumper, total" :hide-on-single-page="false" background
+          @current-change="loadArticles" />
       </div>
     </div>
 
@@ -172,12 +149,8 @@ onMounted(async () => {
       <div class="widget">
         <h3 class="widget-title">📂 分类</h3>
         <ul v-if="categories.length" class="category-list">
-          <li
-            v-for="cat in categories"
-            :key="cat.id"
-            :class="{ active: activeCategoryId === cat.id }"
-            @click="selectCategory(cat.id)"
-          >
+          <li v-for="cat in categories" :key="cat.id" :class="{ active: activeCategoryId === cat.id }"
+            @click="selectCategory(cat.id)">
             {{ cat.name }}
           </li>
         </ul>
@@ -186,14 +159,8 @@ onMounted(async () => {
       <div class="widget">
         <h3 class="widget-title">🏷️ 标签</h3>
         <div v-if="tags.length" class="tag-cloud">
-          <el-tag
-            v-for="tag in tags"
-            :key="tag.id"
-            :type="activeTagId === tag.id ? 'primary' : undefined"
-            :effect="activeTagId === tag.id ? 'dark' : undefined"
-            class="tag-item"
-            @click="selectTag(tag.id)"
-          >
+          <el-tag v-for="tag in tags" :key="tag.id" :type="activeTagId === tag.id ? 'primary' : undefined"
+            :effect="activeTagId === tag.id ? 'dark' : undefined" class="tag-item" @click="selectTag(tag.id)">
             {{ tag.name }}
           </el-tag>
         </div>
@@ -261,6 +228,7 @@ onMounted(async () => {
 
 /* ===== 侧边栏 ===== */
 .sidebar {
+  margin-top: 15px;
   width: 280px;
   flex-shrink: 0;
 }
@@ -324,6 +292,7 @@ onMounted(async () => {
   cursor: pointer;
   transition: all 0.25s ease;
 }
+
 .tag-item:hover {
   color: #409eff !important;
   border-color: #409eff !important;
@@ -341,10 +310,12 @@ onMounted(async () => {
   .blog-layout {
     flex-direction: column;
   }
+
   .article-grid,
   .skeleton-grid {
     grid-template-columns: 1fr;
   }
+
   .sidebar {
     width: 100%;
   }

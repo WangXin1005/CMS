@@ -185,7 +185,7 @@ onMounted(async () => {
     </div>
 
     <!-- 文章预览对话框 -->
-    <el-dialog v-model="dialogVisible" title="文章预览" width="700px" top="5vh">
+    <el-dialog v-model="dialogVisible" title="文章预览" width="700px" top="5vh" destroy-on-close>
       <template v-if="dialogArticle">
         <h2 style="font-size: 20px; margin: 0 0 12px; color: #1a1a1a">{{ dialogArticle.title }}</h2>
         <div style="font-size: 13px; color: #999; margin-bottom: 16px">
@@ -208,7 +208,7 @@ onMounted(async () => {
         </div>
         <el-divider style="margin: 12px 0" />
         <div
-          class="article-content-render"
+          :key="previewKey + '-' + (dialogArticle?.id || 0)" class="article-content-render"
           style="max-height: 400px; overflow-y: auto"
           v-html="sanitizeHtml(dialogArticle.content)"
         ></div>
