@@ -54,7 +54,7 @@ services:
       JWT_SECRET: ${JWT_SECRET}
       JWT_EXPIRATION: ${JWT_EXPIRATION:-86400000}
       JAVA_OPTS: "-Xms64m -Xmx128m -XX:+UseSerialGC -XX:MaxMetaspaceSize=128m -XX:ReservedCodeCacheSize=32m -Xss256k -XX:+ExitOnOutOfMemoryError"
-      APP_UPLOAD_DIR: /tmp/uploads
+      APP_UPLOAD_DIR: /data/uploads
       APP_CORS_ALLOWEDORIGINS: https://gocms.top,http://localhost:3000
     depends_on:
       mysql:
