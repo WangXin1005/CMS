@@ -4,23 +4,26 @@
  * 文章详情页（公开）
  * 路由：/article/:slug
  */
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, inject } from 'vue'
 import { ElMessage } from 'element-plus'
 import { sanitizeHtml } from '~/utils/sanitize'
 
 definePageMeta({ layout: 'public' })
 
+// 从布局注入站点设置（供页脚使用）
+const siteSettings = inject('siteSettings', computed(() => ({
+  siteName: 'CodeBlog',
+  siteLogo: '',
+  icpNumber: '',
+})))
+
 const route = useRoute()
 const router = useRouter()
 
 const { getBySlug } = useArticle()
-const { getList: getCategories } = useCategory()
-const { getList: getTags } = useTag()
 
 const article = ref<Record<string, unknown> | null>(null)
 const loading = ref(true)
-const categories = ref<Record<string, unknown>[]>([])
-const tags = ref<Record<string, unknown>[]>([])
 
 const slug = computed(() => route.params.slug as string)
 
@@ -37,15 +40,6 @@ async function loadArticle() {
   }
 }
 
-async function loadSidebar() {
-  try {
-    const [catRes, tagRes] = await Promise.all([getCategories(), getTags()])
-    categories.value = catRes ?? []
-    tags.value = tagRes ?? []
-  } catch {
-    // ignore sidebar errors
-  }
-}
 
 const formattedDate = computed(() => {
   if (!article.value?.createdAt) return ''
@@ -53,7 +47,7 @@ const formattedDate = computed(() => {
 })
 
 onMounted(async () => {
-  await Promise.all([loadArticle(), loadSidebar()])
+  await loadArticle()
 })
 </script>
 
@@ -75,9 +69,6 @@ onMounted(async () => {
           <span>👤 {{ article.author?.username }}</span>
           <span>📅 {{ formattedDate }}</span>
           <span>👁 {{ article.viewCount }} 次阅读</span>
-          <el-tag v-if="article.category" size="small" type="primary" effect="plain">
-            {{ article.category.name }}
-          </el-tag>
         </div>
       </div>
 
@@ -89,50 +80,14 @@ onMounted(async () => {
       <!-- 文章内容 -->
       <div class="article-content" v-html="sanitizeHtml(article.content)"></div>
 
-      <!-- 标签 -->
-      <div v-if="article.tags?.length" class="article-tags">
-        <el-tag
-          v-for="tag in article.tags"
-          :key="tag.id"
-          size="small"
-          effect="plain"
-          class="tag-item"
-        >
-          #{{ tag.name }}
-        </el-tag>
-      </div>
 
       <el-divider />
 
       <!-- 评论区 -->
       <CommentSection :article-id="article.id" />
+
     </div>
 
-    <!-- 侧边栏 -->
-    <aside class="detail-sidebar">
-      <div class="widget">
-        <h3 class="widget-title">📂 分类</h3>
-        <ul v-if="categories.length" class="category-list">
-          <li v-for="cat in categories" :key="cat.id">
-            <NuxtLink :to="`/?categoryId=${cat.id}`" class="cat-link">{{ cat.name }}</NuxtLink>
-          </li>
-        </ul>
-        <p v-else class="empty-hint">暂无分类</p>
-      </div>
-      <div class="widget">
-        <h3 class="widget-title">🏷️ 标签</h3>
-        <div v-if="tags.length" class="tag-cloud">
-          <NuxtLink
-            v-for="tag in tags"
-            :key="tag.id"
-            :to="`/?tagId=${tag.id}`"
-            class="sidebar-tag-item"
-            >{{ tag.name }}</NuxtLink
-          >
-        </div>
-        <p v-else class="empty-hint">暂无标签</p>
-      </div>
-    </aside>
   </div>
 
   <!-- 加载态 -->
@@ -295,87 +250,6 @@ onMounted(async () => {
   cursor: default;
 }
 
-// ===== 侧边栏 =====
-.detail-sidebar {
-  width: 280px;
-  flex-shrink: 0;
-}
-
-.widget {
-  background: #fff;
-  border-radius: 10px;
-  padding: 20px;
-  margin-bottom: 20px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-}
-
-.widget-title {
-  font-size: 15px;
-  font-weight: 600;
-  margin: 0 0 14px;
-  padding-bottom: 10px;
-  border-bottom: 2px solid #667eea;
-  color: #333;
-}
-
-.category-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.category-list li {
-  padding: 9px 0;
-  border-bottom: 1px solid #f5f5f5;
-
-  &:last-child {
-    border-bottom: none;
-  }
-}
-
-.cat-link {
-  color: #555;
-  text-decoration: none;
-  font-size: 14px;
-  display: block;
-  transition: all 0.2s;
-
-  &:hover {
-    color: #667eea;
-    padding-left: 4px;
-  }
-}
-
-.tag-cloud {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-.sidebar-tag-item {
-  display: inline-block;
-  color: #667eea;
-  text-decoration: none;
-  font-size: 13px;
-  padding: 4px 10px;
-  background: #f0f2ff;
-  border-radius: 4px;
-  transition: all 0.2s;
-
-  &:hover {
-    background: #667eea;
-    color: #fff;
-  }
-}
-
-.empty-hint {
-  color: #999;
-  font-size: 14px;
-  text-align: center;
-  padding: 16px 0;
-  margin: 0;
-}
-
 // ===== 加载态 =====
 .detail-loading {
   max-width: 800px;
@@ -408,9 +282,6 @@ onMounted(async () => {
     flex-direction: column;
     padding: 16px;
   }
-  .detail-sidebar {
-    width: 100%;
-  }
   .detail-main {
     padding: 20px;
   }
@@ -418,4 +289,6 @@ onMounted(async () => {
     font-size: 24px;
   }
 }
+
+
 </style>

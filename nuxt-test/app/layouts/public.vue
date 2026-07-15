@@ -3,7 +3,7 @@
     <header class="public-header">
       <div class="header-inner">
         <NuxtLink to="/" class="logo">
-          <span class="logo-icon"><img v-if="siteLogo" :src="siteLogo" class="logo-img" alt="logo" /><span v-else class="logo-emoji">📝</span></span>
+          <span class="logo-icon"><img v-if="siteLogo" :src="siteLogo" class="logo-img" alt="logo" /><span v-else class="logo-emoji">&#x1F4DD;</span></span>
           <span class="logo-text">{{ siteName }}</span>
         </NuxtLink>
         <nav class="nav-links">
@@ -20,9 +20,9 @@
       </div>
     </header>
     <main class="main-area"><slot /></main>
-    <footer class="public-footer">
+    <footer class="blog-footer">
       <p>&copy; 2026 {{ siteName }}. Powered by Nuxt &amp; Spring Boot.</p>
-      <p v-if="icpNumber" style="margin-top:4px;font-size:12px;color:#bbb">{{ icpNumber }}</p>
+      <p v-if="icpNumber" class="icp-text">{{ icpNumber }}</p>
     </footer>
   </div>
 </template>
@@ -35,6 +35,14 @@ const siteLogo = ref('')
 const siteName = ref('CodeBlog')
 const siteDesc = ref('基于 Nuxt + Spring Boot 构建的博客 CMS 系统')
 const icpNumber = ref('蒙ICP备2026006795号-1')
+
+// 向子页面提供站点设置（供页脚使用）
+const siteSettings = computed(() => ({
+  siteName: siteName.value,
+  siteLogo: siteLogo.value,
+  icpNumber: icpNumber.value,
+}))
+provide('siteSettings', siteSettings)
 
 onMounted(async () => {
   try {
@@ -164,16 +172,24 @@ useHead({
 .main-area {
   flex: 1;
 }
-.public-footer {
+
+
+.blog-footer {
   text-align: center;
-  padding: 24px;
+  padding: 24px 0;
   color: #999;
   font-size: 13px;
   border-top: 1px solid #e8e8e8;
-  margin-top: 40px;
-  background: #fff;
-  p {
-    margin: 0;
-  }
+  margin-top: auto;
+}
+
+.blog-footer p {
+  margin: 0;
+}
+
+.icp-text {
+  margin-top: 4px;
+  font-size: 12px;
+  color: #bbb;
 }
 </style>

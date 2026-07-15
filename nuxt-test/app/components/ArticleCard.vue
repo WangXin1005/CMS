@@ -61,9 +61,6 @@ const coverUrl = computed(() => props.article.coverImage ?? '')
     </div>
     <div class="card-body">
       <div class="card-meta">
-        <el-tag v-if="article.category" size="small" effect="dark" class="category-tag">
-          {{ article.category.name }}
-        </el-tag>
         <span class="date">{{ formattedDate }}</span>
       </div>
       <h3 class="card-title">{{ article.title }}</h3>

@@ -6,6 +6,7 @@ package com.example.nuxtproject.service;
 import com.example.nuxtproject.entity.Category;
 import com.example.nuxtproject.repository.CategoryRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 @Service
@@ -61,8 +62,10 @@ public class CategoryService {
         }
     }
 
+    @Transactional
     public boolean delete(Long id) {
         if (!categoryRepository.existsById(id)) return false;
+        categoryRepository.clearArticleAssociations(id); // 先解除文章关联
         categoryRepository.deleteById(id);
         return true;
     }

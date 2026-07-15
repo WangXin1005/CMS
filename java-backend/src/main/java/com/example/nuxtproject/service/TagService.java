@@ -6,6 +6,7 @@ package com.example.nuxtproject.service;
 import com.example.nuxtproject.entity.Tag;
 import com.example.nuxtproject.repository.TagRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 @Service
@@ -44,8 +45,10 @@ public class TagService {
         return tagRepository.save(tag);
     }
 
+    @Transactional
     public boolean delete(Long id) {
         if (!tagRepository.existsById(id)) return false;
+        tagRepository.clearArticleAssociations(id); // 先清除文章关联
         tagRepository.deleteById(id);
         return true;
     }

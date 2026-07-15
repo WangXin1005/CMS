@@ -16,6 +16,15 @@ export default defineNuxtConfig({
     '/api/**': { proxy: process.env.NUXT_API_PROXY_TARGET || 'http://localhost:8080' },
   },
 
+  // 路由滚动行为：切换路由时回到页面顶部
+  router: {
+    options: {
+      scrollBehavior() {
+        return { top: 0, behavior: 'instant' as const }
+      },
+    },
+  },
+
   elementPlus: {
     locale: zhCn,
   },
