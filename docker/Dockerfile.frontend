@@ -1,14 +1,17 @@
-# ============================================
-# 前端运行时镜像 — 本地已 npm run build，此处仅复制 .output
-# Node.js 128MB，适配 2G 服务器
-# ============================================
+# 前端镜像 — 多阶段构建：先编译 Nuxt 再打包运行
+# 阶段1：Node.js 编译
+FROM node:20-alpine AS builder
+WORKDIR /build
+COPY nuxt-test/package.json nuxt-test/package-lock.json ./
+RUN npm ci --quiet
+COPY nuxt-test/ .
+RUN npm run build
 
+# 阶段2：运行镜像
 FROM node:20-alpine
 WORKDIR /app
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
-
-# 复制本地构建好的 .output（需先在本地执行 npm run build:frontend）
-COPY nuxt-test/.output ./.output
+COPY --from=builder /build/.output ./.output
 
 ENV NODE_OPTIONS="--max-old-space-size=128"
 ENV HOST=0.0.0.0
