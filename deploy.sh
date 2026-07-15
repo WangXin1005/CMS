@@ -16,10 +16,11 @@ git config pack.threads 1
 git config core.compression 0
 
 if [ -n "$GIT_TOKEN" ]; then
-  git pull --no-tags https://oauth2:${GIT_TOKEN}@gitee.com/${GITEE_REPO_OWNER}/${GITEE_REPO_NAME}.git main
+  git fetch --no-tags https://oauth2:${GIT_TOKEN}@gitee.com/${GITEE_REPO_OWNER}/${GITEE_REPO_NAME}.git main
 else
-  git pull --no-tags
+  git fetch --no-tags origin main
 fi
+git reset --hard FETCH_HEAD
 
 echo "[2/3] 重建镜像..."
 docker compose build backend frontend
