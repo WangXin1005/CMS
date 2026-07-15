@@ -1,14 +1,18 @@
-# ============================================
-# 后端运行时镜像 — 本地已 mvn package，此处仅复制 jar
-# JVM 128MB，适配 2G 服务器
-# ============================================
+# 后端镜像 — 多阶段构建：先编译 JAR 再打包运行
+# 阶段1：Maven 编译
+FROM maven:3.9-eclipse-temurin-21-alpine AS builder
+WORKDIR /build
+COPY java-backend/pom.xml .
+# 先下载依赖（利用 Docker 缓存层）
+RUN mvn dependency:go-offline -q || true
+COPY java-backend/src ./src
+RUN mvn package -DskipTests -q
 
+# 阶段2：运行镜像
 FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
-
-# 复制本地构建好的 jar（需先在本地执行 npm run build:backend）
-COPY java-backend/target/*.jar app.jar
+COPY --from=builder /build/target/*.jar app.jar
 
 ENV JAVA_OPTS="-Xms64m -Xmx128m -XX:+UseSerialGC -XX:MaxMetaspaceSize=128m -XX:ReservedCodeCacheSize=32m -Xss256k -XX:+ExitOnOutOfMemoryError -XX:+UseContainerSupport"
 
