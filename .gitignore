@@ -28,6 +28,10 @@ desktop.ini
 .env
 .env.local
 
+# 构建产物（部署需要，仅以下两个目录/文件例外）
+!java-backend/target/demo-0.0.1-SNAPSHOT.jar
+!nuxt-test/.output/
+
 # Uploads (user media files)
 java-backend/uploads/
 
