@@ -1,9 +1,9 @@
 # Java / Maven
 target/
-!java-backend/target/
+
 *.class
 *.jar
-!java-backend/target/*.jar
+*.jar
 *.war
 *.log
 .mvn/timing.log
