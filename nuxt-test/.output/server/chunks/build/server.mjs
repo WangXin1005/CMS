@@ -1,5 +1,5 @@
 import process from 'node:process';globalThis._importMeta_=globalThis._importMeta_||{url:"file:///_entry.js",env:process.env};import { hasInjectionContext, inject, unref, getCurrentInstance, computed, ref, defineAsyncComponent, defineComponent, h, shallowRef, provide, shallowReactive, Suspense, Fragment, createApp, onErrorCaptured, onServerPrefetch, createVNode, resolveDynamicComponent, reactive, effectScope, mergeProps, getCurrentScope, toRef, withCtx, nextTick, isReadonly, useSSRContext, isRef, isShallow, isReactive, toRaw } from 'vue';
-import { p as parseURL, e as encodePath, l as decodePath, m as hasProtocol, n as isScriptProtocol, o as joinURL, w as withQuery, q as sanitizeStatusCode, r as getContext, $ as $fetch$1, v as defu, f as createError$1, x as executeAsync } from '../_/nitro.mjs';
+import { p as parseURL, e as encodePath, l as decodePath, m as hasProtocol, n as isScriptProtocol, o as joinURL, w as withQuery, f as createError$1, q as sanitizeStatusCode, r as getContext, $ as $fetch$1, v as defu, x as executeAsync } from '../_/nitro.mjs';
 import { b as baseURL } from '../routes/renderer.mjs';
 import { useRoute as useRoute$1, RouterView, createMemoryHistory, createRouter, START_LOCATION } from 'vue-router';
 import { isClient, computedEager } from '@vueuse/core';
@@ -202,6 +202,8 @@ if (!("global" in globalThis)) {
 }
 const appLayoutTransition = false;
 const nuxtLinkDefaults = { "componentName": "NuxtLink" };
+const asyncDataDefaults = { "deep": false };
+const fetchDefaults = {};
 const appId = "nuxt-app";
 function getNuxtAppCtx(id = appId) {
   return getContext(id, {
@@ -624,85 +626,85 @@ const _routes = [
     name: "articles-edit-id",
     path: "/articles/edit/:id()",
     meta: { "middleware": "auth" },
-    component: () => import('./_id_-Cbbc7ASu.mjs')
+    component: () => import('./_id_-iyE7QsiJ.mjs')
   },
   {
     name: "articles-create",
     path: "/articles/create",
     meta: { "middleware": "auth" },
-    component: () => import('./create-DdrGTiGu.mjs')
+    component: () => import('./create-DDtvkG_M.mjs')
   },
   {
     name: "article-slug",
     path: "/article/:slug()",
     meta: __nuxt_page_meta$2 || {},
-    component: () => import('./_slug_-BWsRge_R.mjs')
+    component: () => import('./_slug_-CWSa9c8-.mjs')
   },
   {
     name: "articles",
     path: "/articles",
     meta: { "middleware": "auth" },
-    component: () => import('./index-kbjpQ4yJ.mjs')
+    component: () => import('./index-CB54O6y2.mjs')
   },
   {
     name: "categories",
     path: "/categories",
     meta: { "middleware": "auth" },
-    component: () => import('./categories-BlRbmHbi.mjs')
+    component: () => import('./categories-rR7cL6m3.mjs')
   },
   {
     name: "comments",
     path: "/comments",
     meta: { "middleware": "auth" },
-    component: () => import('./comments--J9ERyMt.mjs')
+    component: () => import('./comments-DHnzvMu_.mjs')
   },
   {
     name: "Home",
     path: "/Home",
     meta: { "middleware": "auth" },
-    component: () => import('./Home-BC41chdD.mjs')
+    component: () => import('./Home-C3xCQWcG.mjs')
   },
   {
     name: "login",
     path: "/login",
     meta: __nuxt_page_meta$1 || {},
-    component: () => import('./login-CpT-t0gY.mjs')
+    component: () => import('./login-BEsQpSak.mjs')
   },
   {
     name: "logs",
     path: "/logs",
     meta: { "middleware": "auth" },
-    component: () => import('./logs-DqWiRj3w.mjs')
+    component: () => import('./logs-excbq9vo.mjs')
   },
   {
     name: "media",
     path: "/media",
     meta: { "middleware": "auth" },
-    component: () => import('./media-CfQqSCh_.mjs')
+    component: () => import('./media-CPkzdK64.mjs')
   },
   {
     name: "setting",
     path: "/setting",
     meta: { "middleware": "auth" },
-    component: () => import('./setting-CKXHWBAz.mjs')
+    component: () => import('./setting-B4v8yxAI.mjs')
   },
   {
     name: "tags",
     path: "/tags",
     meta: { "middleware": "auth" },
-    component: () => import('./tags-JaEEVtim.mjs')
+    component: () => import('./tags-CKlw4SeY.mjs')
   },
   {
     name: "user",
     path: "/user",
     meta: { "middleware": "auth" },
-    component: () => import('./user-D_ljkC-s.mjs')
+    component: () => import('./user-C2kTYg7V.mjs')
   },
   {
     name: "index",
     path: "/",
     meta: __nuxt_page_meta || {},
-    component: () => import('./index-D3vMWcqk.mjs')
+    component: () => import('./index-Dnzwlvio.mjs')
   }
 ];
 const _wrapInTransition = (props, children) => {
@@ -879,7 +881,7 @@ const globalMiddleware = [
   manifest_45route_45rule
 ];
 const namedMiddleware = {
-  auth: () => import('./auth-zvMNLbbI.mjs')
+  auth: () => import('./auth-BkRyoTbx.mjs')
 };
 Object.assign(/* @__PURE__ */ Object.create(null), {});
 const pageIslandRoutes = Object.assign(/* @__PURE__ */ Object.create(null), {});
@@ -1284,8 +1286,8 @@ const plugins = [
 ];
 const layouts = {
   blank: defineAsyncComponent(() => import('./blank-D0MnAPB6.mjs').then((m) => m.default || m)),
-  default: defineAsyncComponent(() => import('./default-CbsyHpur.mjs').then((m) => m.default || m)),
-  public: defineAsyncComponent(() => import('./public-cQKoP_wn.mjs').then((m) => m.default || m))
+  default: defineAsyncComponent(() => import('./default-BU-bHSqb.mjs').then((m) => m.default || m)),
+  public: defineAsyncComponent(() => import('./public-Be7snPVs.mjs').then((m) => m.default || m))
 };
 const routeRulesMatcher = _routeRulesMatcher;
 const LayoutLoader = defineComponent({
@@ -1660,5 +1662,5 @@ let entry;
 }
 const entry_default = ((ssrContext) => entry(ssrContext));
 
-export { defineNuxtRouteMiddleware as A, _export_sfc as _, useNuxtApp as a, useRuntimeConfig as b, nuxtLinkDefaults as c, useRoute as d, entry_default as default, encodeRoutePath as e, debugWarn as f, useNamespace as g, useId as h, isBoolean as i, isNumber as j, isEmpty as k, isUndefined as l, isStringNumber as m, navigateTo as n, useZIndex as o, defaultInitialZIndex as p, namespaceContextKey as q, resolveRouteObject as r, useGetDerivedNamespace as s, throwError as t, useRouter as u, useIdInjection as v, isElement as w, isWindow as x, isPropAbsent as y, zIndexContextKey as z };
+export { fetchDefaults as A, isWindow as B, isPropAbsent as C, defineNuxtRouteMiddleware as D, _export_sfc as _, useNuxtApp as a, useRuntimeConfig as b, nuxtLinkDefaults as c, useRoute as d, entry_default as default, encodeRoutePath as e, debugWarn as f, useNamespace as g, useId as h, isBoolean as i, isNumber as j, isEmpty as k, isUndefined as l, isStringNumber as m, navigateTo as n, useZIndex as o, defaultInitialZIndex as p, namespaceContextKey as q, resolveRouteObject as r, useGetDerivedNamespace as s, throwError as t, useRouter as u, useIdInjection as v, isElement as w, asyncDataDefaults as x, createError as y, zIndexContextKey as z };
 //# sourceMappingURL=server.mjs.map
