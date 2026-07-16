@@ -173,7 +173,6 @@ useHead({
   flex: 1;
 }
 
-
 .blog-footer {
   text-align: center;
   padding: 24px 0;
@@ -192,4 +191,5 @@ useHead({
   font-size: 12px;
   color: #bbb;
 }
+
 </style>

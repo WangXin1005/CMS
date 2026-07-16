@@ -26,11 +26,15 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.util.HashMap;
 
 @Aspect
 @Component
 public class LoggingAspect implements ApplicationContextAware {
+
+    private static final Logger logger = LoggerFactory.getLogger(LoggingAspect.class);
 
     private ApplicationContext applicationContext;
 
@@ -91,7 +95,7 @@ public class LoggingAspect implements ApplicationContextAware {
 
     @PostConstruct
     public void init() {
-        System.out.println("[LoggingAspect] initialized successfully");
+        logger.info("[LoggingAspect] initialized successfully");
     }
 
     @Around("execution(* com.example.nuxtproject.controller.*.*(..)) " +
@@ -113,7 +117,7 @@ public class LoggingAspect implements ApplicationContextAware {
             "|| execution(* com.example.nuxtproject.controller.*.upload*(..)) " +
             ")")
     public Object logOperation(ProceedingJoinPoint joinPoint) throws Throwable {
-        System.out.println("[ASPECT] intercepted: " + joinPoint.getSignature().getName());
+        logger.info("[ASPECT] intercepted: " + joinPoint.getSignature().getName());
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
         String methodName = signature.getMethod().getName();
         String className = joinPoint.getTarget().getClass().getSimpleName().replace("Controller", "").split("\\$\\$")[0];
@@ -135,7 +139,7 @@ public class LoggingAspect implements ApplicationContextAware {
         if ("UPDATE".equals(action) || "DELETE".equals(action) || "APPROVE".equals(action) || "REJECT".equals(action)) {
         // SiteSetting 特殊处理：按 key 查找旧数据（entityId 为 null 因为参数中无 Number 类型 ID）
         if (oldDataJson == null && "SiteSetting".equals(className) && "UPDATE".equals(action)) {
-            System.out.println("[SITE_SETTING_LOG] attempting old data lookup");
+            logger.info("[SITE_SETTING_LOG] attempting old data lookup");
             for (Object arg : joinPoint.getArgs()) {
                 if (arg instanceof String && ((String) arg).length() < 100) {
                     try {
@@ -165,10 +169,10 @@ public class LoggingAspect implements ApplicationContextAware {
                             fields.remove("id");
                             if (!fields.isEmpty()) {
                                 oldDataJson = objectMapper.writeValueAsString(fields);
-                                System.out.println("[SITE_SETTING_LOG] old data captured: " + oldDataJson);
+                                logger.info("[SITE_SETTING_LOG] old data captured: " + oldDataJson);
                             }
                         }
-                    } catch (Exception e) { System.out.println("[SITE_SETTING_LOG] error: " + e.getMessage()); }
+                    } catch (Exception e) { logger.info("[SITE_SETTING_LOG] error: " + e.getMessage()); }
                     break;
                 }
             }
@@ -250,7 +254,7 @@ public class LoggingAspect implements ApplicationContextAware {
                     }
                 }
                 String dataStr = buildDataString(action, oldDataJson, newDataJson);
-                System.out.println("[LOG_ASPECT] action=" + action + " oldData=" + (oldDataJson != null ? "present(" + oldDataJson.length() + ")" : "null") + " newData=" + (newDataJson != null ? "present(" + newDataJson.length() + ")" : "null") + " dataStr=" + (dataStr != null ? "present(" + dataStr.length() + ")" : "null"));
+                logger.info("[LOG_ASPECT] action=" + action + " oldData=" + (oldDataJson != null ? "present(" + oldDataJson.length() + ")" : "null") + " newData=" + (newDataJson != null ? "present(" + newDataJson.length() + ")" : "null") + " dataStr=" + (dataStr != null ? "present(" + dataStr.length() + ")" : "null"));
                 if (dataStr != null) {
                     details = details + " | 数据: " + dataStr;
                 }
@@ -393,7 +397,7 @@ private String loadOldEntityJson(String entityName, Long entityId) {
         try {
             String cleanName = entityName.contains("$") ? entityName.substring(0, entityName.indexOf("$")) : entityName;
             String repoName = cleanName.substring(0, 1).toLowerCase() + cleanName.substring(1) + "Repository";
-            System.out.println("[LOG_OLD] entityName=" + entityName + " cleanName=" + cleanName + " repoName=" + repoName + " entityId=" + entityId);
+            logger.info("[LOG_OLD] entityName=" + entityName + " cleanName=" + cleanName + " repoName=" + repoName + " entityId=" + entityId);
             Object repo = applicationContext.getBean(repoName);
             Optional<?> result = (Optional<?>) repo.getClass().getMethod("findById", Object.class).invoke(repo, entityId);
             if (result.isPresent()) {
@@ -460,15 +464,15 @@ private String loadOldEntityJson(String entityName, Long entityId) {
 
                 if (!fields.isEmpty()) {
                     String json = objectMapper.writeValueAsString(fields);
-                    System.out.println("[LOG_OLD] captured " + fields.size() + " fields: " + (json.length() > 200 ? json.substring(0, 200) + "..." : json));
+                    logger.info("[LOG_OLD] captured " + fields.size() + " fields: " + (json.length() > 200 ? json.substring(0, 200) + "..." : json));
                     return json;
                 }
-                System.out.println("[LOG_OLD] fields empty for " + cleanName);
+                logger.info("[LOG_OLD] fields empty for " + cleanName);
             } else {
-                System.out.println("[LOG_OLD] entity not found for " + cleanName + " id=" + entityId);
+                logger.info("[LOG_OLD] entity not found for " + cleanName + " id=" + entityId);
             }
         } catch (Exception e) {
-            System.out.println("[LOG_OLD] error: " + e.getMessage());
+            logger.info("[LOG_OLD] error: " + e.getMessage());
         }
         return null;
     }

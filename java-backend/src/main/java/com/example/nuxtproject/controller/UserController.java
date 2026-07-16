@@ -114,8 +114,8 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('SUPERADMIN')")
-    @Operation(summary = "删除用户", description = "仅超级管理员可删除用户，且不能删除自己或最后一个超级管理员")
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN')")
+    @Operation(summary = "删除用户", description = "管理员可删除下级用户，且不能删除自己或最后一个超级管理员")
     public ResponseEntity<?> deleteUser(
             @Parameter(hidden = true) @AuthenticationPrincipal UserPrincipal principal,
             @Parameter(description = "用户 ID", required = true) @PathVariable Long id) {

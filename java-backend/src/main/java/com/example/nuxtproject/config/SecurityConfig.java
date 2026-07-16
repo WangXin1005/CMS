@@ -101,7 +101,8 @@ public class SecurityConfig {
                         "/api-docs/**",
                         "/swagger-resources/**",
                         "/webjars/**"
-                ).permitAll()
+                ).access((authentication, context) ->
+                        new org.springframework.security.authorization.AuthorizationDecision(swaggerEnabled))
                 // Spring 内部错误转发路径
                 .requestMatchers("/api/health").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/public/settings").permitAll()
@@ -117,15 +118,6 @@ public class SecurityConfig {
         return http.build();
     }
 
-    /**
-     * 动态控制 Swagger 访问权限：仅当 swaggerEnabled 为 true 时放行
-     */
-    private org.springframework.security.authorization.AuthorizationDecision checkSwaggerAccess(
-            jakarta.servlet.http.HttpServletRequest request,
-            org.springframework.security.core.Authentication authentication) {
-        boolean granted = swaggerEnabled;
-        return new org.springframework.security.authorization.AuthorizationDecision(granted);
-    }
 
     /**
      * CORS 跨域配置

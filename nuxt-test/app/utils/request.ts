@@ -8,6 +8,7 @@
  */
 import axios from 'axios'
 import { ElMessage } from 'element-plus'
+import { navigateTo } from '#app'
 
 const request = axios.create({
   baseURL: '/api',
@@ -29,7 +30,7 @@ request.interceptors.response.use(
         !url.includes('/users/init') &&
         !url.includes('/auth/register') && !url.includes('/auth/login')
       ) {
-        window.location.href = '/login'
+        navigateTo('/login')
       }
     }
     return Promise.reject(error)

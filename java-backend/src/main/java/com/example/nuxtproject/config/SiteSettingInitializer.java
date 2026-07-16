@@ -4,12 +4,16 @@ import com.example.nuxtproject.entity.SiteSetting;
 import com.example.nuxtproject.repository.SiteSettingRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 站点设置默认值初始化器 — 首次启动时插入默认配置项。
  */
 @Component
 public class SiteSettingInitializer implements CommandLineRunner {
+
+    private static final Logger logger = LoggerFactory.getLogger(SiteSettingInitializer.class);
 
     private final SiteSettingRepository repo;
 
@@ -28,7 +32,7 @@ public class SiteSettingInitializer implements CommandLineRunner {
     private void initIfAbsent(String key, String value) {
         if (repo.findBySettingKey(key).isEmpty()) {
             repo.save(new SiteSetting(key, value));
-            System.out.println("[SiteSettingInit] 初始化默认值: " + key + " = " + value);
+            logger.info("[SiteSettingInit] 初始化默认值: {} = {}", key, value);
         }
     }
 }

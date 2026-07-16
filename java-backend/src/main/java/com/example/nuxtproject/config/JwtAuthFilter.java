@@ -86,7 +86,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 }
             }
         } catch (Exception e) {
-            logger.error("JWT authentication error", e);
+            logger.error("JWT 认证异常，已清除安全上下文", e);
+            SecurityContextHolder.clearContext();
         }
 
         filterChain.doFilter(request, response);

@@ -16,7 +16,10 @@ export default defineNuxtRouteMiddleware(() => {
       token.value = ''
       return navigateTo('/login')
     }
-    const payload = JSON.parse(atob(parts[1]))
+    // 使用 Uint8Array + TextDecoder 安全解码 Base64（兼容 Unicode）
+    const base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/')
+    const binary = Uint8Array.from(atob(base64), (c) => c.charCodeAt(0))
+    const payload = JSON.parse(new TextDecoder().decode(binary))
     if (payload.exp && payload.exp * 1000 < Date.now()) {
       // Token 已过期，清除并跳转登录
       token.value = ''

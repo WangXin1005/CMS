@@ -62,6 +62,10 @@ public class RateLimitFilter extends OncePerRequestFilter {
         }
 
         long now = System.currentTimeMillis();
+        // 清理过期条目，防止内存泄漏
+        if (buckets.size() > 1000) {
+            buckets.entrySet().removeIf(e -> now - e.getValue().timestamp > WINDOW_MS);
+        }
         RateWindow window = buckets.compute(ip, (k, v) -> {
             if (v == null || now - v.timestamp > WINDOW_MS) {
                 return new RateWindow(now, 1);
