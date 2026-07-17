@@ -170,8 +170,14 @@ var avatar_vue_vue_type_script_setup_true_lang_default = /* @__PURE__ */ defineC
     const avatarGroupContext = inject(avatarGroupContextKey, void 0);
     const ns = useNamespace("avatar");
     const hasLoadError = ref(false);
-    const size = computed(() => props.size ?? avatarGroupContext?.size);
-    const shape = computed(() => props.shape ?? avatarGroupContext?.shape ?? "circle");
+    const size = computed(() => {
+      var _a;
+      return (_a = props.size) != null ? _a : avatarGroupContext == null ? void 0 : avatarGroupContext.size;
+    });
+    const shape = computed(() => {
+      var _a, _b;
+      return (_b = (_a = props.shape) != null ? _a : avatarGroupContext == null ? void 0 : avatarGroupContext.shape) != null ? _b : "circle";
+    });
     const avatarClass = computed(() => {
       const { icon } = props;
       const classList = [ns.b()];
@@ -218,7 +224,8 @@ var avatar_group_default = /* @__PURE__ */ defineComponent({
       shape: toRef(props, "shape")
     }));
     return () => {
-      const avatars = flattedChildren(slots.default?.() ?? []);
+      var _a, _b;
+      const avatars = flattedChildren((_b = (_a = slots.default) == null ? void 0 : _a.call(slots)) != null ? _b : []);
       let visibleAvatars = avatars;
       if (props.collapseAvatars && avatars.length > props.maxCollapseAvatars) {
         visibleAvatars = avatars.slice(0, props.maxCollapseAvatars);
@@ -236,7 +243,10 @@ var avatar_group_default = /* @__PURE__ */ defineComponent({
             "class": props.collapseClass,
             "style": props.collapseStyle
           }, { default: () => [createTextVNode("+ "), hiddenAvatars.length] }),
-          content: () => createVNode("div", { "class": ns.e("collapse-avatars") }, [hiddenAvatars.map((node, idx) => isVNode(node) ? cloneVNode(node, { key: node.key ?? idx }) : node)])
+          content: () => createVNode("div", { "class": ns.e("collapse-avatars") }, [hiddenAvatars.map((node, idx) => {
+            var _a2;
+            return isVNode(node) ? cloneVNode(node, { key: (_a2 = node.key) != null ? _a2 : idx }) : node;
+          })])
         }));
       }
       return createVNode("div", { "class": ns.b() }, [visibleAvatars]);
@@ -647,7 +657,8 @@ var roving_focus_group_impl_vue_vue_type_script_lang_default = defineComponent({
   props: rovingFocusGroupProps,
   emits: [CURRENT_TAB_ID_CHANGE_EVT, "entryFocus"],
   setup(props, { emit }) {
-    const currentTabbedId = ref((props.currentTabId || props.defaultCurrentTabId) ?? null);
+    var _a;
+    const currentTabbedId = ref((_a = props.currentTabId || props.defaultCurrentTabId) != null ? _a : null);
     const isBackingOut = ref(false);
     const isClickFocus = ref(false);
     const rovingFocusGroupRef = ref();
@@ -662,18 +673,20 @@ var roving_focus_group_impl_vue_vue_type_script_lang_default = defineComponent({
       isBackingOut.value = true;
     };
     const onMousedown = composeEventHandlers((e) => {
-      props.onMousedown?.(e);
+      var _a2;
+      (_a2 = props.onMousedown) == null ? void 0 : _a2.call(props, e);
     }, () => {
       isClickFocus.value = true;
     });
     const onFocus = composeEventHandlers((e) => {
-      props.onFocus?.(e);
+      var _a2;
+      (_a2 = props.onFocus) == null ? void 0 : _a2.call(props, e);
     }, (e) => {
       const isKeyboardFocus = !unref(isClickFocus);
       const { target, currentTarget } = e;
       if (target === currentTarget && isKeyboardFocus && !unref(isBackingOut)) {
         const entryFocusEvt = new Event(ENTRY_FOCUS_EVT, EVT_OPTS);
-        currentTarget?.dispatchEvent(entryFocusEvt);
+        currentTarget == null ? void 0 : currentTarget.dispatchEvent(entryFocusEvt);
         if (!entryFocusEvt.defaultPrevented) {
           const items = getItems().filter((item) => item.focusable);
           focusFirst([
@@ -686,7 +699,8 @@ var roving_focus_group_impl_vue_vue_type_script_lang_default = defineComponent({
       isClickFocus.value = false;
     });
     const onBlur = composeEventHandlers((e) => {
-      props.onBlur?.(e);
+      var _a2;
+      (_a2 = props.onBlur) == null ? void 0 : _a2.call(props, e);
     }, () => {
       isBackingOut.value = false;
     });
@@ -733,7 +747,7 @@ var roving_focus_group_impl_vue_vue_type_script_lang_default = defineComponent({
       onKeydown
     });
     watch(() => props.currentTabId, (val) => {
-      currentTabbedId.value = val ?? null;
+      currentTabbedId.value = val != null ? val : null;
     });
     useEventListener(rovingFocusGroupRef, ENTRY_FOCUS_EVT, handleEntryFocus);
   }
@@ -870,13 +884,16 @@ var dropdown_vue_vue_type_script_lang_default = defineComponent({
     const defaultTriggerId = useId().value;
     const triggerId = computed(() => props.id || defaultTriggerId);
     function handleClick() {
-      popperRef.value?.onClose(void 0, 0);
+      var _a;
+      (_a = popperRef.value) == null ? void 0 : _a.onClose(void 0, 0);
     }
     function handleClose() {
-      popperRef.value?.onClose();
+      var _a;
+      (_a = popperRef.value) == null ? void 0 : _a.onClose();
     }
     function handleOpen() {
-      popperRef.value?.onOpen();
+      var _a;
+      (_a = popperRef.value) == null ? void 0 : _a.onOpen();
     }
     const dropdownSize = useFormSize();
     function commandHandler(...args) {
@@ -886,7 +903,7 @@ var dropdown_vue_vue_type_script_lang_default = defineComponent({
     }
     function onItemLeave() {
       const contentEl = unref(contentRef);
-      trigger.value.includes("hover") && contentEl?.focus({ preventScroll: true });
+      trigger.value.includes("hover") && (contentEl == null ? void 0 : contentEl.focus({ preventScroll: true }));
       currentTabId.value = null;
     }
     function handleCurrentTabIdChange(id) {
@@ -896,8 +913,9 @@ var dropdown_vue_vue_type_script_lang_default = defineComponent({
       emit("visible-change", true);
     }
     function handleShowTooltip(event) {
-      isUsingKeyboard.value = event?.type === "keydown";
-      contentRef.value?.focus();
+      var _a;
+      isUsingKeyboard.value = (event == null ? void 0 : event.type) === "keydown";
+      (_a = contentRef.value) == null ? void 0 : _a.focus();
     }
     function handleBeforeHideTooltip() {
       emit("visible-change", false);
@@ -946,6 +964,7 @@ var dropdown_vue_vue_type_script_lang_default = defineComponent({
   }
 });
 function _sfc_render$3(_ctx, _cache, $props, $setup, $data, $options) {
+  var _a;
   const _component_el_roving_focus_group = resolveComponent("el-roving-focus-group");
   const _component_el_scrollbar = resolveComponent("el-scrollbar");
   const _component_el_only_child = resolveComponent("el-only-child");
@@ -970,7 +989,7 @@ function _sfc_render$3(_ctx, _cache, $props, $setup, $data, $options) {
     "show-arrow": _ctx.showArrow,
     "show-after": _ctx.trigger === "hover" ? _ctx.showTimeout : 0,
     "hide-after": _ctx.trigger === "hover" ? _ctx.hideTimeout : 0,
-    "virtual-ref": _ctx.virtualRef ?? _ctx.triggeringElementRef,
+    "virtual-ref": (_a = _ctx.virtualRef) != null ? _a : _ctx.triggeringElementRef,
     "virtual-triggering": _ctx.virtualTriggering || _ctx.splitButton,
     disabled: _ctx.disabled,
     transition: `${_ctx.ns.namespace.value}-zoom-in-top`,
@@ -1167,7 +1186,7 @@ const useDropdown = () => {
   const elDropdown = inject(DROPDOWN_INSTANCE_INJECTION_KEY, {});
   return {
     elDropdown,
-    _elDropdownSize: computed(() => elDropdown?.dropdownSize)
+    _elDropdownSize: computed(() => elDropdown == null ? void 0 : elDropdown.dropdownSize)
   };
 };
 var dropdown_item_vue_vue_type_script_lang_default = defineComponent({
@@ -1198,7 +1217,7 @@ var dropdown_item_vue_vue_type_script_lang_default = defineComponent({
       const target = e.currentTarget;
       if (target === (void 0).activeElement || target.contains((void 0).activeElement)) return;
       onItemEnter(e);
-      if (!e.defaultPrevented) target?.focus({ preventScroll: true });
+      if (!e.defaultPrevented) target == null ? void 0 : target.focus({ preventScroll: true });
     }));
     const handlePointerLeave = composeEventHandlers((e) => {
       emit("pointerleave", e);
@@ -1210,12 +1229,13 @@ var dropdown_item_vue_vue_type_script_lang_default = defineComponent({
         emit("click", e);
         return e.type !== "keydown" && e.defaultPrevented;
       }, (e) => {
+        var _a, _b, _c;
         if (props.disabled) {
           e.stopImmediatePropagation();
           return;
         }
-        if (elDropdown?.hideOnClick?.value) elDropdown.handleClick?.();
-        elDropdown.commandHandler?.(props.command, _instance, e);
+        if ((_a = elDropdown == null ? void 0 : elDropdown.hideOnClick) == null ? void 0 : _a.value) (_b = elDropdown.handleClick) == null ? void 0 : _b.call(elDropdown);
+        (_c = elDropdown.commandHandler) == null ? void 0 : _c.call(elDropdown, props.command, _instance, e);
       }),
       handlePointerMove,
       handlePointerLeave,
@@ -1261,11 +1281,12 @@ var dropdown_menu_vue_vue_type_script_lang_default = defineComponent({
     const { rovingFocusGroupRef, rovingFocusGroupRootStyle, onBlur, onFocus, onKeydown, onMousedown } = inject(ROVING_FOCUS_GROUP_INJECTION_KEY, void 0);
     const { collectionRef: rovingFocusGroupCollectionRef } = inject(COLLECTION_INJECTION_KEY, void 0);
     const dropdownKls = computed(() => {
-      return [ns.b("menu"), ns.bm("menu", size?.value)];
+      return [ns.b("menu"), ns.bm("menu", size == null ? void 0 : size.value)];
     });
     const dropdownListWrapperRef = composeRefs(contentRef, rovingFocusGroupRef, rovingFocusGroupCollectionRef);
     const handleKeydown = composeEventHandlers((e) => {
-      props.onKeydown?.(e);
+      var _a;
+      (_a = props.onKeydown) == null ? void 0 : _a.call(props, e);
     }, (e) => {
       const { currentTarget, target } = e;
       const code = getEventCode(e);
@@ -1319,27 +1340,27 @@ const _sfc_main$2 = /* @__PURE__ */ defineComponent({
     const { username, role, logout, changePassword } = useAuth();
     const route = useRoute();
     const breadcrumbMap = {
-      "/home": "仪表盘",
-      "/articles": "文章管理",
-      "/categories": "分类管理",
-      "/tags": "标签管理",
-      "/comments": "评论管理",
-      "/media": "媒体管理",
-      "/users": "用户管理",
-      "/settings": "站点设置",
-      "/logs": "操作日志"
+      "/home": "\u4EEA\u8868\u76D8",
+      "/articles": "\u6587\u7AE0\u7BA1\u7406",
+      "/categories": "\u5206\u7C7B\u7BA1\u7406",
+      "/tags": "\u6807\u7B7E\u7BA1\u7406",
+      "/comments": "\u8BC4\u8BBA\u7BA1\u7406",
+      "/media": "\u5A92\u4F53\u7BA1\u7406",
+      "/users": "\u7528\u6237\u7BA1\u7406",
+      "/settings": "\u7AD9\u70B9\u8BBE\u7F6E",
+      "/logs": "\u64CD\u4F5C\u65E5\u5FD7"
     };
     computed(() => {
       const path = route.path;
-      const items = [{ name: "首页", path: "/" }];
+      const items = [{ name: "\u9996\u9875", path: "/" }];
       if (path === "/") return items;
       if (path === "/home") {
-        items.push({ name: "仪表盘", path: "" });
+        items.push({ name: "\u4EEA\u8868\u76D8", path: "" });
         return items;
       }
       if (path.startsWith("/articles/create")) {
-        items.push({ name: "文章管理", path: "/articles" });
-        items.push({ name: "创建文章", path: "" });
+        items.push({ name: "\u6587\u7AE0\u7BA1\u7406", path: "/articles" });
+        items.push({ name: "\u521B\u5EFA\u6587\u7AE0", path: "" });
         return items;
       }
       const label = breadcrumbMap[path];
@@ -1355,11 +1376,11 @@ const _sfc_main$2 = /* @__PURE__ */ defineComponent({
     }
     async function handleChangePassword() {
       if (!passwordForm.value.oldPassword || !passwordForm.value.newPassword) {
-        ElMessage.warning("请填写完整信息");
+        ElMessage.warning("\u8BF7\u586B\u5199\u5B8C\u6574\u4FE1\u606F");
         return;
       }
       if (passwordForm.value.newPassword !== passwordForm.value.confirmPassword) {
-        ElMessage.warning("两次输入的密码不一致");
+        ElMessage.warning("\u4E24\u6B21\u8F93\u5165\u7684\u5BC6\u7801\u4E0D\u4E00\u81F4");
         return;
       }
       passwordLoading.value = true;
@@ -1368,7 +1389,7 @@ const _sfc_main$2 = /* @__PURE__ */ defineComponent({
           oldPassword: passwordForm.value.oldPassword,
           newPassword: passwordForm.value.newPassword
         });
-        ElMessage.success("密码修改成功");
+        ElMessage.success("\u5BC6\u7801\u4FEE\u6539\u6210\u529F");
         dialogVisible.value = false;
       } catch (e) {
       } finally {
@@ -1376,7 +1397,8 @@ const _sfc_main$2 = /* @__PURE__ */ defineComponent({
       }
     }
     function handleCommand(command) {
-      (void 0).activeElement?.blur?.();
+      var _a, _b;
+      (_b = (_a = (void 0).activeElement) == null ? void 0 : _a.blur) == null ? void 0 : _b.call(_a);
       if (command === "setting") {
         openDialog();
       } else if (command === "logout") {
@@ -1420,7 +1442,7 @@ const _sfc_main$2 = /* @__PURE__ */ defineComponent({
                     }),
                     _: 1
                   }, _parent3, _scopeId2));
-                  _push3(`<span data-v-38be4280${_scopeId2}>返 回 博 客</span>`);
+                  _push3(`<span data-v-38be4280${_scopeId2}>\u8FD4 \u56DE \u535A \u5BA2</span>`);
                 } else {
                   return [
                     createVNode(_component_el_icon, { class: "back-icon" }, {
@@ -1429,7 +1451,7 @@ const _sfc_main$2 = /* @__PURE__ */ defineComponent({
                       ]),
                       _: 1
                     }),
-                    createVNode("span", null, "返 回 博 客")
+                    createVNode("span", null, "\u8FD4 \u56DE \u535A \u5BA2")
                   ];
                 }
               }),
@@ -1445,10 +1467,10 @@ const _sfc_main$2 = /* @__PURE__ */ defineComponent({
                   _push3(ssrRenderComponent(_component_el_dropdown_item, { command: "setting" }, {
                     default: withCtx((_3, _push4, _parent4, _scopeId3) => {
                       if (_push4) {
-                        _push4(`个人设置`);
+                        _push4(`\u4E2A\u4EBA\u8BBE\u7F6E`);
                       } else {
                         return [
-                          createTextVNode("个人设置")
+                          createTextVNode("\u4E2A\u4EBA\u8BBE\u7F6E")
                         ];
                       }
                     }),
@@ -1457,10 +1479,10 @@ const _sfc_main$2 = /* @__PURE__ */ defineComponent({
                   _push3(ssrRenderComponent(_component_el_dropdown_item, { command: "logout" }, {
                     default: withCtx((_3, _push4, _parent4, _scopeId3) => {
                       if (_push4) {
-                        _push4(`退出登录`);
+                        _push4(`\u9000\u51FA\u767B\u5F55`);
                       } else {
                         return [
-                          createTextVNode("退出登录")
+                          createTextVNode("\u9000\u51FA\u767B\u5F55")
                         ];
                       }
                     }),
@@ -1470,13 +1492,13 @@ const _sfc_main$2 = /* @__PURE__ */ defineComponent({
                   return [
                     createVNode(_component_el_dropdown_item, { command: "setting" }, {
                       default: withCtx(() => [
-                        createTextVNode("个人设置")
+                        createTextVNode("\u4E2A\u4EBA\u8BBE\u7F6E")
                       ]),
                       _: 1
                     }),
                     createVNode(_component_el_dropdown_item, { command: "logout" }, {
                       default: withCtx(() => [
-                        createTextVNode("退出登录")
+                        createTextVNode("\u9000\u51FA\u767B\u5F55")
                       ]),
                       _: 1
                     })
@@ -1491,11 +1513,12 @@ const _sfc_main$2 = /* @__PURE__ */ defineComponent({
                     class: "user-avatar"
                   }, {
                     default: withCtx((_3, _push4, _parent4, _scopeId3) => {
+                      var _a, _b, _c, _d;
                       if (_push4) {
-                        _push4(`${ssrInterpolate(unref(username)?.charAt(0)?.toUpperCase())}`);
+                        _push4(`${ssrInterpolate((_b = (_a = unref(username)) == null ? void 0 : _a.charAt(0)) == null ? void 0 : _b.toUpperCase())}`);
                       } else {
                         return [
-                          createTextVNode(toDisplayString(unref(username)?.charAt(0)?.toUpperCase()), 1)
+                          createTextVNode(toDisplayString((_d = (_c = unref(username)) == null ? void 0 : _c.charAt(0)) == null ? void 0 : _d.toUpperCase()), 1)
                         ];
                       }
                     }),
@@ -1522,9 +1545,12 @@ const _sfc_main$2 = /* @__PURE__ */ defineComponent({
                         size: 32,
                         class: "user-avatar"
                       }, {
-                        default: withCtx(() => [
-                          createTextVNode(toDisplayString(unref(username)?.charAt(0)?.toUpperCase()), 1)
-                        ]),
+                        default: withCtx(() => {
+                          var _a, _b;
+                          return [
+                            createTextVNode(toDisplayString((_b = (_a = unref(username)) == null ? void 0 : _a.charAt(0)) == null ? void 0 : _b.toUpperCase()), 1)
+                          ];
+                        }),
                         _: 1
                       }),
                       createVNode("span", { class: "username" }, toDisplayString(unref(username)), 1),
@@ -1555,7 +1581,7 @@ const _sfc_main$2 = /* @__PURE__ */ defineComponent({
                       ]),
                       _: 1
                     }),
-                    createVNode("span", null, "返 回 博 客")
+                    createVNode("span", null, "\u8FD4 \u56DE \u535A \u5BA2")
                   ]),
                   _: 1
                 })
@@ -1568,13 +1594,13 @@ const _sfc_main$2 = /* @__PURE__ */ defineComponent({
                   dropdown: withCtx(() => [
                     createVNode(_component_el_dropdown_item, { command: "setting" }, {
                       default: withCtx(() => [
-                        createTextVNode("个人设置")
+                        createTextVNode("\u4E2A\u4EBA\u8BBE\u7F6E")
                       ]),
                       _: 1
                     }),
                     createVNode(_component_el_dropdown_item, { command: "logout" }, {
                       default: withCtx(() => [
-                        createTextVNode("退出登录")
+                        createTextVNode("\u9000\u51FA\u767B\u5F55")
                       ]),
                       _: 1
                     })
@@ -1585,9 +1611,12 @@ const _sfc_main$2 = /* @__PURE__ */ defineComponent({
                         size: 32,
                         class: "user-avatar"
                       }, {
-                        default: withCtx(() => [
-                          createTextVNode(toDisplayString(unref(username)?.charAt(0)?.toUpperCase()), 1)
-                        ]),
+                        default: withCtx(() => {
+                          var _a, _b;
+                          return [
+                            createTextVNode(toDisplayString((_b = (_a = unref(username)) == null ? void 0 : _a.charAt(0)) == null ? void 0 : _b.toUpperCase()), 1)
+                          ];
+                        }),
                         _: 1
                       }),
                       createVNode("span", { class: "username" }, toDisplayString(unref(username)), 1),
@@ -1610,7 +1639,7 @@ const _sfc_main$2 = /* @__PURE__ */ defineComponent({
       _push(ssrRenderComponent(_component_el_dialog, {
         modelValue: dialogVisible.value,
         "onUpdate:modelValue": ($event) => dialogVisible.value = $event,
-        title: "个人设置",
+        title: "\u4E2A\u4EBA\u8BBE\u7F6E",
         width: "420px"
       }, {
         footer: withCtx((_, _push2, _parent2, _scopeId) => {
@@ -1620,10 +1649,10 @@ const _sfc_main$2 = /* @__PURE__ */ defineComponent({
             }, {
               default: withCtx((_2, _push3, _parent3, _scopeId2) => {
                 if (_push3) {
-                  _push3(`取消`);
+                  _push3(`\u53D6\u6D88`);
                 } else {
                   return [
-                    createTextVNode("取消")
+                    createTextVNode("\u53D6\u6D88")
                   ];
                 }
               }),
@@ -1636,10 +1665,10 @@ const _sfc_main$2 = /* @__PURE__ */ defineComponent({
             }, {
               default: withCtx((_2, _push3, _parent3, _scopeId2) => {
                 if (_push3) {
-                  _push3(`确认修改`);
+                  _push3(`\u786E\u8BA4\u4FEE\u6539`);
                 } else {
                   return [
-                    createTextVNode("确认修改")
+                    createTextVNode("\u786E\u8BA4\u4FEE\u6539")
                   ];
                 }
               }),
@@ -1651,7 +1680,7 @@ const _sfc_main$2 = /* @__PURE__ */ defineComponent({
                 onClick: ($event) => dialogVisible.value = false
               }, {
                 default: withCtx(() => [
-                  createTextVNode("取消")
+                  createTextVNode("\u53D6\u6D88")
                 ]),
                 _: 1
               }, 8, ["onClick"]),
@@ -1661,7 +1690,7 @@ const _sfc_main$2 = /* @__PURE__ */ defineComponent({
                 onClick: handleChangePassword
               }, {
                 default: withCtx(() => [
-                  createTextVNode("确认修改")
+                  createTextVNode("\u786E\u8BA4\u4FEE\u6539")
                 ]),
                 _: 1
               }, 8, ["loading"])
@@ -1676,7 +1705,7 @@ const _sfc_main$2 = /* @__PURE__ */ defineComponent({
             }, {
               default: withCtx((_2, _push3, _parent3, _scopeId2) => {
                 if (_push3) {
-                  _push3(ssrRenderComponent(_component_el_form_item, { label: "用户名" }, {
+                  _push3(ssrRenderComponent(_component_el_form_item, { label: "\u7528\u6237\u540D" }, {
                     default: withCtx((_3, _push4, _parent4, _scopeId3) => {
                       if (_push4) {
                         _push4(ssrRenderComponent(_component_el_input, {
@@ -1694,7 +1723,7 @@ const _sfc_main$2 = /* @__PURE__ */ defineComponent({
                     }),
                     _: 1
                   }, _parent3, _scopeId2));
-                  _push3(ssrRenderComponent(_component_el_form_item, { label: "角色" }, {
+                  _push3(ssrRenderComponent(_component_el_form_item, { label: "\u89D2\u8272" }, {
                     default: withCtx((_3, _push4, _parent4, _scopeId3) => {
                       if (_push4) {
                         _push4(ssrRenderComponent(_component_el_tag, null, {
@@ -1723,14 +1752,14 @@ const _sfc_main$2 = /* @__PURE__ */ defineComponent({
                     _: 1
                   }, _parent3, _scopeId2));
                   _push3(ssrRenderComponent(_component_el_divider, null, null, _parent3, _scopeId2));
-                  _push3(ssrRenderComponent(_component_el_form_item, { label: "原密码" }, {
+                  _push3(ssrRenderComponent(_component_el_form_item, { label: "\u539F\u5BC6\u7801" }, {
                     default: withCtx((_3, _push4, _parent4, _scopeId3) => {
                       if (_push4) {
                         _push4(ssrRenderComponent(_component_el_input, {
                           modelValue: passwordForm.value.oldPassword,
                           "onUpdate:modelValue": ($event) => passwordForm.value.oldPassword = $event,
                           type: "password",
-                          placeholder: "请输入原密码",
+                          placeholder: "\u8BF7\u8F93\u5165\u539F\u5BC6\u7801",
                           "show-password": ""
                         }, null, _parent4, _scopeId3));
                       } else {
@@ -1739,7 +1768,7 @@ const _sfc_main$2 = /* @__PURE__ */ defineComponent({
                             modelValue: passwordForm.value.oldPassword,
                             "onUpdate:modelValue": ($event) => passwordForm.value.oldPassword = $event,
                             type: "password",
-                            placeholder: "请输入原密码",
+                            placeholder: "\u8BF7\u8F93\u5165\u539F\u5BC6\u7801",
                             "show-password": ""
                           }, null, 8, ["modelValue", "onUpdate:modelValue"])
                         ];
@@ -1747,14 +1776,14 @@ const _sfc_main$2 = /* @__PURE__ */ defineComponent({
                     }),
                     _: 1
                   }, _parent3, _scopeId2));
-                  _push3(ssrRenderComponent(_component_el_form_item, { label: "新密码" }, {
+                  _push3(ssrRenderComponent(_component_el_form_item, { label: "\u65B0\u5BC6\u7801" }, {
                     default: withCtx((_3, _push4, _parent4, _scopeId3) => {
                       if (_push4) {
                         _push4(ssrRenderComponent(_component_el_input, {
                           modelValue: passwordForm.value.newPassword,
                           "onUpdate:modelValue": ($event) => passwordForm.value.newPassword = $event,
                           type: "password",
-                          placeholder: "请输入新密码",
+                          placeholder: "\u8BF7\u8F93\u5165\u65B0\u5BC6\u7801",
                           "show-password": ""
                         }, null, _parent4, _scopeId3));
                       } else {
@@ -1763,7 +1792,7 @@ const _sfc_main$2 = /* @__PURE__ */ defineComponent({
                             modelValue: passwordForm.value.newPassword,
                             "onUpdate:modelValue": ($event) => passwordForm.value.newPassword = $event,
                             type: "password",
-                            placeholder: "请输入新密码",
+                            placeholder: "\u8BF7\u8F93\u5165\u65B0\u5BC6\u7801",
                             "show-password": ""
                           }, null, 8, ["modelValue", "onUpdate:modelValue"])
                         ];
@@ -1771,14 +1800,14 @@ const _sfc_main$2 = /* @__PURE__ */ defineComponent({
                     }),
                     _: 1
                   }, _parent3, _scopeId2));
-                  _push3(ssrRenderComponent(_component_el_form_item, { label: "确认密码" }, {
+                  _push3(ssrRenderComponent(_component_el_form_item, { label: "\u786E\u8BA4\u5BC6\u7801" }, {
                     default: withCtx((_3, _push4, _parent4, _scopeId3) => {
                       if (_push4) {
                         _push4(ssrRenderComponent(_component_el_input, {
                           modelValue: passwordForm.value.confirmPassword,
                           "onUpdate:modelValue": ($event) => passwordForm.value.confirmPassword = $event,
                           type: "password",
-                          placeholder: "请再次输入新密码",
+                          placeholder: "\u8BF7\u518D\u6B21\u8F93\u5165\u65B0\u5BC6\u7801",
                           "show-password": ""
                         }, null, _parent4, _scopeId3));
                       } else {
@@ -1787,7 +1816,7 @@ const _sfc_main$2 = /* @__PURE__ */ defineComponent({
                             modelValue: passwordForm.value.confirmPassword,
                             "onUpdate:modelValue": ($event) => passwordForm.value.confirmPassword = $event,
                             type: "password",
-                            placeholder: "请再次输入新密码",
+                            placeholder: "\u8BF7\u518D\u6B21\u8F93\u5165\u65B0\u5BC6\u7801",
                             "show-password": ""
                           }, null, 8, ["modelValue", "onUpdate:modelValue"])
                         ];
@@ -1797,7 +1826,7 @@ const _sfc_main$2 = /* @__PURE__ */ defineComponent({
                   }, _parent3, _scopeId2));
                 } else {
                   return [
-                    createVNode(_component_el_form_item, { label: "用户名" }, {
+                    createVNode(_component_el_form_item, { label: "\u7528\u6237\u540D" }, {
                       default: withCtx(() => [
                         createVNode(_component_el_input, {
                           "model-value": unref(username),
@@ -1806,7 +1835,7 @@ const _sfc_main$2 = /* @__PURE__ */ defineComponent({
                       ]),
                       _: 1
                     }),
-                    createVNode(_component_el_form_item, { label: "角色" }, {
+                    createVNode(_component_el_form_item, { label: "\u89D2\u8272" }, {
                       default: withCtx(() => [
                         createVNode(_component_el_tag, null, {
                           default: withCtx(() => [
@@ -1818,37 +1847,37 @@ const _sfc_main$2 = /* @__PURE__ */ defineComponent({
                       _: 1
                     }),
                     createVNode(_component_el_divider),
-                    createVNode(_component_el_form_item, { label: "原密码" }, {
+                    createVNode(_component_el_form_item, { label: "\u539F\u5BC6\u7801" }, {
                       default: withCtx(() => [
                         createVNode(_component_el_input, {
                           modelValue: passwordForm.value.oldPassword,
                           "onUpdate:modelValue": ($event) => passwordForm.value.oldPassword = $event,
                           type: "password",
-                          placeholder: "请输入原密码",
+                          placeholder: "\u8BF7\u8F93\u5165\u539F\u5BC6\u7801",
                           "show-password": ""
                         }, null, 8, ["modelValue", "onUpdate:modelValue"])
                       ]),
                       _: 1
                     }),
-                    createVNode(_component_el_form_item, { label: "新密码" }, {
+                    createVNode(_component_el_form_item, { label: "\u65B0\u5BC6\u7801" }, {
                       default: withCtx(() => [
                         createVNode(_component_el_input, {
                           modelValue: passwordForm.value.newPassword,
                           "onUpdate:modelValue": ($event) => passwordForm.value.newPassword = $event,
                           type: "password",
-                          placeholder: "请输入新密码",
+                          placeholder: "\u8BF7\u8F93\u5165\u65B0\u5BC6\u7801",
                           "show-password": ""
                         }, null, 8, ["modelValue", "onUpdate:modelValue"])
                       ]),
                       _: 1
                     }),
-                    createVNode(_component_el_form_item, { label: "确认密码" }, {
+                    createVNode(_component_el_form_item, { label: "\u786E\u8BA4\u5BC6\u7801" }, {
                       default: withCtx(() => [
                         createVNode(_component_el_input, {
                           modelValue: passwordForm.value.confirmPassword,
                           "onUpdate:modelValue": ($event) => passwordForm.value.confirmPassword = $event,
                           type: "password",
-                          placeholder: "请再次输入新密码",
+                          placeholder: "\u8BF7\u518D\u6B21\u8F93\u5165\u65B0\u5BC6\u7801",
                           "show-password": ""
                         }, null, 8, ["modelValue", "onUpdate:modelValue"])
                       ]),
@@ -1866,7 +1895,7 @@ const _sfc_main$2 = /* @__PURE__ */ defineComponent({
                 onSubmit: withModifiers(handleChangePassword, ["prevent"])
               }, {
                 default: withCtx(() => [
-                  createVNode(_component_el_form_item, { label: "用户名" }, {
+                  createVNode(_component_el_form_item, { label: "\u7528\u6237\u540D" }, {
                     default: withCtx(() => [
                       createVNode(_component_el_input, {
                         "model-value": unref(username),
@@ -1875,7 +1904,7 @@ const _sfc_main$2 = /* @__PURE__ */ defineComponent({
                     ]),
                     _: 1
                   }),
-                  createVNode(_component_el_form_item, { label: "角色" }, {
+                  createVNode(_component_el_form_item, { label: "\u89D2\u8272" }, {
                     default: withCtx(() => [
                       createVNode(_component_el_tag, null, {
                         default: withCtx(() => [
@@ -1887,37 +1916,37 @@ const _sfc_main$2 = /* @__PURE__ */ defineComponent({
                     _: 1
                   }),
                   createVNode(_component_el_divider),
-                  createVNode(_component_el_form_item, { label: "原密码" }, {
+                  createVNode(_component_el_form_item, { label: "\u539F\u5BC6\u7801" }, {
                     default: withCtx(() => [
                       createVNode(_component_el_input, {
                         modelValue: passwordForm.value.oldPassword,
                         "onUpdate:modelValue": ($event) => passwordForm.value.oldPassword = $event,
                         type: "password",
-                        placeholder: "请输入原密码",
+                        placeholder: "\u8BF7\u8F93\u5165\u539F\u5BC6\u7801",
                         "show-password": ""
                       }, null, 8, ["modelValue", "onUpdate:modelValue"])
                     ]),
                     _: 1
                   }),
-                  createVNode(_component_el_form_item, { label: "新密码" }, {
+                  createVNode(_component_el_form_item, { label: "\u65B0\u5BC6\u7801" }, {
                     default: withCtx(() => [
                       createVNode(_component_el_input, {
                         modelValue: passwordForm.value.newPassword,
                         "onUpdate:modelValue": ($event) => passwordForm.value.newPassword = $event,
                         type: "password",
-                        placeholder: "请输入新密码",
+                        placeholder: "\u8BF7\u8F93\u5165\u65B0\u5BC6\u7801",
                         "show-password": ""
                       }, null, 8, ["modelValue", "onUpdate:modelValue"])
                     ]),
                     _: 1
                   }),
-                  createVNode(_component_el_form_item, { label: "确认密码" }, {
+                  createVNode(_component_el_form_item, { label: "\u786E\u8BA4\u5BC6\u7801" }, {
                     default: withCtx(() => [
                       createVNode(_component_el_input, {
                         modelValue: passwordForm.value.confirmPassword,
                         "onUpdate:modelValue": ($event) => passwordForm.value.confirmPassword = $event,
                         type: "password",
-                        placeholder: "请再次输入新密码",
+                        placeholder: "\u8BF7\u518D\u6B21\u8F93\u5165\u65B0\u5BC6\u7801",
                         "show-password": ""
                       }, null, 8, ["modelValue", "onUpdate:modelValue"])
                     ]),
@@ -1961,7 +1990,7 @@ const _sfc_main$1 = /* @__PURE__ */ defineComponent({
       if (siteLogo.value) {
         _push(`<img${ssrRenderAttr("src", siteLogo.value)} class="logo-img" alt="logo" data-v-66d8b4f9>`);
       } else {
-        _push(`<span class="logo-emoji" data-v-66d8b4f9>📝</span>`);
+        _push(`<span class="logo-emoji" data-v-66d8b4f9>\u{1F4DD}</span>`);
       }
       _push(`</span><span class="logo-text" data-v-66d8b4f9>${ssrInterpolate(siteName.value)}</span></div>`);
       _push(ssrRenderComponent(_component_el_menu, {
@@ -1990,7 +2019,7 @@ const _sfc_main$1 = /* @__PURE__ */ defineComponent({
                     }),
                     _: 1
                   }, _parent3, _scopeId2));
-                  _push3(`<span data-v-66d8b4f9${_scopeId2}>仪表盘</span>`);
+                  _push3(`<span data-v-66d8b4f9${_scopeId2}>\u4EEA\u8868\u76D8</span>`);
                 } else {
                   return [
                     createVNode(_component_el_icon, null, {
@@ -1999,7 +2028,7 @@ const _sfc_main$1 = /* @__PURE__ */ defineComponent({
                       ]),
                       _: 1
                     }),
-                    createVNode("span", null, "仪表盘")
+                    createVNode("span", null, "\u4EEA\u8868\u76D8")
                   ];
                 }
               }),
@@ -2020,7 +2049,7 @@ const _sfc_main$1 = /* @__PURE__ */ defineComponent({
                     }),
                     _: 1
                   }, _parent3, _scopeId2));
-                  _push3(`<span data-v-66d8b4f9${_scopeId2}>文章管理</span>`);
+                  _push3(`<span data-v-66d8b4f9${_scopeId2}>\u6587\u7AE0\u7BA1\u7406</span>`);
                 } else {
                   return [
                     createVNode(_component_el_icon, null, {
@@ -2029,7 +2058,7 @@ const _sfc_main$1 = /* @__PURE__ */ defineComponent({
                       ]),
                       _: 1
                     }),
-                    createVNode("span", null, "文章管理")
+                    createVNode("span", null, "\u6587\u7AE0\u7BA1\u7406")
                   ];
                 }
               }),
@@ -2050,7 +2079,7 @@ const _sfc_main$1 = /* @__PURE__ */ defineComponent({
                     }),
                     _: 1
                   }, _parent3, _scopeId2));
-                  _push3(`<span data-v-66d8b4f9${_scopeId2}>分类管理</span>`);
+                  _push3(`<span data-v-66d8b4f9${_scopeId2}>\u5206\u7C7B\u7BA1\u7406</span>`);
                 } else {
                   return [
                     createVNode(_component_el_icon, null, {
@@ -2059,7 +2088,7 @@ const _sfc_main$1 = /* @__PURE__ */ defineComponent({
                       ]),
                       _: 1
                     }),
-                    createVNode("span", null, "分类管理")
+                    createVNode("span", null, "\u5206\u7C7B\u7BA1\u7406")
                   ];
                 }
               }),
@@ -2080,7 +2109,7 @@ const _sfc_main$1 = /* @__PURE__ */ defineComponent({
                     }),
                     _: 1
                   }, _parent3, _scopeId2));
-                  _push3(`<span data-v-66d8b4f9${_scopeId2}>标签管理</span>`);
+                  _push3(`<span data-v-66d8b4f9${_scopeId2}>\u6807\u7B7E\u7BA1\u7406</span>`);
                 } else {
                   return [
                     createVNode(_component_el_icon, null, {
@@ -2089,7 +2118,7 @@ const _sfc_main$1 = /* @__PURE__ */ defineComponent({
                       ]),
                       _: 1
                     }),
-                    createVNode("span", null, "标签管理")
+                    createVNode("span", null, "\u6807\u7B7E\u7BA1\u7406")
                   ];
                 }
               }),
@@ -2111,7 +2140,7 @@ const _sfc_main$1 = /* @__PURE__ */ defineComponent({
                       }),
                       _: 1
                     }, _parent3, _scopeId2));
-                    _push3(`<span data-v-66d8b4f9${_scopeId2}>评论管理</span>`);
+                    _push3(`<span data-v-66d8b4f9${_scopeId2}>\u8BC4\u8BBA\u7BA1\u7406</span>`);
                   } else {
                     return [
                       createVNode(_component_el_icon, null, {
@@ -2120,7 +2149,7 @@ const _sfc_main$1 = /* @__PURE__ */ defineComponent({
                         ]),
                         _: 1
                       }),
-                      createVNode("span", null, "评论管理")
+                      createVNode("span", null, "\u8BC4\u8BBA\u7BA1\u7406")
                     ];
                   }
                 }),
@@ -2145,7 +2174,7 @@ const _sfc_main$1 = /* @__PURE__ */ defineComponent({
                       }),
                       _: 1
                     }, _parent3, _scopeId2));
-                    _push3(`<span data-v-66d8b4f9${_scopeId2}>媒体管理</span>`);
+                    _push3(`<span data-v-66d8b4f9${_scopeId2}>\u5A92\u4F53\u7BA1\u7406</span>`);
                   } else {
                     return [
                       createVNode(_component_el_icon, null, {
@@ -2154,7 +2183,7 @@ const _sfc_main$1 = /* @__PURE__ */ defineComponent({
                         ]),
                         _: 1
                       }),
-                      createVNode("span", null, "媒体管理")
+                      createVNode("span", null, "\u5A92\u4F53\u7BA1\u7406")
                     ];
                   }
                 }),
@@ -2179,7 +2208,7 @@ const _sfc_main$1 = /* @__PURE__ */ defineComponent({
                       }),
                       _: 1
                     }, _parent3, _scopeId2));
-                    _push3(`<span data-v-66d8b4f9${_scopeId2}>用户管理</span>`);
+                    _push3(`<span data-v-66d8b4f9${_scopeId2}>\u7528\u6237\u7BA1\u7406</span>`);
                   } else {
                     return [
                       createVNode(_component_el_icon, null, {
@@ -2188,7 +2217,7 @@ const _sfc_main$1 = /* @__PURE__ */ defineComponent({
                         ]),
                         _: 1
                       }),
-                      createVNode("span", null, "用户管理")
+                      createVNode("span", null, "\u7528\u6237\u7BA1\u7406")
                     ];
                   }
                 }),
@@ -2213,7 +2242,7 @@ const _sfc_main$1 = /* @__PURE__ */ defineComponent({
                       }),
                       _: 1
                     }, _parent3, _scopeId2));
-                    _push3(`<span data-v-66d8b4f9${_scopeId2}>站点设置</span>`);
+                    _push3(`<span data-v-66d8b4f9${_scopeId2}>\u7AD9\u70B9\u8BBE\u7F6E</span>`);
                   } else {
                     return [
                       createVNode(_component_el_icon, null, {
@@ -2222,7 +2251,7 @@ const _sfc_main$1 = /* @__PURE__ */ defineComponent({
                         ]),
                         _: 1
                       }),
-                      createVNode("span", null, "站点设置")
+                      createVNode("span", null, "\u7AD9\u70B9\u8BBE\u7F6E")
                     ];
                   }
                 }),
@@ -2247,7 +2276,7 @@ const _sfc_main$1 = /* @__PURE__ */ defineComponent({
                       }),
                       _: 1
                     }, _parent3, _scopeId2));
-                    _push3(`<span data-v-66d8b4f9${_scopeId2}>操作日志</span>`);
+                    _push3(`<span data-v-66d8b4f9${_scopeId2}>\u64CD\u4F5C\u65E5\u5FD7</span>`);
                   } else {
                     return [
                       createVNode(_component_el_icon, null, {
@@ -2256,7 +2285,7 @@ const _sfc_main$1 = /* @__PURE__ */ defineComponent({
                         ]),
                         _: 1
                       }),
-                      createVNode("span", null, "操作日志")
+                      createVNode("span", null, "\u64CD\u4F5C\u65E5\u5FD7")
                     ];
                   }
                 }),
@@ -2275,7 +2304,7 @@ const _sfc_main$1 = /* @__PURE__ */ defineComponent({
                     ]),
                     _: 1
                   }),
-                  createVNode("span", null, "仪表盘")
+                  createVNode("span", null, "\u4EEA\u8868\u76D8")
                 ]),
                 _: 1
               }),
@@ -2287,7 +2316,7 @@ const _sfc_main$1 = /* @__PURE__ */ defineComponent({
                     ]),
                     _: 1
                   }),
-                  createVNode("span", null, "文章管理")
+                  createVNode("span", null, "\u6587\u7AE0\u7BA1\u7406")
                 ]),
                 _: 1
               }),
@@ -2299,7 +2328,7 @@ const _sfc_main$1 = /* @__PURE__ */ defineComponent({
                     ]),
                     _: 1
                   }),
-                  createVNode("span", null, "分类管理")
+                  createVNode("span", null, "\u5206\u7C7B\u7BA1\u7406")
                 ]),
                 _: 1
               }),
@@ -2311,7 +2340,7 @@ const _sfc_main$1 = /* @__PURE__ */ defineComponent({
                     ]),
                     _: 1
                   }),
-                  createVNode("span", null, "标签管理")
+                  createVNode("span", null, "\u6807\u7B7E\u7BA1\u7406")
                 ]),
                 _: 1
               }),
@@ -2326,7 +2355,7 @@ const _sfc_main$1 = /* @__PURE__ */ defineComponent({
                     ]),
                     _: 1
                   }),
-                  createVNode("span", null, "评论管理")
+                  createVNode("span", null, "\u8BC4\u8BBA\u7BA1\u7406")
                 ]),
                 _: 1
               })) : createCommentVNode("", true),
@@ -2341,7 +2370,7 @@ const _sfc_main$1 = /* @__PURE__ */ defineComponent({
                     ]),
                     _: 1
                   }),
-                  createVNode("span", null, "媒体管理")
+                  createVNode("span", null, "\u5A92\u4F53\u7BA1\u7406")
                 ]),
                 _: 1
               })) : createCommentVNode("", true),
@@ -2356,7 +2385,7 @@ const _sfc_main$1 = /* @__PURE__ */ defineComponent({
                     ]),
                     _: 1
                   }),
-                  createVNode("span", null, "用户管理")
+                  createVNode("span", null, "\u7528\u6237\u7BA1\u7406")
                 ]),
                 _: 1
               })) : createCommentVNode("", true),
@@ -2371,7 +2400,7 @@ const _sfc_main$1 = /* @__PURE__ */ defineComponent({
                     ]),
                     _: 1
                   }),
-                  createVNode("span", null, "站点设置")
+                  createVNode("span", null, "\u7AD9\u70B9\u8BBE\u7F6E")
                 ]),
                 _: 1
               })) : createCommentVNode("", true),
@@ -2386,7 +2415,7 @@ const _sfc_main$1 = /* @__PURE__ */ defineComponent({
                     ]),
                     _: 1
                   }),
-                  createVNode("span", null, "操作日志")
+                  createVNode("span", null, "\u64CD\u4F5C\u65E5\u5FD7")
                 ]),
                 _: 1
               })) : createCommentVNode("", true)

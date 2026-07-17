@@ -201,14 +201,16 @@ const useCheckboxDisabled = ({ model, isChecked }) => {
   const checkboxGroup = inject(checkboxGroupContextKey, void 0);
   const formContext = inject(formContextKey, void 0);
   const isLimitDisabled = computed(() => {
-    const max = checkboxGroup?.max?.value;
-    const min = checkboxGroup?.min?.value;
+    var _a, _b;
+    const max = (_a = checkboxGroup == null ? void 0 : checkboxGroup.max) == null ? void 0 : _a.value;
+    const min = (_b = checkboxGroup == null ? void 0 : checkboxGroup.min) == null ? void 0 : _b.value;
     return !isUndefined(max) && model.value.length >= max && !isChecked.value || !isUndefined(min) && model.value.length <= min && isChecked.value;
   });
   return {
     isDisabled: useFormDisabled(computed(() => {
-      if (checkboxGroup === void 0) return formContext?.disabled ?? isLimitDisabled.value;
-      else return checkboxGroup.disabled?.value || isLimitDisabled.value;
+      var _a, _b;
+      if (checkboxGroup === void 0) return (_a = formContext == null ? void 0 : formContext.disabled) != null ? _a : isLimitDisabled.value;
+      else return ((_b = checkboxGroup.disabled) == null ? void 0 : _b.value) || isLimitDisabled.value;
     })),
     isLimitDisabled
   };
@@ -218,11 +220,12 @@ const useCheckboxEvent = (props, { model, isLimitExceeded, hasOwnLabel, isDisabl
   const { formItem } = useFormItem();
   const { emit } = getCurrentInstance();
   function getLabeledValue(value) {
+    var _a, _b, _c, _d;
     return [
       true,
       props.trueValue,
       props.trueLabel
-    ].includes(value) ? props.trueValue ?? props.trueLabel ?? true : props.falseValue ?? props.falseLabel ?? false;
+    ].includes(value) ? (_b = (_a = props.trueValue) != null ? _a : props.trueLabel) != null ? _b : true : (_d = (_c = props.falseValue) != null ? _c : props.falseLabel) != null ? _d : false;
   }
   function emitChangeEvent(checked, e) {
     emit(CHANGE_EVENT, getLabeledValue(checked), e);
@@ -246,9 +249,9 @@ const useCheckboxEvent = (props, { model, isLimitExceeded, hasOwnLabel, isDisabl
       }
     }
   }
-  const validateEvent = computed(() => checkboxGroup?.validateEvent || props.validateEvent);
+  const validateEvent = computed(() => (checkboxGroup == null ? void 0 : checkboxGroup.validateEvent) || props.validateEvent);
   watch(() => props.modelValue, () => {
-    if (validateEvent.value) formItem?.validate("change").catch(NOOP);
+    if (validateEvent.value) formItem == null ? void 0 : formItem.validate("change").catch(NOOP);
   });
   return {
     handleChange,
@@ -262,17 +265,20 @@ const useCheckboxModel = (props) => {
   const isGroup = computed(() => isUndefined(checkboxGroup) === false);
   const isLimitExceeded = ref(false);
   const isControlled = computed(() => {
-    const rawProps = vnode.props ?? {};
+    var _a;
+    const rawProps = (_a = vnode.props) != null ? _a : {};
     return "modelValue" in rawProps || "model-value" in rawProps;
   });
   const model = computed({
     get() {
-      return isGroup.value ? checkboxGroup?.modelValue?.value : !isControlled.value ? selfModel.value : props.modelValue;
+      var _a;
+      return isGroup.value ? (_a = checkboxGroup == null ? void 0 : checkboxGroup.modelValue) == null ? void 0 : _a.value : !isControlled.value ? selfModel.value : props.modelValue;
     },
     set(val) {
+      var _a, _b;
       if (isGroup.value && isArray(val)) {
-        isLimitExceeded.value = checkboxGroup?.max?.value !== void 0 && val.length > checkboxGroup?.max.value && val.length > model.value.length;
-        isLimitExceeded.value === false && checkboxGroup?.changeEvent?.(val);
+        isLimitExceeded.value = ((_a = checkboxGroup == null ? void 0 : checkboxGroup.max) == null ? void 0 : _a.value) !== void 0 && val.length > (checkboxGroup == null ? void 0 : checkboxGroup.max.value) && val.length > model.value.length;
+        isLimitExceeded.value === false && ((_b = checkboxGroup == null ? void 0 : checkboxGroup.changeEvent) == null ? void 0 : _b.call(checkboxGroup, val));
       } else {
         emit(UPDATE_MODEL_EVENT, val);
         selfModel.value = val;
@@ -301,10 +307,16 @@ const useCheckboxStatus = (props, slots, { model }) => {
     else return !!value;
   });
   return {
-    checkboxButtonSize: useFormSize(computed(() => checkboxGroup?.size?.value), { prop: true }),
+    checkboxButtonSize: useFormSize(computed(() => {
+      var _a;
+      return (_a = checkboxGroup == null ? void 0 : checkboxGroup.size) == null ? void 0 : _a.value;
+    }), { prop: true }),
     isChecked,
     isFocused,
-    checkboxSize: useFormSize(computed(() => checkboxGroup?.size?.value)),
+    checkboxSize: useFormSize(computed(() => {
+      var _a;
+      return (_a = checkboxGroup == null ? void 0 : checkboxGroup.size) == null ? void 0 : _a.value;
+    })),
     hasOwnLabel: computed(() => {
       return !!slots.default || !isPropAbsent(actualValue.value);
     }),
@@ -333,8 +345,9 @@ const useCheckbox = (props, slots) => {
   });
   const setStoreValue = () => {
     function addToStore() {
+      var _a, _b;
       if (isArray(model.value) && !model.value.includes(actualValue.value)) model.value.push(actualValue.value);
-      else model.value = props.trueValue ?? props.trueLabel ?? true;
+      else model.value = (_b = (_a = props.trueValue) != null ? _a : props.trueLabel) != null ? _b : true;
     }
     props.checked && addToStore();
   };
@@ -391,9 +404,10 @@ var checkbox_vue_vue_type_script_setup_true_lang_default = /* @__PURE__ */ defin
     const props = __props;
     const { inputId, isLabeledByFormItem, isChecked, isDisabled, isFocused, checkboxSize, hasOwnLabel, model, actualValue, handleChange, onClickRoot } = useCheckbox(props, useSlots());
     const inputBindings = computed(() => {
+      var _a, _b, _c, _d;
       if (props.trueValue || props.falseValue || props.trueLabel || props.falseLabel) return {
-        "true-value": props.trueValue ?? props.trueLabel ?? true,
-        "false-value": props.falseValue ?? props.falseLabel ?? false
+        "true-value": (_b = (_a = props.trueValue) != null ? _a : props.trueLabel) != null ? _b : true,
+        "false-value": (_d = (_c = props.falseValue) != null ? _c : props.falseLabel) != null ? _d : false
       };
       return { value: actualValue.value };
     });
@@ -471,20 +485,22 @@ var checkbox_button_vue_vue_type_script_setup_true_lang_default = /* @__PURE__ *
     const props = __props;
     const { isFocused, isChecked, isDisabled, checkboxButtonSize, model, actualValue, handleChange } = useCheckbox(props, useSlots());
     const inputBindings = computed(() => {
+      var _a, _b, _c, _d;
       if (props.trueValue || props.falseValue || props.trueLabel || props.falseLabel) return {
-        "true-value": props.trueValue ?? props.trueLabel ?? true,
-        "false-value": props.falseValue ?? props.falseLabel ?? false
+        "true-value": (_b = (_a = props.trueValue) != null ? _a : props.trueLabel) != null ? _b : true,
+        "false-value": (_d = (_c = props.falseValue) != null ? _c : props.falseLabel) != null ? _d : false
       };
       return { value: actualValue.value };
     });
     const checkboxGroup = inject(checkboxGroupContextKey, void 0);
     const ns = useNamespace("checkbox");
     const activeStyle = computed(() => {
-      const fillValue = checkboxGroup?.fill?.value ?? "";
+      var _a, _b, _c, _d;
+      const fillValue = (_b = (_a = checkboxGroup == null ? void 0 : checkboxGroup.fill) == null ? void 0 : _a.value) != null ? _b : "";
       return {
         backgroundColor: fillValue,
         borderColor: fillValue,
-        color: checkboxGroup?.textColor?.value ?? "",
+        color: (_d = (_c = checkboxGroup == null ? void 0 : checkboxGroup.textColor) == null ? void 0 : _c.value) != null ? _d : "",
         boxShadow: fillValue ? `-1px 0 0 0 ${fillValue}` : void 0
       };
     });
@@ -580,15 +596,16 @@ var checkbox_group_vue_vue_type_script_setup_true_lang_default = /* @__PURE__ */
       changeEvent
     });
     watch(() => props.modelValue, (newVal, oldValue) => {
-      if (props.validateEvent && !isEqual(newVal, oldValue)) formItem?.validate("change").catch(NOOP);
+      if (props.validateEvent && !isEqual(newVal, oldValue)) formItem == null ? void 0 : formItem.validate("change").catch(NOOP);
     });
     return (_ctx, _cache) => {
+      var _a;
       return openBlock(), createBlock(resolveDynamicComponent(__props.tag), {
         id: unref(groupId),
         class: normalizeClass(unref(ns).b("group")),
         role: "group",
         "aria-label": !unref(isLabeledByFormItem) ? __props.ariaLabel || "checkbox-group" : void 0,
-        "aria-labelledby": unref(isLabeledByFormItem) ? unref(formItem)?.labelId : void 0
+        "aria-labelledby": unref(isLabeledByFormItem) ? (_a = unref(formItem)) == null ? void 0 : _a.labelId : void 0
       }, {
         default: withCtx(() => [renderSlot(_ctx.$slots, "default", {}, () => [(openBlock(true), createElementBlock(Fragment, null, renderList(__props.options, (item, index) => {
           return openBlock(), createBlock(resolveDynamicComponent(optionComponent.value), mergeProps({ key: index }, { ref_for: true }, getOptionProps(item)), null, 16);

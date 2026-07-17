@@ -219,14 +219,17 @@ const LISTENER_PREFIX = /^on[A-Z]/;
 const useAttrs = (params = {}) => {
   const { excludeListeners = false, excludeKeys } = params;
   const allExcludeKeys = computed(() => {
-    return (excludeKeys?.value || []).concat(DEFAULT_EXCLUDE_KEYS);
+    return ((excludeKeys == null ? void 0 : excludeKeys.value) || []).concat(DEFAULT_EXCLUDE_KEYS);
   });
   const instance = getCurrentInstance();
   if (!instance) {
     debugWarn("use-attrs", "getCurrentInstance() returned null. useAttrs() must be called at the top of a setup function");
     return computed(() => ({}));
   }
-  return computed(() => fromPairs(Object.entries(instance.proxy?.$attrs).filter(([key]) => !allExcludeKeys.value.includes(key) && !(excludeListeners && LISTENER_PREFIX.test(key)))));
+  return computed(() => {
+    var _a;
+    return fromPairs(Object.entries((_a = instance.proxy) == null ? void 0 : _a.$attrs).filter(([key]) => !allExcludeKeys.value.includes(key) && !(excludeListeners && LISTENER_PREFIX.test(key))));
+  });
 };
 function useCursor(input) {
   let selectionInfo;
@@ -268,18 +271,20 @@ function useFocusController(target, { disabled, beforeFocus, afterFocus, beforeB
     if (unref(disabled) || isFocused.value || cancelFocus) return;
     isFocused.value = true;
     emit("focus", event);
-    afterFocus?.();
+    afterFocus == null ? void 0 : afterFocus();
   };
   const handleBlur = (event) => {
+    var _a;
     const cancelBlur = isFunction(beforeBlur) ? beforeBlur(event) : false;
-    if (unref(disabled) || event.relatedTarget && wrapperRef.value?.contains(event.relatedTarget) || cancelBlur) return;
+    if (unref(disabled) || event.relatedTarget && ((_a = wrapperRef.value) == null ? void 0 : _a.contains(event.relatedTarget)) || cancelBlur) return;
     isFocused.value = false;
     emit("blur", event);
-    afterBlur?.();
+    afterBlur == null ? void 0 : afterBlur();
   };
   const handleClick = (event) => {
-    if (unref(disabled) || isFocusable(event.target) || wrapperRef.value?.contains((void 0).activeElement) && wrapperRef.value !== (void 0).activeElement) return;
-    target.value?.focus();
+    var _a, _b;
+    if (unref(disabled) || isFocusable(event.target) || ((_a = wrapperRef.value) == null ? void 0 : _a.contains((void 0).activeElement)) && wrapperRef.value !== (void 0).activeElement) return;
+    (_b = target.value) == null ? void 0 : _b.focus();
   };
   watch([wrapperRef, () => unref(disabled)], ([el, disabled2]) => {
     if (!el) return;
@@ -300,15 +305,15 @@ function useFocusController(target, { disabled, beforeFocus, afterFocus, beforeB
 function useComposition({ afterComposition, emit }) {
   const isComposing = ref(false);
   const handleCompositionStart = (event) => {
-    emit?.("compositionstart", event);
+    emit == null ? void 0 : emit("compositionstart", event);
     isComposing.value = true;
   };
   const handleCompositionUpdate = (event) => {
-    emit?.("compositionupdate", event);
+    emit == null ? void 0 : emit("compositionupdate", event);
     isComposing.value = true;
   };
   const handleCompositionEnd = (event) => {
-    emit?.("compositionend", event);
+    emit == null ? void 0 : emit("compositionend", event);
     if (isComposing.value) {
       isComposing.value = false;
       nextTick(() => afterComposition(event));
@@ -370,6 +375,7 @@ function calculateNodeStyling(targetElement) {
   };
 }
 function calcTextareaHeight(targetElement, minRows = 1, maxRows) {
+  var _a;
   if (!hiddenTextarea) {
     hiddenTextarea = (void 0).createElement("textarea");
     let hostNode = (void 0).body;
@@ -377,8 +383,8 @@ function calcTextareaHeight(targetElement, minRows = 1, maxRows) {
     hostNode.appendChild(hiddenTextarea);
   }
   const { paddingSize, borderSize, boxSizing, contextStyle } = calculateNodeStyling(targetElement);
-  contextStyle.forEach(([key, value]) => hiddenTextarea?.style.setProperty(key, value));
-  Object.entries(HIDDEN_STYLE).forEach(([key, value]) => hiddenTextarea?.style.setProperty(key, value, "important"));
+  contextStyle.forEach(([key, value]) => hiddenTextarea == null ? void 0 : hiddenTextarea.style.setProperty(key, value));
+  Object.entries(HIDDEN_STYLE).forEach(([key, value]) => hiddenTextarea == null ? void 0 : hiddenTextarea.style.setProperty(key, value, "important"));
   hiddenTextarea.value = targetElement.value || targetElement.placeholder || "";
   let height = hiddenTextarea.scrollHeight;
   const result = {};
@@ -398,7 +404,7 @@ function calcTextareaHeight(targetElement, minRows = 1, maxRows) {
     height = Math.min(maxHeight, height);
   }
   result.height = `${height}px`;
-  hiddenTextarea.parentNode?.removeChild(hiddenTextarea);
+  (_a = hiddenTextarea.parentNode) == null ? void 0 : _a.removeChild(hiddenTextarea);
   hiddenTextarea = void 0;
   return result;
 }
@@ -464,7 +470,10 @@ var input_vue_vue_type_script_setup_true_lang_default = /* @__PURE__ */ defineCo
     ]);
     const wrapperKls = computed(() => [nsInput.e("wrapper"), nsInput.is("focus", isFocused.value)]);
     const attrs = useAttrs();
-    const maxlength = computed(() => props.maxlength?.toString());
+    const maxlength = computed(() => {
+      var _a;
+      return (_a = props.maxlength) == null ? void 0 : _a.toString();
+    });
     const { form: elForm, formItem: elFormItem } = useFormItem();
     const { inputId } = useFormItemInputId(props, { formItemContext: elFormItem });
     const inputSize = useFormSize();
@@ -484,11 +493,15 @@ var input_vue_vue_type_script_setup_true_lang_default = /* @__PURE__ */ defineCo
     const { wrapperRef, isFocused, handleFocus, handleBlur } = useFocusController(_ref, {
       disabled: inputDisabled,
       afterBlur() {
-        if (props.validateEvent) elFormItem?.validate?.("blur").catch(NOOP);
+        var _a;
+        if (props.validateEvent) (_a = elFormItem == null ? void 0 : elFormItem.validate) == null ? void 0 : _a.call(elFormItem, "blur").catch(NOOP);
       }
     });
-    const needStatusIcon = computed(() => elForm?.statusIcon ?? false);
-    const validateState = computed(() => elFormItem?.validateState || "");
+    const needStatusIcon = computed(() => {
+      var _a;
+      return (_a = elForm == null ? void 0 : elForm.statusIcon) != null ? _a : false;
+    });
+    const validateState = computed(() => (elFormItem == null ? void 0 : elFormItem.validateState) || "");
     const validateIcon = computed(() => validateState.value && ValidateComponentsMap[validateState.value]);
     const passwordIcon = computed(() => passwordVisible.value ? view_default : hide_default);
     const containerStyle = computed(() => [rawAttrs.style]);
@@ -550,13 +563,15 @@ var input_vue_vue_type_script_setup_true_lang_default = /* @__PURE__ */ defineCo
     const createOnceInitResize = (resizeTextarea2) => {
       let isInit = false;
       return () => {
+        var _a;
         if (isInit || !props.autosize) {
           if (props.resize !== "none") setTimeout(() => {
-            textareaHeight.value = textarea.value?.style.height;
+            var _a2;
+            textareaHeight.value = (_a2 = textarea.value) == null ? void 0 : _a2.style.height;
           });
           return;
         }
-        if (!(textarea.value?.offsetParent === null)) {
+        if (!(((_a = textarea.value) == null ? void 0 : _a.offsetParent) === null)) {
           setTimeout(resizeTextarea2);
           isInit = true;
         }
@@ -667,8 +682,14 @@ var input_vue_vue_type_script_setup_true_lang_default = /* @__PURE__ */ defineCo
     const handlePasswordVisible = () => {
       passwordVisible.value = !passwordVisible.value;
     };
-    const focus = () => _ref.value?.focus();
-    const blur = () => _ref.value?.blur();
+    const focus = () => {
+      var _a;
+      return (_a = _ref.value) == null ? void 0 : _a.focus();
+    };
+    const blur = () => {
+      var _a;
+      return (_a = _ref.value) == null ? void 0 : _a.blur();
+    };
     const handleMouseLeave = (evt) => {
       hovering.value = false;
       emit("mouseleave", evt);
@@ -681,7 +702,8 @@ var input_vue_vue_type_script_setup_true_lang_default = /* @__PURE__ */ defineCo
       emit("keydown", evt);
     };
     const select = () => {
-      _ref.value?.select();
+      var _a;
+      (_a = _ref.value) == null ? void 0 : _a.select();
     };
     const clear = (evt) => {
       emit(UPDATE_MODEL_EVENT, "");
@@ -690,11 +712,12 @@ var input_vue_vue_type_script_setup_true_lang_default = /* @__PURE__ */ defineCo
       emit(INPUT_EVENT, "");
     };
     watch(() => props.modelValue, () => {
+      var _a;
       nextTick(() => {
         resizeTextarea();
         if (props.autosize) textareaHeight.value = void 0;
       });
-      if (props.validateEvent) elFormItem?.validate?.("change").catch(NOOP);
+      if (props.validateEvent) (_a = elFormItem == null ? void 0 : elFormItem.validate) == null ? void 0 : _a.call(elFormItem, "change").catch(NOOP);
     });
     watch(() => nativeInputValue.value, (val) => {
       saveValue.value = val;

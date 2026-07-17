@@ -1,11 +1,13 @@
 import { a as useNuxtApp } from './server.mjs';
 
 function useRequestEvent(nuxtApp) {
-  nuxtApp ||= useNuxtApp();
-  return nuxtApp.ssrContext?.event;
+  var _a;
+  nuxtApp || (nuxtApp = useNuxtApp());
+  return (_a = nuxtApp.ssrContext) == null ? void 0 : _a.event;
 }
 function useRequestFetch() {
-  return useRequestEvent()?.$fetch || globalThis.$fetch;
+  var _a;
+  return ((_a = useRequestEvent()) == null ? void 0 : _a.$fetch) || globalThis.$fetch;
 }
 
 export { useRequestEvent as a, useRequestFetch as u };

@@ -94,7 +94,8 @@ var tag_vue_vue_type_script_setup_true_lang_default = /* @__PURE__ */ defineComp
       emit("click", event);
     };
     const handleVNodeMounted = (vnode) => {
-      if (vnode?.component?.subTree?.component?.bum) vnode.component.subTree.component.bum = null;
+      var _a, _b, _c;
+      if ((_c = (_b = (_a = vnode == null ? void 0 : vnode.component) == null ? void 0 : _a.subTree) == null ? void 0 : _b.component) == null ? void 0 : _c.bum) vnode.component.subTree.component.bum = null;
     };
     return (_ctx, _cache) => {
       return __props.disableTransitions ? (openBlock(), createElementBlock("span", {

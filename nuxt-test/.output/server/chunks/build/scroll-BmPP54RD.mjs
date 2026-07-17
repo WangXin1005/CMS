@@ -32,6 +32,7 @@ const getScrollContainer = (el, isVertical) => {
 };
 let scrollBarWidth;
 const getScrollBarWidth = (namespace) => {
+  var _a;
   if (!isClient) return 0;
   if (scrollBarWidth !== void 0) return scrollBarWidth;
   const outer = (void 0).createElement("div");
@@ -47,7 +48,7 @@ const getScrollBarWidth = (namespace) => {
   inner.style.width = "100%";
   outer.appendChild(inner);
   const widthWithScroll = inner.offsetWidth;
-  outer.parentNode?.removeChild(outer);
+  (_a = outer.parentNode) == null ? void 0 : _a.removeChild(outer);
   scrollBarWidth = widthNoScroll - widthWithScroll;
   return scrollBarWidth;
 };

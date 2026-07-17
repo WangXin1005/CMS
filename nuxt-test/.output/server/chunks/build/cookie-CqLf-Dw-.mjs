@@ -104,8 +104,9 @@ const CookieDefaults = {
   refresh: false
 };
 function useCookie(name, _opts) {
+  var _a, _b, _c;
   const opts = { ...CookieDefaults, ..._opts };
-  opts.filter ??= (key) => key === name;
+  (_a = opts.filter) != null ? _a : opts.filter = (key) => key === name;
   const cookies = readRawCookies(opts) || {};
   let delay;
   if (opts.maxAge !== void 0) {
@@ -114,7 +115,7 @@ function useCookie(name, _opts) {
     delay = opts.expires.getTime() - Date.now();
   }
   const hasExpired = delay !== void 0 && delay <= 0;
-  const cookieValue = klona(hasExpired ? void 0 : cookies[name] ?? opts.default?.());
+  const cookieValue = klona(hasExpired ? void 0 : (_c = cookies[name]) != null ? _c : (_b = opts.default) == null ? void 0 : _b.call(opts));
   const cookie = cookieServerRef(name, cookieValue);
   {
     const nuxtApp = useNuxtApp();
@@ -123,11 +124,11 @@ function useCookie(name, _opts) {
       if (opts.readonly || valueIsSame && !opts.refresh) {
         return;
       }
-      nuxtApp._cookiesChanged ||= {};
+      nuxtApp._cookiesChanged || (nuxtApp._cookiesChanged = {});
       if (valueIsSame && opts.refresh && !nuxtApp._cookiesChanged[name]) {
         return;
       }
-      nuxtApp._cookies ||= {};
+      nuxtApp._cookies || (nuxtApp._cookies = {});
       if (name in nuxtApp._cookies) {
         if (isEqual(cookie.value, nuxtApp._cookies[name])) {
           return;
@@ -176,7 +177,7 @@ function cookieServerRef(name, value) {
         return internalRef.value;
       },
       set(newValue) {
-        nuxtApp._cookiesChanged ||= {};
+        nuxtApp._cookiesChanged || (nuxtApp._cookiesChanged = {});
         nuxtApp._cookiesChanged[name] = true;
         internalRef.value = newValue;
         trigger();

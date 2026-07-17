@@ -67,7 +67,7 @@ const _sfc_main$1 = /* @__PURE__ */ defineComponent({
       submitting.value = true;
       try {
         await submit({ content: newComment.value.trim(), articleId: props.articleId });
-        ElMessage.success("评论提交成功，等待审核");
+        ElMessage.success("\u8BC4\u8BBA\u63D0\u4EA4\u6210\u529F\uFF0C\u7B49\u5F85\u5BA1\u6838");
         newComment.value = "";
         await loadComments();
       } catch {
@@ -82,7 +82,7 @@ const _sfc_main$1 = /* @__PURE__ */ defineComponent({
       const _component_el_divider = ElDivider;
       const _component_el_skeleton = ElSkeleton;
       const _component_el_skeleton_item = ElSkeletonItem;
-      _push(`<div${ssrRenderAttrs(mergeProps({ class: "comment-section" }, _attrs))} data-v-ac26c31f><h3 class="comment-title" data-v-ac26c31f>💬 评论 (${ssrInterpolate(comments.value.length)})</h3>`);
+      _push(`<div${ssrRenderAttrs(mergeProps({ class: "comment-section" }, _attrs))} data-v-ac26c31f><h3 class="comment-title" data-v-ac26c31f>\u{1F4AC} \u8BC4\u8BBA (${ssrInterpolate(comments.value.length)})</h3>`);
       if (unref(isLoggedIn)) {
         _push(`<div class="comment-form" data-v-ac26c31f>`);
         _push(ssrRenderComponent(_component_el_input, {
@@ -90,7 +90,7 @@ const _sfc_main$1 = /* @__PURE__ */ defineComponent({
           "onUpdate:modelValue": ($event) => newComment.value = $event,
           type: "textarea",
           rows: 3,
-          placeholder: "写下你的评论...",
+          placeholder: "\u5199\u4E0B\u4F60\u7684\u8BC4\u8BBA...",
           maxlength: "1000",
           "show-word-limit": ""
         }, null, _parent));
@@ -103,10 +103,10 @@ const _sfc_main$1 = /* @__PURE__ */ defineComponent({
         }, {
           default: withCtx((_, _push2, _parent2, _scopeId) => {
             if (_push2) {
-              _push2(` 提交评论 `);
+              _push2(` \u63D0\u4EA4\u8BC4\u8BBA `);
             } else {
               return [
-                createTextVNode(" 提交评论 ")
+                createTextVNode(" \u63D0\u4EA4\u8BC4\u8BBA ")
               ];
             }
           }),
@@ -114,23 +114,23 @@ const _sfc_main$1 = /* @__PURE__ */ defineComponent({
         }, _parent));
         _push(`</div></div>`);
       } else {
-        _push(`<div class="login-hint" data-v-ac26c31f><p data-v-ac26c31f>请 `);
+        _push(`<div class="login-hint" data-v-ac26c31f><p data-v-ac26c31f>\u8BF7 `);
         _push(ssrRenderComponent(_component_NuxtLink, {
           to: loginUrl.value,
           class: "login-link"
         }, {
           default: withCtx((_, _push2, _parent2, _scopeId) => {
             if (_push2) {
-              _push2(`登录`);
+              _push2(`\u767B\u5F55`);
             } else {
               return [
-                createTextVNode("登录")
+                createTextVNode("\u767B\u5F55")
               ];
             }
           }),
           _: 1
         }, _parent));
-        _push(` 后发表评论</p></div>`);
+        _push(` \u540E\u53D1\u8868\u8BC4\u8BBA</p></div>`);
       }
       _push(ssrRenderComponent(_component_el_divider, null, null, _parent));
       if (loading.value) {
@@ -163,11 +163,12 @@ const _sfc_main$1 = /* @__PURE__ */ defineComponent({
         }, _parent));
         _push(`</div>`);
       } else if (comments.value.length === 0) {
-        _push(`<div class="comments-empty" data-v-ac26c31f>暂无评论</div>`);
+        _push(`<div class="comments-empty" data-v-ac26c31f>\u6682\u65E0\u8BC4\u8BBA</div>`);
       } else {
         _push(`<div class="comments-list" data-v-ac26c31f><!--[-->`);
         ssrRenderList(comments.value, (comment) => {
-          _push(`<div class="comment-item" data-v-ac26c31f><div class="comment-header" data-v-ac26c31f><strong data-v-ac26c31f>${ssrInterpolate(comment.author?.username || "匿名")}</strong><span class="comment-date" data-v-ac26c31f>${ssrInterpolate((comment.createdAt || "").replace("T", " ").slice(0, 16))}</span></div><p class="comment-content" data-v-ac26c31f>${ssrInterpolate(comment.content)}</p></div>`);
+          var _a;
+          _push(`<div class="comment-item" data-v-ac26c31f><div class="comment-header" data-v-ac26c31f><strong data-v-ac26c31f>${ssrInterpolate(((_a = comment.author) == null ? void 0 : _a.username) || "\u533F\u540D")}</strong><span class="comment-date" data-v-ac26c31f>${ssrInterpolate((comment.createdAt || "").replace("T", " ").slice(0, 16))}</span></div><p class="comment-content" data-v-ac26c31f>${ssrInterpolate(comment.content)}</p></div>`);
         });
         _push(`<!--]--></div>`);
       }
@@ -197,10 +198,12 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
     const loading = ref(true);
     computed(() => route.params.slug);
     const formattedDate = computed(() => {
-      if (!article.value?.createdAt) return "";
+      var _a;
+      if (!((_a = article.value) == null ? void 0 : _a.createdAt)) return "";
       return (article.value.createdAt || "").replace("T", " ").slice(0, 16);
     });
     return (_ctx, _push, _parent, _attrs) => {
+      var _a, _b;
       const _component_el_button = ElButton;
       const _component_el_divider = ElDivider;
       const _component_CommentSection = __nuxt_component_2;
@@ -215,7 +218,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
         }, {
           default: withCtx((_, _push2, _parent2, _scopeId) => {
             if (_push2) {
-              _push2(`<svg viewBox="0 0 24 24" width="14" height="14" style="${ssrRenderStyle({ "margin-right": "2px" })}" data-v-712dea6d${_scopeId}><path fill="currentColor" d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" data-v-712dea6d${_scopeId}></path></svg> 返回 `);
+              _push2(`<svg viewBox="0 0 24 24" width="14" height="14" style="${ssrRenderStyle({ "margin-right": "2px" })}" data-v-712dea6d${_scopeId}><path fill="currentColor" d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" data-v-712dea6d${_scopeId}></path></svg> \u8FD4\u56DE `);
             } else {
               return [
                 (openBlock(), createBlock("svg", {
@@ -229,19 +232,19 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                     d: "M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"
                   })
                 ])),
-                createTextVNode(" 返回 ")
+                createTextVNode(" \u8FD4\u56DE ")
               ];
             }
           }),
           _: 1
         }, _parent));
-        _push(`</div><div class="article-header" data-v-712dea6d><h1 class="article-title" data-v-712dea6d>${ssrInterpolate(article.value.title)}</h1><div class="article-meta" data-v-712dea6d><span data-v-712dea6d>👤 ${ssrInterpolate(article.value.author?.username)}</span><span data-v-712dea6d>📅 ${ssrInterpolate(formattedDate.value)}</span><span data-v-712dea6d>👁 ${ssrInterpolate(article.value.viewCount)} 次阅读</span></div></div>`);
+        _push(`</div><div class="article-header" data-v-712dea6d><h1 class="article-title" data-v-712dea6d>${ssrInterpolate(article.value.title)}</h1><div class="article-meta" data-v-712dea6d><span data-v-712dea6d>\u{1F464} ${ssrInterpolate((_a = article.value.author) == null ? void 0 : _a.username)}</span><span data-v-712dea6d>\u{1F4C5} ${ssrInterpolate(formattedDate.value)}</span><span data-v-712dea6d>\u{1F441} ${ssrInterpolate(article.value.viewCount)} \u6B21\u9605\u8BFB</span></div></div>`);
         if (article.value.coverImage) {
           _push(`<div class="article-cover" data-v-712dea6d><img${ssrRenderAttr("src", article.value.coverImage)}${ssrRenderAttr("alt", article.value.title)} data-v-712dea6d></div>`);
         } else {
           _push(`<!---->`);
         }
-        _push(`<div class="article-content" data-v-712dea6d>${unref(sanitizeHtml)(article.value.content) ?? ""}</div>`);
+        _push(`<div class="article-content" data-v-712dea6d>${(_b = unref(sanitizeHtml)(article.value.content)) != null ? _b : ""}</div>`);
         _push(ssrRenderComponent(_component_el_divider, null, null, _parent));
         _push(ssrRenderComponent(_component_CommentSection, {
           "article-id": article.value.id

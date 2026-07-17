@@ -108,7 +108,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
       }
       try {
         const res = await getList();
-        categories.value = res ?? [];
+        categories.value = res != null ? res : [];
         if (!append && tableHeight.value) {
           const rowH = 42;
           const needed = Math.ceil(tableHeight.value / rowH) + 2;
@@ -128,23 +128,24 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
       dialogVisible.value = true;
     }
     function openEdit(cat) {
+      var _a;
       editingId.value = cat.id;
-      form.value = { name: cat.name, description: cat.description ?? "" };
+      form.value = { name: cat.name, description: (_a = cat.description) != null ? _a : "" };
       dialogVisible.value = true;
     }
     async function handleSave() {
       if (!form.value.name) {
-        ElMessage.warning("名称不能为空");
+        ElMessage.warning("\u540D\u79F0\u4E0D\u80FD\u4E3A\u7A7A");
         return;
       }
       try {
         if (editingId.value) {
           await update(editingId.value, { name: form.value.name, description: form.value.description });
-          ElMessage.success("更新成功");
+          ElMessage.success("\u66F4\u65B0\u6210\u529F");
         } else {
           const slug = form.value.name.toLowerCase().replace(/s+/g, "-");
           await create({ name: form.value.name, slug, description: form.value.description });
-          ElMessage.success("创建成功");
+          ElMessage.success("\u521B\u5EFA\u6210\u529F");
         }
         dialogVisible.value = false;
         await loadData();
@@ -153,16 +154,17 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
     }
     async function handleDelete(id) {
       try {
-        await ElMessageBox.confirm("确定删除此分类？", "确认", { confirmButtonText: "确定", cancelButtonText: "取消", type: "warning" });
+        await ElMessageBox.confirm("\u786E\u5B9A\u5220\u9664\u6B64\u5206\u7C7B\uFF1F", "\u786E\u8BA4", { confirmButtonText: "\u786E\u5B9A", cancelButtonText: "\u53D6\u6D88", type: "warning" });
         await remove(id);
-        ElMessage.success("删除成功");
+        ElMessage.success("\u5220\u9664\u6210\u529F");
         await loadData();
       } catch {
       }
     }
     function handleScroll() {
+      var _a, _b;
       if (allLoaded.value || loading.value || loadingMore.value) return;
-      const el = tableRef.value?.$el?.querySelector(".el-table__body-wrapper");
+      const el = (_b = (_a = tableRef.value) == null ? void 0 : _a.$el) == null ? void 0 : _b.querySelector(".el-table__body-wrapper");
       if (!el) return;
       const dist = el.scrollHeight - el.scrollTop - el.clientHeight;
       if (dist <= 50) {
@@ -184,7 +186,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
       const _component_el_form_item = ElFormItem;
       const _component_el_input = ElInput;
       const _directive_loading = vLoading;
-      _push(`<div${ssrRenderAttrs(mergeProps({ style: { "flex": "1", "min-height": "0", "display": "flex", "flex-direction": "column" } }, _attrs))}><div class="page-header"><h2>分类管理</h2>`);
+      _push(`<div${ssrRenderAttrs(mergeProps({ style: { "flex": "1", "min-height": "0", "display": "flex", "flex-direction": "column" } }, _attrs))}><div class="page-header"><h2>\u5206\u7C7B\u7BA1\u7406</h2>`);
       if (!isGuest.value) {
         _push(ssrRenderComponent(_component_el_button, {
           type: "primary",
@@ -193,10 +195,10 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
         }, {
           default: withCtx((_, _push2, _parent2, _scopeId) => {
             if (_push2) {
-              _push2(`新增分类`);
+              _push2(`\u65B0\u589E\u5206\u7C7B`);
             } else {
               return [
-                createTextVNode("新增分类")
+                createTextVNode("\u65B0\u589E\u5206\u7C7B")
               ];
             }
           }),
@@ -218,17 +220,17 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
       }, ssrGetDirectiveProps(_ctx, _directive_loading, loading.value)), {
         empty: withCtx((_, _push2, _parent2, _scopeId) => {
           if (_push2) {
-            _push2(`<div style="${ssrRenderStyle({ "padding": "40px 0", "color": "#909399" })}"${_scopeId}>暂无数据</div>`);
+            _push2(`<div style="${ssrRenderStyle({ "padding": "40px 0", "color": "#909399" })}"${_scopeId}>\u6682\u65E0\u6570\u636E</div>`);
           } else {
             return [
-              createVNode("div", { style: { "padding": "40px 0", "color": "#909399" } }, "暂无数据")
+              createVNode("div", { style: { "padding": "40px 0", "color": "#909399" } }, "\u6682\u65E0\u6570\u636E")
             ];
           }
         }),
         default: withCtx((_, _push2, _parent2, _scopeId) => {
           if (_push2) {
             _push2(ssrRenderComponent(_component_el_table_column, {
-              label: "排序",
+              label: "\u6392\u5E8F",
               width: "55",
               "class-name": "drag-handle-col",
               align: "center"
@@ -236,7 +238,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
               default: withCtx(({ row }, _push3, _parent3, _scopeId2) => {
                 if (_push3) {
                   if (row._isEndMarker) {
-                    _push3(`<div style="${ssrRenderStyle({ "text-align": "center", "color": "#999", "font-size": "13px", "padding": "2px 0", "line-height": "1.2", "width": "100%" })}"${_scopeId2}>已加载全部</div>`);
+                    _push3(`<div style="${ssrRenderStyle({ "text-align": "center", "color": "#999", "font-size": "13px", "padding": "2px 0", "line-height": "1.2", "width": "100%" })}"${_scopeId2}>\u5DF2\u52A0\u8F7D\u5168\u90E8</div>`);
                   } else {
                     _push3(ssrRenderComponent(_component_el_icon, {
                       class: "drag-handle",
@@ -259,7 +261,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                     row._isEndMarker ? (openBlock(), createBlock("div", {
                       key: 0,
                       style: { "text-align": "center", "color": "#999", "font-size": "13px", "padding": "2px 0", "line-height": "1.2", "width": "100%" }
-                    }, "已加载全部")) : (openBlock(), createBlock(_component_el_icon, {
+                    }, "\u5DF2\u52A0\u8F7D\u5168\u90E8")) : (openBlock(), createBlock(_component_el_icon, {
                       key: 1,
                       class: "drag-handle",
                       style: { "cursor": "grab", "color": "#bbb", "font-size": "16px" }
@@ -276,18 +278,18 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
             }, _parent2, _scopeId));
             _push2(ssrRenderComponent(_component_el_table_column, {
               prop: "name",
-              label: "名称",
+              label: "\u540D\u79F0",
               "min-width": "220"
             }, null, _parent2, _scopeId));
             _push2(ssrRenderComponent(_component_el_table_column, {
               prop: "description",
-              label: "描述",
+              label: "\u63CF\u8FF0",
               "min-width": "300",
               "show-overflow-tooltip": ""
             }, null, _parent2, _scopeId));
             _push2(ssrRenderComponent(_component_el_table_column, {
               prop: "createdAt",
-              label: "创建时间",
+              label: "\u521B\u5EFA\u65F6\u95F4",
               width: "160"
             }, {
               default: withCtx(({ row }, _push3, _parent3, _scopeId2) => {
@@ -303,7 +305,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
             }, _parent2, _scopeId));
             if (isAdmin.value) {
               _push2(ssrRenderComponent(_component_el_table_column, {
-                label: "操作",
+                label: "\u64CD\u4F5C",
                 width: "130",
                 fixed: "right"
               }, {
@@ -317,10 +319,10 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                     }, {
                       default: withCtx((_2, _push4, _parent4, _scopeId3) => {
                         if (_push4) {
-                          _push4(`编辑`);
+                          _push4(`\u7F16\u8F91`);
                         } else {
                           return [
-                            createTextVNode("编辑")
+                            createTextVNode("\u7F16\u8F91")
                           ];
                         }
                       }),
@@ -334,10 +336,10 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                     }, {
                       default: withCtx((_2, _push4, _parent4, _scopeId3) => {
                         if (_push4) {
-                          _push4(`删除`);
+                          _push4(`\u5220\u9664`);
                         } else {
                           return [
-                            createTextVNode("删除")
+                            createTextVNode("\u5220\u9664")
                           ];
                         }
                       }),
@@ -352,7 +354,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                         onClick: ($event) => openEdit(row)
                       }, {
                         default: withCtx(() => [
-                          createTextVNode("编辑")
+                          createTextVNode("\u7F16\u8F91")
                         ]),
                         _: 1
                       }, 8, ["onClick"]),
@@ -363,7 +365,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                         onClick: ($event) => handleDelete(row.id)
                       }, {
                         default: withCtx(() => [
-                          createTextVNode("删除")
+                          createTextVNode("\u5220\u9664")
                         ]),
                         _: 1
                       }, 8, ["onClick"])
@@ -378,7 +380,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
           } else {
             return [
               createVNode(_component_el_table_column, {
-                label: "排序",
+                label: "\u6392\u5E8F",
                 width: "55",
                 "class-name": "drag-handle-col",
                 align: "center"
@@ -387,7 +389,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                   row._isEndMarker ? (openBlock(), createBlock("div", {
                     key: 0,
                     style: { "text-align": "center", "color": "#999", "font-size": "13px", "padding": "2px 0", "line-height": "1.2", "width": "100%" }
-                  }, "已加载全部")) : (openBlock(), createBlock(_component_el_icon, {
+                  }, "\u5DF2\u52A0\u8F7D\u5168\u90E8")) : (openBlock(), createBlock(_component_el_icon, {
                     key: 1,
                     class: "drag-handle",
                     style: { "cursor": "grab", "color": "#bbb", "font-size": "16px" }
@@ -402,18 +404,18 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
               }),
               createVNode(_component_el_table_column, {
                 prop: "name",
-                label: "名称",
+                label: "\u540D\u79F0",
                 "min-width": "220"
               }),
               createVNode(_component_el_table_column, {
                 prop: "description",
-                label: "描述",
+                label: "\u63CF\u8FF0",
                 "min-width": "300",
                 "show-overflow-tooltip": ""
               }),
               createVNode(_component_el_table_column, {
                 prop: "createdAt",
-                label: "创建时间",
+                label: "\u521B\u5EFA\u65F6\u95F4",
                 width: "160"
               }, {
                 default: withCtx(({ row }) => [
@@ -423,7 +425,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
               }),
               isAdmin.value ? (openBlock(), createBlock(_component_el_table_column, {
                 key: 0,
-                label: "操作",
+                label: "\u64CD\u4F5C",
                 width: "130",
                 fixed: "right"
               }, {
@@ -435,7 +437,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                     onClick: ($event) => openEdit(row)
                   }, {
                     default: withCtx(() => [
-                      createTextVNode("编辑")
+                      createTextVNode("\u7F16\u8F91")
                     ]),
                     _: 1
                   }, 8, ["onClick"]),
@@ -446,7 +448,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                     onClick: ($event) => handleDelete(row.id)
                   }, {
                     default: withCtx(() => [
-                      createTextVNode("删除")
+                      createTextVNode("\u5220\u9664")
                     ]),
                     _: 1
                   }, 8, ["onClick"])
@@ -462,7 +464,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
       _push(ssrRenderComponent(_component_el_dialog, {
         modelValue: dialogVisible.value,
         "onUpdate:modelValue": ($event) => dialogVisible.value = $event,
-        title: editingId.value ? "编辑分类" : "新增分类",
+        title: editingId.value ? "\u7F16\u8F91\u5206\u7C7B" : "\u65B0\u589E\u5206\u7C7B",
         width: "480",
         "destroy-on-close": ""
       }, {
@@ -473,10 +475,10 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
             }, {
               default: withCtx((_2, _push3, _parent3, _scopeId2) => {
                 if (_push3) {
-                  _push3(`取消`);
+                  _push3(`\u53D6\u6D88`);
                 } else {
                   return [
-                    createTextVNode("取消")
+                    createTextVNode("\u53D6\u6D88")
                   ];
                 }
               }),
@@ -488,10 +490,10 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
             }, {
               default: withCtx((_2, _push3, _parent3, _scopeId2) => {
                 if (_push3) {
-                  _push3(`保存`);
+                  _push3(`\u4FDD\u5B58`);
                 } else {
                   return [
-                    createTextVNode("保存")
+                    createTextVNode("\u4FDD\u5B58")
                   ];
                 }
               }),
@@ -503,7 +505,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                 onClick: ($event) => dialogVisible.value = false
               }, {
                 default: withCtx(() => [
-                  createTextVNode("取消")
+                  createTextVNode("\u53D6\u6D88")
                 ]),
                 _: 1
               }, 8, ["onClick"]),
@@ -512,7 +514,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                 onClick: handleSave
               }, {
                 default: withCtx(() => [
-                  createTextVNode("保存")
+                  createTextVNode("\u4FDD\u5B58")
                 ]),
                 _: 1
               })
@@ -530,7 +532,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
               default: withCtx((_2, _push3, _parent3, _scopeId2) => {
                 if (_push3) {
                   _push3(ssrRenderComponent(_component_el_form_item, {
-                    label: "名称",
+                    label: "\u540D\u79F0",
                     required: ""
                   }, {
                     default: withCtx((_3, _push4, _parent4, _scopeId3) => {
@@ -538,28 +540,28 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                         _push4(ssrRenderComponent(_component_el_input, {
                           modelValue: form.value.name,
                           "onUpdate:modelValue": ($event) => form.value.name = $event,
-                          placeholder: "分类名称"
+                          placeholder: "\u5206\u7C7B\u540D\u79F0"
                         }, null, _parent4, _scopeId3));
                       } else {
                         return [
                           createVNode(_component_el_input, {
                             modelValue: form.value.name,
                             "onUpdate:modelValue": ($event) => form.value.name = $event,
-                            placeholder: "分类名称"
+                            placeholder: "\u5206\u7C7B\u540D\u79F0"
                           }, null, 8, ["modelValue", "onUpdate:modelValue"])
                         ];
                       }
                     }),
                     _: 1
                   }, _parent3, _scopeId2));
-                  _push3(ssrRenderComponent(_component_el_form_item, { label: "描述" }, {
+                  _push3(ssrRenderComponent(_component_el_form_item, { label: "\u63CF\u8FF0" }, {
                     default: withCtx((_3, _push4, _parent4, _scopeId3) => {
                       if (_push4) {
                         _push4(ssrRenderComponent(_component_el_input, {
                           modelValue: form.value.description,
                           "onUpdate:modelValue": ($event) => form.value.description = $event,
                           type: "textarea",
-                          placeholder: "分类描述"
+                          placeholder: "\u5206\u7C7B\u63CF\u8FF0"
                         }, null, _parent4, _scopeId3));
                       } else {
                         return [
@@ -567,7 +569,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                             modelValue: form.value.description,
                             "onUpdate:modelValue": ($event) => form.value.description = $event,
                             type: "textarea",
-                            placeholder: "分类描述"
+                            placeholder: "\u5206\u7C7B\u63CF\u8FF0"
                           }, null, 8, ["modelValue", "onUpdate:modelValue"])
                         ];
                       }
@@ -577,25 +579,25 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                 } else {
                   return [
                     createVNode(_component_el_form_item, {
-                      label: "名称",
+                      label: "\u540D\u79F0",
                       required: ""
                     }, {
                       default: withCtx(() => [
                         createVNode(_component_el_input, {
                           modelValue: form.value.name,
                           "onUpdate:modelValue": ($event) => form.value.name = $event,
-                          placeholder: "分类名称"
+                          placeholder: "\u5206\u7C7B\u540D\u79F0"
                         }, null, 8, ["modelValue", "onUpdate:modelValue"])
                       ]),
                       _: 1
                     }),
-                    createVNode(_component_el_form_item, { label: "描述" }, {
+                    createVNode(_component_el_form_item, { label: "\u63CF\u8FF0" }, {
                       default: withCtx(() => [
                         createVNode(_component_el_input, {
                           modelValue: form.value.description,
                           "onUpdate:modelValue": ($event) => form.value.description = $event,
                           type: "textarea",
-                          placeholder: "分类描述"
+                          placeholder: "\u5206\u7C7B\u63CF\u8FF0"
                         }, null, 8, ["modelValue", "onUpdate:modelValue"])
                       ]),
                       _: 1
@@ -615,25 +617,25 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
               }, {
                 default: withCtx(() => [
                   createVNode(_component_el_form_item, {
-                    label: "名称",
+                    label: "\u540D\u79F0",
                     required: ""
                   }, {
                     default: withCtx(() => [
                       createVNode(_component_el_input, {
                         modelValue: form.value.name,
                         "onUpdate:modelValue": ($event) => form.value.name = $event,
-                        placeholder: "分类名称"
+                        placeholder: "\u5206\u7C7B\u540D\u79F0"
                       }, null, 8, ["modelValue", "onUpdate:modelValue"])
                     ]),
                     _: 1
                   }),
-                  createVNode(_component_el_form_item, { label: "描述" }, {
+                  createVNode(_component_el_form_item, { label: "\u63CF\u8FF0" }, {
                     default: withCtx(() => [
                       createVNode(_component_el_input, {
                         modelValue: form.value.description,
                         "onUpdate:modelValue": ($event) => form.value.description = $event,
                         type: "textarea",
-                        placeholder: "分类描述"
+                        placeholder: "\u5206\u7C7B\u63CF\u8FF0"
                       }, null, 8, ["modelValue", "onUpdate:modelValue"])
                     ]),
                     _: 1

@@ -95,7 +95,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
       loading.value = true;
       try {
         const res = await getList();
-        tags.value = res ?? [];
+        tags.value = res != null ? res : [];
         currentPage.value = 1;
       } catch {
         tags.value = [];
@@ -115,17 +115,17 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
     }
     async function handleSave() {
       if (!form.value.name) {
-        ElMessage.warning("名称不能为空");
+        ElMessage.warning("\u540D\u79F0\u4E0D\u80FD\u4E3A\u7A7A");
         return;
       }
       try {
         if (editingId.value) {
           await update(editingId.value, form.value);
-          ElMessage.success("更新成功");
+          ElMessage.success("\u66F4\u65B0\u6210\u529F");
         } else {
           const slug = form.value.name.toLowerCase().replace(/s+/g, "-");
           await create({ name: form.value.name, slug });
-          ElMessage.success("创建成功");
+          ElMessage.success("\u521B\u5EFA\u6210\u529F");
         }
         dialogVisible.value = false;
         await loadData();
@@ -134,9 +134,9 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
     }
     async function handleDelete(id) {
       try {
-        await ElMessageBox.confirm("确定删除此标签？", "确认", { confirmButtonText: "确定", cancelButtonText: "取消", type: "warning" });
+        await ElMessageBox.confirm("\u786E\u5B9A\u5220\u9664\u6B64\u6807\u7B7E\uFF1F", "\u786E\u8BA4", { confirmButtonText: "\u786E\u5B9A", cancelButtonText: "\u53D6\u6D88", type: "warning" });
         await remove(id);
-        ElMessage.success("删除成功");
+        ElMessage.success("\u5220\u9664\u6210\u529F");
         await loadData();
       } catch {
       }
@@ -151,7 +151,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
       const _component_el_form = ElForm;
       const _component_el_form_item = ElFormItem;
       const _directive_loading = vLoading;
-      _push(`<div${ssrRenderAttrs(mergeProps({ style: { "flex": "1", "min-height": "0", "display": "flex", "flex-direction": "column" } }, _attrs))}><div class="page-header"><h2>标签管理</h2>`);
+      _push(`<div${ssrRenderAttrs(mergeProps({ style: { "flex": "1", "min-height": "0", "display": "flex", "flex-direction": "column" } }, _attrs))}><div class="page-header"><h2>\u6807\u7B7E\u7BA1\u7406</h2>`);
       if (!isGuest.value) {
         _push(ssrRenderComponent(_component_el_button, {
           type: "primary",
@@ -160,10 +160,10 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
         }, {
           default: withCtx((_, _push2, _parent2, _scopeId) => {
             if (_push2) {
-              _push2(`新增标签`);
+              _push2(`\u65B0\u589E\u6807\u7B7E`);
             } else {
               return [
-                createTextVNode("新增标签")
+                createTextVNode("\u65B0\u589E\u6807\u7B7E")
               ];
             }
           }),
@@ -176,7 +176,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
       _push(ssrRenderComponent(_component_el_input, {
         modelValue: search.value,
         "onUpdate:modelValue": ($event) => search.value = $event,
-        placeholder: "搜索标签...",
+        placeholder: "\u641C\u7D22\u6807\u7B7E...",
         "prefix-icon": unref(search_default),
         style: { "width": "260px" },
         clearable: ""
@@ -190,10 +190,10 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
       }, ssrGetDirectiveProps(_ctx, _directive_loading, loading.value)), {
         empty: withCtx((_, _push2, _parent2, _scopeId) => {
           if (_push2) {
-            _push2(`<div style="${ssrRenderStyle({ "padding": "40px 0", "color": "#909399" })}"${_scopeId}>暂无数据</div>`);
+            _push2(`<div style="${ssrRenderStyle({ "padding": "40px 0", "color": "#909399" })}"${_scopeId}>\u6682\u65E0\u6570\u636E</div>`);
           } else {
             return [
-              createVNode("div", { style: { "padding": "40px 0", "color": "#909399" } }, "暂无数据")
+              createVNode("div", { style: { "padding": "40px 0", "color": "#909399" } }, "\u6682\u65E0\u6570\u636E")
             ];
           }
         }),
@@ -201,19 +201,19 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
           if (_push2) {
             _push2(ssrRenderComponent(_component_el_table_column, {
               type: "index",
-              label: "序号",
+              label: "\u5E8F\u53F7",
               width: "55",
               align: "center",
               index: (i) => (currentPage.value - 1) * pageSize.value + i + 1
             }, null, _parent2, _scopeId));
             _push2(ssrRenderComponent(_component_el_table_column, {
               prop: "name",
-              label: "名称",
+              label: "\u540D\u79F0",
               "min-width": "280"
             }, null, _parent2, _scopeId));
             _push2(ssrRenderComponent(_component_el_table_column, {
               prop: "createdAt",
-              label: "创建时间",
+              label: "\u521B\u5EFA\u65F6\u95F4",
               width: "160"
             }, {
               default: withCtx(({ row }, _push3, _parent3, _scopeId2) => {
@@ -229,7 +229,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
             }, _parent2, _scopeId));
             if (isAdmin.value) {
               _push2(ssrRenderComponent(_component_el_table_column, {
-                label: "操作",
+                label: "\u64CD\u4F5C",
                 width: "130",
                 fixed: "right"
               }, {
@@ -243,10 +243,10 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                     }, {
                       default: withCtx((_2, _push4, _parent4, _scopeId3) => {
                         if (_push4) {
-                          _push4(`编辑`);
+                          _push4(`\u7F16\u8F91`);
                         } else {
                           return [
-                            createTextVNode("编辑")
+                            createTextVNode("\u7F16\u8F91")
                           ];
                         }
                       }),
@@ -260,10 +260,10 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                     }, {
                       default: withCtx((_2, _push4, _parent4, _scopeId3) => {
                         if (_push4) {
-                          _push4(`删除`);
+                          _push4(`\u5220\u9664`);
                         } else {
                           return [
-                            createTextVNode("删除")
+                            createTextVNode("\u5220\u9664")
                           ];
                         }
                       }),
@@ -278,7 +278,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                         onClick: ($event) => openEdit(row)
                       }, {
                         default: withCtx(() => [
-                          createTextVNode("编辑")
+                          createTextVNode("\u7F16\u8F91")
                         ]),
                         _: 1
                       }, 8, ["onClick"]),
@@ -289,7 +289,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                         onClick: ($event) => handleDelete(row.id)
                       }, {
                         default: withCtx(() => [
-                          createTextVNode("删除")
+                          createTextVNode("\u5220\u9664")
                         ]),
                         _: 1
                       }, 8, ["onClick"])
@@ -305,19 +305,19 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
             return [
               createVNode(_component_el_table_column, {
                 type: "index",
-                label: "序号",
+                label: "\u5E8F\u53F7",
                 width: "55",
                 align: "center",
                 index: (i) => (currentPage.value - 1) * pageSize.value + i + 1
               }, null, 8, ["index"]),
               createVNode(_component_el_table_column, {
                 prop: "name",
-                label: "名称",
+                label: "\u540D\u79F0",
                 "min-width": "280"
               }),
               createVNode(_component_el_table_column, {
                 prop: "createdAt",
-                label: "创建时间",
+                label: "\u521B\u5EFA\u65F6\u95F4",
                 width: "160"
               }, {
                 default: withCtx(({ row }) => [
@@ -327,7 +327,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
               }),
               isAdmin.value ? (openBlock(), createBlock(_component_el_table_column, {
                 key: 0,
-                label: "操作",
+                label: "\u64CD\u4F5C",
                 width: "130",
                 fixed: "right"
               }, {
@@ -339,7 +339,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                     onClick: ($event) => openEdit(row)
                   }, {
                     default: withCtx(() => [
-                      createTextVNode("编辑")
+                      createTextVNode("\u7F16\u8F91")
                     ]),
                     _: 1
                   }, 8, ["onClick"]),
@@ -350,7 +350,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                     onClick: ($event) => handleDelete(row.id)
                   }, {
                     default: withCtx(() => [
-                      createTextVNode("删除")
+                      createTextVNode("\u5220\u9664")
                     ]),
                     _: 1
                   }, 8, ["onClick"])
@@ -376,7 +376,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
       _push(ssrRenderComponent(_component_el_dialog, {
         modelValue: dialogVisible.value,
         "onUpdate:modelValue": ($event) => dialogVisible.value = $event,
-        title: editingId.value ? "编辑标签" : "新增标签",
+        title: editingId.value ? "\u7F16\u8F91\u6807\u7B7E" : "\u65B0\u589E\u6807\u7B7E",
         width: "480",
         "destroy-on-close": ""
       }, {
@@ -387,10 +387,10 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
             }, {
               default: withCtx((_2, _push3, _parent3, _scopeId2) => {
                 if (_push3) {
-                  _push3(`取消`);
+                  _push3(`\u53D6\u6D88`);
                 } else {
                   return [
-                    createTextVNode("取消")
+                    createTextVNode("\u53D6\u6D88")
                   ];
                 }
               }),
@@ -402,10 +402,10 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
             }, {
               default: withCtx((_2, _push3, _parent3, _scopeId2) => {
                 if (_push3) {
-                  _push3(`保存`);
+                  _push3(`\u4FDD\u5B58`);
                 } else {
                   return [
-                    createTextVNode("保存")
+                    createTextVNode("\u4FDD\u5B58")
                   ];
                 }
               }),
@@ -417,7 +417,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                 onClick: ($event) => dialogVisible.value = false
               }, {
                 default: withCtx(() => [
-                  createTextVNode("取消")
+                  createTextVNode("\u53D6\u6D88")
                 ]),
                 _: 1
               }, 8, ["onClick"]),
@@ -426,7 +426,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                 onClick: handleSave
               }, {
                 default: withCtx(() => [
-                  createTextVNode("保存")
+                  createTextVNode("\u4FDD\u5B58")
                 ]),
                 _: 1
               })
@@ -444,7 +444,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
               default: withCtx((_2, _push3, _parent3, _scopeId2) => {
                 if (_push3) {
                   _push3(ssrRenderComponent(_component_el_form_item, {
-                    label: "名称",
+                    label: "\u540D\u79F0",
                     required: ""
                   }, {
                     default: withCtx((_3, _push4, _parent4, _scopeId3) => {
@@ -452,14 +452,14 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                         _push4(ssrRenderComponent(_component_el_input, {
                           modelValue: form.value.name,
                           "onUpdate:modelValue": ($event) => form.value.name = $event,
-                          placeholder: "标签名称"
+                          placeholder: "\u6807\u7B7E\u540D\u79F0"
                         }, null, _parent4, _scopeId3));
                       } else {
                         return [
                           createVNode(_component_el_input, {
                             modelValue: form.value.name,
                             "onUpdate:modelValue": ($event) => form.value.name = $event,
-                            placeholder: "标签名称"
+                            placeholder: "\u6807\u7B7E\u540D\u79F0"
                           }, null, 8, ["modelValue", "onUpdate:modelValue"])
                         ];
                       }
@@ -469,14 +469,14 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                 } else {
                   return [
                     createVNode(_component_el_form_item, {
-                      label: "名称",
+                      label: "\u540D\u79F0",
                       required: ""
                     }, {
                       default: withCtx(() => [
                         createVNode(_component_el_input, {
                           modelValue: form.value.name,
                           "onUpdate:modelValue": ($event) => form.value.name = $event,
-                          placeholder: "标签名称"
+                          placeholder: "\u6807\u7B7E\u540D\u79F0"
                         }, null, 8, ["modelValue", "onUpdate:modelValue"])
                       ]),
                       _: 1
@@ -496,14 +496,14 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
               }, {
                 default: withCtx(() => [
                   createVNode(_component_el_form_item, {
-                    label: "名称",
+                    label: "\u540D\u79F0",
                     required: ""
                   }, {
                     default: withCtx(() => [
                       createVNode(_component_el_input, {
                         modelValue: form.value.name,
                         "onUpdate:modelValue": ($event) => form.value.name = $event,
-                        placeholder: "标签名称"
+                        placeholder: "\u6807\u7B7E\u540D\u79F0"
                       }, null, 8, ["modelValue", "onUpdate:modelValue"])
                     ]),
                     _: 1

@@ -36,8 +36,8 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
     useAuth();
     const siteLogo = ref("");
     const siteName = ref("CodeBlog");
-    const siteDesc = ref("基于 Nuxt + Spring Boot 构建的博客 CMS 系统");
-    const icpNumber = ref("蒙ICP备2026006795号-1");
+    const siteDesc = ref("\u57FA\u4E8E Nuxt + Spring Boot \u6784\u5EFA\u7684\u535A\u5BA2 CMS \u7CFB\u7EDF");
+    const icpNumber = ref("\u8499ICP\u59072026006795\u53F7-1");
     const siteSettings = computed(() => ({
       siteName: siteName.value,
       siteLogo: siteLogo.value,
@@ -62,7 +62,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
             if (siteLogo.value) {
               _push2(`<img${ssrRenderAttr("src", siteLogo.value)} class="logo-img" alt="logo" data-v-08b66d2e${_scopeId}>`);
             } else {
-              _push2(`<span class="logo-emoji" data-v-08b66d2e${_scopeId}>📝</span>`);
+              _push2(`<span class="logo-emoji" data-v-08b66d2e${_scopeId}>\u{1F4DD}</span>`);
             }
             _push2(`</span><span class="logo-text" data-v-08b66d2e${_scopeId}>${ssrInterpolate(siteName.value)}</span>`);
           } else {
@@ -76,7 +76,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                 }, null, 8, ["src"])) : (openBlock(), createBlock("span", {
                   key: 1,
                   class: "logo-emoji"
-                }, "📝"))
+                }, "\u{1F4DD}"))
               ]),
               createVNode("span", { class: "logo-text" }, toDisplayString(siteName.value), 1)
             ];
@@ -88,7 +88,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
       _push(ssrRenderComponent(_component_ClientOnly, null, {}, _parent));
       _push(`</nav></div></header><main class="main-area" data-v-08b66d2e>`);
       ssrRenderSlot(_ctx.$slots, "default", {}, null, _push, _parent);
-      _push(`</main><footer class="blog-footer" data-v-08b66d2e><p data-v-08b66d2e>© 2026 ${ssrInterpolate(siteName.value)}. Powered by Nuxt &amp; Spring Boot.</p>`);
+      _push(`</main><footer class="blog-footer" data-v-08b66d2e><p data-v-08b66d2e>\xA9 2026 ${ssrInterpolate(siteName.value)}. Powered by Nuxt &amp; Spring Boot.</p>`);
       if (icpNumber.value) {
         _push(`<p class="icp-text" data-v-08b66d2e>${ssrInterpolate(icpNumber.value)}</p>`);
       } else {

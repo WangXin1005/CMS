@@ -25,7 +25,7 @@ const useDraggable = (targetRef, dragRef, draggable, overflow) => {
       const minTop = -targetTop + offsetY;
       const maxLeft = clientWidth - targetLeft - targetWidth + offsetX;
       const maxTop = clientHeight - targetTop - (targetHeight < clientHeight ? targetHeight : 0) + offsetY;
-      if (!overflow?.value) {
+      if (!(overflow == null ? void 0 : overflow.value)) {
         moveX = clamp(moveX, minLeft, maxLeft);
         moveY = clamp(moveY, minTop, maxTop);
       }

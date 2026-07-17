@@ -36,7 +36,8 @@ const TextStyle = Mark.create({
   addCommands() {
     return {
       removeEmptyTextStyle: () => ({ state, commands }) => {
-        const attrs = state.selection.$from.marks().find((m) => m.type.name === this.name)?.attrs;
+        var _a;
+        const attrs = (_a = state.selection.$from.marks().find((m) => m.type.name === this.name)) == null ? void 0 : _a.attrs;
         if (!attrs || Object.keys(attrs).length === 0) return commands.unsetMark(this.name);
         return true;
       }
@@ -115,8 +116,9 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
         FontSize
       ],
       onUpdate: () => {
+        var _a, _b;
         if (mode.value === "rich") {
-          emit("update:modelValue", editor.value?.getHTML() ?? "");
+          emit("update:modelValue", (_b = (_a = editor.value) == null ? void 0 : _a.getHTML()) != null ? _b : "");
           syncFontSize();
         }
       }
@@ -140,8 +142,9 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
       { immediate: true }
     );
     function toggleMode() {
+      var _a;
       if (mode.value === "rich") {
-        const html = editor.value?.getHTML() || props.modelValue || "";
+        const html = ((_a = editor.value) == null ? void 0 : _a.getHTML()) || props.modelValue || "";
         markdownContent.value = turndownService.turndown(html);
         mode.value = "markdown";
       } else {
@@ -174,7 +177,8 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
       }
     }
     function setParagraphStyle() {
-      editor.value?.chain().focus().setParagraph().unsetMark("fontSize").run();
+      var _a;
+      (_a = editor.value) == null ? void 0 : _a.chain().focus().setParagraph().unsetMark("fontSize").run();
       currentSize.value = "16";
     }
     function setFontSize(size) {
@@ -271,11 +275,11 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
       if (selected) {
         mdWrap("[", "](url)");
       } else {
-        mdWrap("[链接文本](", ")");
+        mdWrap("[\u94FE\u63A5\u6587\u672C](", ")");
       }
     }
     function mdImage() {
-      mdWrap("![图片描述](", ")");
+      mdWrap("![\u56FE\u7247\u63CF\u8FF0](", ")");
     }
     const previewHtml = computed(() => {
       if (mode.value !== "markdown") return "";
@@ -286,6 +290,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
       }
     });
     return (_ctx, _push, _parent, _attrs) => {
+      var _a;
       const _component_el_tooltip = ElTooltip;
       const _component_el_select = ElSelect;
       const _component_el_option = ElOption;
@@ -295,7 +300,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
       if (mode.value === "rich" && unref(editor)) {
         _push(`<div class="editor-toolbar" data-v-c7fe8ab0>`);
         _push(ssrRenderComponent(_component_el_tooltip, {
-          content: "字号",
+          content: "\u5B57\u53F7",
           placement: "top"
         }, {
           default: withCtx((_, _push2, _parent2, _scopeId) => {
@@ -363,7 +368,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
           default: withCtx((_, _push2, _parent2, _scopeId) => {
             if (_push2) {
               _push2(ssrRenderComponent(_component_el_tooltip, {
-                content: "正文",
+                content: "\u6B63\u6587",
                 placement: "top"
               }, {
                 default: withCtx((_2, _push3, _parent3, _scopeId2) => {
@@ -375,10 +380,10 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                     }, {
                       default: withCtx((_3, _push4, _parent4, _scopeId3) => {
                         if (_push4) {
-                          _push4(`正文`);
+                          _push4(`\u6B63\u6587`);
                         } else {
                           return [
-                            createTextVNode("正文")
+                            createTextVNode("\u6B63\u6587")
                           ];
                         }
                       }),
@@ -392,7 +397,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                         onClick: setParagraphStyle
                       }, {
                         default: withCtx(() => [
-                          createTextVNode("正文")
+                          createTextVNode("\u6B63\u6587")
                         ]),
                         _: 1
                       }, 8, ["class"])
@@ -402,7 +407,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                 _: 1
               }, _parent2, _scopeId));
               _push2(ssrRenderComponent(_component_el_tooltip, {
-                content: "标题1",
+                content: "\u6807\u98981",
                 placement: "top"
               }, {
                 default: withCtx((_2, _push3, _parent3, _scopeId2) => {
@@ -439,7 +444,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                 _: 1
               }, _parent2, _scopeId));
               _push2(ssrRenderComponent(_component_el_tooltip, {
-                content: "标题2",
+                content: "\u6807\u98982",
                 placement: "top"
               }, {
                 default: withCtx((_2, _push3, _parent3, _scopeId2) => {
@@ -476,7 +481,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                 _: 1
               }, _parent2, _scopeId));
               _push2(ssrRenderComponent(_component_el_tooltip, {
-                content: "标题3",
+                content: "\u6807\u98983",
                 placement: "top"
               }, {
                 default: withCtx((_2, _push3, _parent3, _scopeId2) => {
@@ -513,7 +518,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                 _: 1
               }, _parent2, _scopeId));
               _push2(ssrRenderComponent(_component_el_tooltip, {
-                content: "标题4",
+                content: "\u6807\u98984",
                 placement: "top"
               }, {
                 default: withCtx((_2, _push3, _parent3, _scopeId2) => {
@@ -550,7 +555,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                 _: 1
               }, _parent2, _scopeId));
               _push2(ssrRenderComponent(_component_el_tooltip, {
-                content: "标题5",
+                content: "\u6807\u98985",
                 placement: "top"
               }, {
                 default: withCtx((_2, _push3, _parent3, _scopeId2) => {
@@ -589,7 +594,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
             } else {
               return [
                 createVNode(_component_el_tooltip, {
-                  content: "正文",
+                  content: "\u6B63\u6587",
                   placement: "top"
                 }, {
                   default: withCtx(() => [
@@ -599,7 +604,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                       onClick: setParagraphStyle
                     }, {
                       default: withCtx(() => [
-                        createTextVNode("正文")
+                        createTextVNode("\u6B63\u6587")
                       ]),
                       _: 1
                     }, 8, ["class"])
@@ -607,7 +612,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                   _: 1
                 }),
                 createVNode(_component_el_tooltip, {
-                  content: "标题1",
+                  content: "\u6807\u98981",
                   placement: "top"
                 }, {
                   default: withCtx(() => [
@@ -624,7 +629,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                   _: 1
                 }),
                 createVNode(_component_el_tooltip, {
-                  content: "标题2",
+                  content: "\u6807\u98982",
                   placement: "top"
                 }, {
                   default: withCtx(() => [
@@ -641,7 +646,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                   _: 1
                 }),
                 createVNode(_component_el_tooltip, {
-                  content: "标题3",
+                  content: "\u6807\u98983",
                   placement: "top"
                 }, {
                   default: withCtx(() => [
@@ -658,7 +663,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                   _: 1
                 }),
                 createVNode(_component_el_tooltip, {
-                  content: "标题4",
+                  content: "\u6807\u98984",
                   placement: "top"
                 }, {
                   default: withCtx(() => [
@@ -675,7 +680,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                   _: 1
                 }),
                 createVNode(_component_el_tooltip, {
-                  content: "标题5",
+                  content: "\u6807\u98985",
                   placement: "top"
                 }, {
                   default: withCtx(() => [
@@ -700,7 +705,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
           default: withCtx((_, _push2, _parent2, _scopeId) => {
             if (_push2) {
               _push2(ssrRenderComponent(_component_el_tooltip, {
-                content: "加粗",
+                content: "\u52A0\u7C97",
                 placement: "top"
               }, {
                 default: withCtx((_2, _push3, _parent3, _scopeId2) => {
@@ -737,7 +742,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                 _: 1
               }, _parent2, _scopeId));
               _push2(ssrRenderComponent(_component_el_tooltip, {
-                content: "斜体",
+                content: "\u659C\u4F53",
                 placement: "top"
               }, {
                 default: withCtx((_2, _push3, _parent3, _scopeId2) => {
@@ -774,7 +779,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                 _: 1
               }, _parent2, _scopeId));
               _push2(ssrRenderComponent(_component_el_tooltip, {
-                content: "删除线",
+                content: "\u5220\u9664\u7EBF",
                 placement: "top"
               }, {
                 default: withCtx((_2, _push3, _parent3, _scopeId2) => {
@@ -813,7 +818,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
             } else {
               return [
                 createVNode(_component_el_tooltip, {
-                  content: "加粗",
+                  content: "\u52A0\u7C97",
                   placement: "top"
                 }, {
                   default: withCtx(() => [
@@ -830,7 +835,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                   _: 1
                 }),
                 createVNode(_component_el_tooltip, {
-                  content: "斜体",
+                  content: "\u659C\u4F53",
                   placement: "top"
                 }, {
                   default: withCtx(() => [
@@ -847,7 +852,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                   _: 1
                 }),
                 createVNode(_component_el_tooltip, {
-                  content: "删除线",
+                  content: "\u5220\u9664\u7EBF",
                   placement: "top"
                 }, {
                   default: withCtx(() => [
@@ -872,7 +877,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
           default: withCtx((_, _push2, _parent2, _scopeId) => {
             if (_push2) {
               _push2(ssrRenderComponent(_component_el_tooltip, {
-                content: "无序列表",
+                content: "\u65E0\u5E8F\u5217\u8868",
                 placement: "top"
               }, {
                 default: withCtx((_2, _push3, _parent3, _scopeId2) => {
@@ -909,7 +914,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                 _: 1
               }, _parent2, _scopeId));
               _push2(ssrRenderComponent(_component_el_tooltip, {
-                content: "有序列表",
+                content: "\u6709\u5E8F\u5217\u8868",
                 placement: "top"
               }, {
                 default: withCtx((_2, _push3, _parent3, _scopeId2) => {
@@ -948,7 +953,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
             } else {
               return [
                 createVNode(_component_el_tooltip, {
-                  content: "无序列表",
+                  content: "\u65E0\u5E8F\u5217\u8868",
                   placement: "top"
                 }, {
                   default: withCtx(() => [
@@ -965,7 +970,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                   _: 1
                 }),
                 createVNode(_component_el_tooltip, {
-                  content: "有序列表",
+                  content: "\u6709\u5E8F\u5217\u8868",
                   placement: "top"
                 }, {
                   default: withCtx(() => [
@@ -990,7 +995,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
           default: withCtx((_, _push2, _parent2, _scopeId) => {
             if (_push2) {
               _push2(ssrRenderComponent(_component_el_tooltip, {
-                content: "引用",
+                content: "\u5F15\u7528",
                 placement: "top"
               }, {
                 default: withCtx((_2, _push3, _parent3, _scopeId2) => {
@@ -1001,10 +1006,10 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                     }, {
                       default: withCtx((_3, _push4, _parent4, _scopeId3) => {
                         if (_push4) {
-                          _push4(`引用`);
+                          _push4(`\u5F15\u7528`);
                         } else {
                           return [
-                            createTextVNode("引用")
+                            createTextVNode("\u5F15\u7528")
                           ];
                         }
                       }),
@@ -1017,7 +1022,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                         onClick: ($event) => unref(editor).chain().focus().toggleBlockquote().run()
                       }, {
                         default: withCtx(() => [
-                          createTextVNode("引用")
+                          createTextVNode("\u5F15\u7528")
                         ]),
                         _: 1
                       }, 8, ["class", "onClick"])
@@ -1027,7 +1032,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                 _: 1
               }, _parent2, _scopeId));
               _push2(ssrRenderComponent(_component_el_tooltip, {
-                content: "代码块",
+                content: "\u4EE3\u7801\u5757",
                 placement: "top"
               }, {
                 default: withCtx((_2, _push3, _parent3, _scopeId2) => {
@@ -1064,7 +1069,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                 _: 1
               }, _parent2, _scopeId));
               _push2(ssrRenderComponent(_component_el_tooltip, {
-                content: "分隔线",
+                content: "\u5206\u9694\u7EBF",
                 placement: "top"
               }, {
                 default: withCtx((_2, _push3, _parent3, _scopeId2) => {
@@ -1074,10 +1079,10 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                     }, {
                       default: withCtx((_3, _push4, _parent4, _scopeId3) => {
                         if (_push4) {
-                          _push4(`—`);
+                          _push4(`\u2014`);
                         } else {
                           return [
-                            createTextVNode("—")
+                            createTextVNode("\u2014")
                           ];
                         }
                       }),
@@ -1089,7 +1094,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                         onClick: ($event) => unref(editor).chain().focus().setHorizontalRule().run()
                       }, {
                         default: withCtx(() => [
-                          createTextVNode("—")
+                          createTextVNode("\u2014")
                         ]),
                         _: 1
                       }, 8, ["onClick"])
@@ -1101,7 +1106,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
             } else {
               return [
                 createVNode(_component_el_tooltip, {
-                  content: "引用",
+                  content: "\u5F15\u7528",
                   placement: "top"
                 }, {
                   default: withCtx(() => [
@@ -1110,7 +1115,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                       onClick: ($event) => unref(editor).chain().focus().toggleBlockquote().run()
                     }, {
                       default: withCtx(() => [
-                        createTextVNode("引用")
+                        createTextVNode("\u5F15\u7528")
                       ]),
                       _: 1
                     }, 8, ["class", "onClick"])
@@ -1118,7 +1123,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                   _: 1
                 }),
                 createVNode(_component_el_tooltip, {
-                  content: "代码块",
+                  content: "\u4EE3\u7801\u5757",
                   placement: "top"
                 }, {
                   default: withCtx(() => [
@@ -1135,7 +1140,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                   _: 1
                 }),
                 createVNode(_component_el_tooltip, {
-                  content: "分隔线",
+                  content: "\u5206\u9694\u7EBF",
                   placement: "top"
                 }, {
                   default: withCtx(() => [
@@ -1143,7 +1148,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                       onClick: ($event) => unref(editor).chain().focus().setHorizontalRule().run()
                     }, {
                       default: withCtx(() => [
-                        createTextVNode("—")
+                        createTextVNode("\u2014")
                       ]),
                       _: 1
                     }, 8, ["onClick"])
@@ -1159,7 +1164,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
           default: withCtx((_, _push2, _parent2, _scopeId) => {
             if (_push2) {
               _push2(ssrRenderComponent(_component_el_tooltip, {
-                content: "撤销",
+                content: "\u64A4\u9500",
                 placement: "top"
               }, {
                 default: withCtx((_2, _push3, _parent3, _scopeId2) => {
@@ -1169,10 +1174,10 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                     }, {
                       default: withCtx((_3, _push4, _parent4, _scopeId3) => {
                         if (_push4) {
-                          _push4(`←`);
+                          _push4(`\u2190`);
                         } else {
                           return [
-                            createTextVNode("←")
+                            createTextVNode("\u2190")
                           ];
                         }
                       }),
@@ -1184,7 +1189,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                         onClick: ($event) => unref(editor).chain().focus().undo().run()
                       }, {
                         default: withCtx(() => [
-                          createTextVNode("←")
+                          createTextVNode("\u2190")
                         ]),
                         _: 1
                       }, 8, ["onClick"])
@@ -1194,7 +1199,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                 _: 1
               }, _parent2, _scopeId));
               _push2(ssrRenderComponent(_component_el_tooltip, {
-                content: "恢复",
+                content: "\u6062\u590D",
                 placement: "top"
               }, {
                 default: withCtx((_2, _push3, _parent3, _scopeId2) => {
@@ -1204,10 +1209,10 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                     }, {
                       default: withCtx((_3, _push4, _parent4, _scopeId3) => {
                         if (_push4) {
-                          _push4(`→`);
+                          _push4(`\u2192`);
                         } else {
                           return [
-                            createTextVNode("→")
+                            createTextVNode("\u2192")
                           ];
                         }
                       }),
@@ -1219,7 +1224,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                         onClick: ($event) => unref(editor).chain().focus().redo().run()
                       }, {
                         default: withCtx(() => [
-                          createTextVNode("→")
+                          createTextVNode("\u2192")
                         ]),
                         _: 1
                       }, 8, ["onClick"])
@@ -1231,7 +1236,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
             } else {
               return [
                 createVNode(_component_el_tooltip, {
-                  content: "撤销",
+                  content: "\u64A4\u9500",
                   placement: "top"
                 }, {
                   default: withCtx(() => [
@@ -1239,7 +1244,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                       onClick: ($event) => unref(editor).chain().focus().undo().run()
                     }, {
                       default: withCtx(() => [
-                        createTextVNode("←")
+                        createTextVNode("\u2190")
                       ]),
                       _: 1
                     }, 8, ["onClick"])
@@ -1247,7 +1252,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                   _: 1
                 }),
                 createVNode(_component_el_tooltip, {
-                  content: "恢复",
+                  content: "\u6062\u590D",
                   placement: "top"
                 }, {
                   default: withCtx(() => [
@@ -1255,7 +1260,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                       onClick: ($event) => unref(editor).chain().focus().redo().run()
                     }, {
                       default: withCtx(() => [
-                        createTextVNode("→")
+                        createTextVNode("\u2192")
                       ]),
                       _: 1
                     }, 8, ["onClick"])
@@ -1274,7 +1279,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
           default: withCtx((_, _push2, _parent2, _scopeId) => {
             if (_push2) {
               _push2(ssrRenderComponent(_component_el_tooltip, {
-                content: "切换到 Markdown 编辑",
+                content: "\u5207\u6362\u5230 Markdown \u7F16\u8F91",
                 placement: "top"
               }, {
                 default: withCtx((_2, _push3, _parent3, _scopeId2) => {
@@ -1313,7 +1318,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
             } else {
               return [
                 createVNode(_component_el_tooltip, {
-                  content: "切换到 Markdown 编辑",
+                  content: "\u5207\u6362\u5230 Markdown \u7F16\u8F91",
                   placement: "top"
                 }, {
                   default: withCtx(() => [
@@ -1344,7 +1349,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
           default: withCtx((_, _push2, _parent2, _scopeId) => {
             if (_push2) {
               _push2(ssrRenderComponent(_component_el_tooltip, {
-                content: "加粗",
+                content: "\u52A0\u7C97",
                 placement: "top"
               }, {
                 default: withCtx((_2, _push3, _parent3, _scopeId2) => {
@@ -1379,7 +1384,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                 _: 1
               }, _parent2, _scopeId));
               _push2(ssrRenderComponent(_component_el_tooltip, {
-                content: "斜体",
+                content: "\u659C\u4F53",
                 placement: "top"
               }, {
                 default: withCtx((_2, _push3, _parent3, _scopeId2) => {
@@ -1414,7 +1419,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                 _: 1
               }, _parent2, _scopeId));
               _push2(ssrRenderComponent(_component_el_tooltip, {
-                content: "删除线",
+                content: "\u5220\u9664\u7EBF",
                 placement: "top"
               }, {
                 default: withCtx((_2, _push3, _parent3, _scopeId2) => {
@@ -1451,7 +1456,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
             } else {
               return [
                 createVNode(_component_el_tooltip, {
-                  content: "加粗",
+                  content: "\u52A0\u7C97",
                   placement: "top"
                 }, {
                   default: withCtx(() => [
@@ -1467,7 +1472,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                   _: 1
                 }),
                 createVNode(_component_el_tooltip, {
-                  content: "斜体",
+                  content: "\u659C\u4F53",
                   placement: "top"
                 }, {
                   default: withCtx(() => [
@@ -1483,7 +1488,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                   _: 1
                 }),
                 createVNode(_component_el_tooltip, {
-                  content: "删除线",
+                  content: "\u5220\u9664\u7EBF",
                   placement: "top"
                 }, {
                   default: withCtx(() => [
@@ -1507,7 +1512,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
           default: withCtx((_, _push2, _parent2, _scopeId) => {
             if (_push2) {
               _push2(ssrRenderComponent(_component_el_tooltip, {
-                content: "标题1",
+                content: "\u6807\u98981",
                 placement: "top"
               }, {
                 default: withCtx((_2, _push3, _parent3, _scopeId2) => {
@@ -1542,7 +1547,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                 _: 1
               }, _parent2, _scopeId));
               _push2(ssrRenderComponent(_component_el_tooltip, {
-                content: "标题2",
+                content: "\u6807\u98982",
                 placement: "top"
               }, {
                 default: withCtx((_2, _push3, _parent3, _scopeId2) => {
@@ -1577,7 +1582,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                 _: 1
               }, _parent2, _scopeId));
               _push2(ssrRenderComponent(_component_el_tooltip, {
-                content: "标题3",
+                content: "\u6807\u98983",
                 placement: "top"
               }, {
                 default: withCtx((_2, _push3, _parent3, _scopeId2) => {
@@ -1612,7 +1617,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                 _: 1
               }, _parent2, _scopeId));
               _push2(ssrRenderComponent(_component_el_tooltip, {
-                content: "标题4",
+                content: "\u6807\u98984",
                 placement: "top"
               }, {
                 default: withCtx((_2, _push3, _parent3, _scopeId2) => {
@@ -1647,7 +1652,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                 _: 1
               }, _parent2, _scopeId));
               _push2(ssrRenderComponent(_component_el_tooltip, {
-                content: "标题5",
+                content: "\u6807\u98985",
                 placement: "top"
               }, {
                 default: withCtx((_2, _push3, _parent3, _scopeId2) => {
@@ -1684,7 +1689,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
             } else {
               return [
                 createVNode(_component_el_tooltip, {
-                  content: "标题1",
+                  content: "\u6807\u98981",
                   placement: "top"
                 }, {
                   default: withCtx(() => [
@@ -1700,7 +1705,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                   _: 1
                 }),
                 createVNode(_component_el_tooltip, {
-                  content: "标题2",
+                  content: "\u6807\u98982",
                   placement: "top"
                 }, {
                   default: withCtx(() => [
@@ -1716,7 +1721,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                   _: 1
                 }),
                 createVNode(_component_el_tooltip, {
-                  content: "标题3",
+                  content: "\u6807\u98983",
                   placement: "top"
                 }, {
                   default: withCtx(() => [
@@ -1732,7 +1737,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                   _: 1
                 }),
                 createVNode(_component_el_tooltip, {
-                  content: "标题4",
+                  content: "\u6807\u98984",
                   placement: "top"
                 }, {
                   default: withCtx(() => [
@@ -1748,7 +1753,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                   _: 1
                 }),
                 createVNode(_component_el_tooltip, {
-                  content: "标题5",
+                  content: "\u6807\u98985",
                   placement: "top"
                 }, {
                   default: withCtx(() => [
@@ -1772,7 +1777,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
           default: withCtx((_, _push2, _parent2, _scopeId) => {
             if (_push2) {
               _push2(ssrRenderComponent(_component_el_tooltip, {
-                content: "无序列表",
+                content: "\u65E0\u5E8F\u5217\u8868",
                 placement: "top"
               }, {
                 default: withCtx((_2, _push3, _parent3, _scopeId2) => {
@@ -1807,7 +1812,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                 _: 1
               }, _parent2, _scopeId));
               _push2(ssrRenderComponent(_component_el_tooltip, {
-                content: "有序列表",
+                content: "\u6709\u5E8F\u5217\u8868",
                 placement: "top"
               }, {
                 default: withCtx((_2, _push3, _parent3, _scopeId2) => {
@@ -1844,7 +1849,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
             } else {
               return [
                 createVNode(_component_el_tooltip, {
-                  content: "无序列表",
+                  content: "\u65E0\u5E8F\u5217\u8868",
                   placement: "top"
                 }, {
                   default: withCtx(() => [
@@ -1860,7 +1865,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                   _: 1
                 }),
                 createVNode(_component_el_tooltip, {
-                  content: "有序列表",
+                  content: "\u6709\u5E8F\u5217\u8868",
                   placement: "top"
                 }, {
                   default: withCtx(() => [
@@ -1884,7 +1889,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
           default: withCtx((_, _push2, _parent2, _scopeId) => {
             if (_push2) {
               _push2(ssrRenderComponent(_component_el_tooltip, {
-                content: "引用",
+                content: "\u5F15\u7528",
                 placement: "top"
               }, {
                 default: withCtx((_2, _push3, _parent3, _scopeId2) => {
@@ -1894,10 +1899,10 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                     }, {
                       default: withCtx((_3, _push4, _parent4, _scopeId3) => {
                         if (_push4) {
-                          _push4(`引用`);
+                          _push4(`\u5F15\u7528`);
                         } else {
                           return [
-                            createTextVNode("引用")
+                            createTextVNode("\u5F15\u7528")
                           ];
                         }
                       }),
@@ -1909,7 +1914,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                         onClick: ($event) => mdLinePrefix(">")
                       }, {
                         default: withCtx(() => [
-                          createTextVNode("引用")
+                          createTextVNode("\u5F15\u7528")
                         ]),
                         _: 1
                       }, 8, ["onClick"])
@@ -1919,7 +1924,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                 _: 1
               }, _parent2, _scopeId));
               _push2(ssrRenderComponent(_component_el_tooltip, {
-                content: "代码块",
+                content: "\u4EE3\u7801\u5757",
                 placement: "top"
               }, {
                 default: withCtx((_2, _push3, _parent3, _scopeId2) => {
@@ -1954,7 +1959,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                 _: 1
               }, _parent2, _scopeId));
               _push2(ssrRenderComponent(_component_el_tooltip, {
-                content: "分隔线",
+                content: "\u5206\u9694\u7EBF",
                 placement: "top"
               }, {
                 default: withCtx((_2, _push3, _parent3, _scopeId2) => {
@@ -1991,7 +1996,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
             } else {
               return [
                 createVNode(_component_el_tooltip, {
-                  content: "引用",
+                  content: "\u5F15\u7528",
                   placement: "top"
                 }, {
                   default: withCtx(() => [
@@ -1999,7 +2004,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                       onClick: ($event) => mdLinePrefix(">")
                     }, {
                       default: withCtx(() => [
-                        createTextVNode("引用")
+                        createTextVNode("\u5F15\u7528")
                       ]),
                       _: 1
                     }, 8, ["onClick"])
@@ -2007,7 +2012,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                   _: 1
                 }),
                 createVNode(_component_el_tooltip, {
-                  content: "代码块",
+                  content: "\u4EE3\u7801\u5757",
                   placement: "top"
                 }, {
                   default: withCtx(() => [
@@ -2023,7 +2028,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                   _: 1
                 }),
                 createVNode(_component_el_tooltip, {
-                  content: "分隔线",
+                  content: "\u5206\u9694\u7EBF",
                   placement: "top"
                 }, {
                   default: withCtx(() => [
@@ -2047,7 +2052,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
           default: withCtx((_, _push2, _parent2, _scopeId) => {
             if (_push2) {
               _push2(ssrRenderComponent(_component_el_tooltip, {
-                content: "链接",
+                content: "\u94FE\u63A5",
                 placement: "top"
               }, {
                 default: withCtx((_2, _push3, _parent3, _scopeId2) => {
@@ -2057,10 +2062,10 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                     }, {
                       default: withCtx((_3, _push4, _parent4, _scopeId3) => {
                         if (_push4) {
-                          _push4(`链接`);
+                          _push4(`\u94FE\u63A5`);
                         } else {
                           return [
-                            createTextVNode("链接")
+                            createTextVNode("\u94FE\u63A5")
                           ];
                         }
                       }),
@@ -2072,7 +2077,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                         onClick: ($event) => mdLink()
                       }, {
                         default: withCtx(() => [
-                          createTextVNode("链接")
+                          createTextVNode("\u94FE\u63A5")
                         ]),
                         _: 1
                       }, 8, ["onClick"])
@@ -2082,7 +2087,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                 _: 1
               }, _parent2, _scopeId));
               _push2(ssrRenderComponent(_component_el_tooltip, {
-                content: "图片",
+                content: "\u56FE\u7247",
                 placement: "top"
               }, {
                 default: withCtx((_2, _push3, _parent3, _scopeId2) => {
@@ -2092,10 +2097,10 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                     }, {
                       default: withCtx((_3, _push4, _parent4, _scopeId3) => {
                         if (_push4) {
-                          _push4(`图片`);
+                          _push4(`\u56FE\u7247`);
                         } else {
                           return [
-                            createTextVNode("图片")
+                            createTextVNode("\u56FE\u7247")
                           ];
                         }
                       }),
@@ -2107,7 +2112,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                         onClick: ($event) => mdImage()
                       }, {
                         default: withCtx(() => [
-                          createTextVNode("图片")
+                          createTextVNode("\u56FE\u7247")
                         ]),
                         _: 1
                       }, 8, ["onClick"])
@@ -2119,7 +2124,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
             } else {
               return [
                 createVNode(_component_el_tooltip, {
-                  content: "链接",
+                  content: "\u94FE\u63A5",
                   placement: "top"
                 }, {
                   default: withCtx(() => [
@@ -2127,7 +2132,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                       onClick: ($event) => mdLink()
                     }, {
                       default: withCtx(() => [
-                        createTextVNode("链接")
+                        createTextVNode("\u94FE\u63A5")
                       ]),
                       _: 1
                     }, 8, ["onClick"])
@@ -2135,7 +2140,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                   _: 1
                 }),
                 createVNode(_component_el_tooltip, {
-                  content: "图片",
+                  content: "\u56FE\u7247",
                   placement: "top"
                 }, {
                   default: withCtx(() => [
@@ -2143,7 +2148,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                       onClick: ($event) => mdImage()
                     }, {
                       default: withCtx(() => [
-                        createTextVNode("图片")
+                        createTextVNode("\u56FE\u7247")
                       ]),
                       _: 1
                     }, 8, ["onClick"])
@@ -2162,7 +2167,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
           default: withCtx((_, _push2, _parent2, _scopeId) => {
             if (_push2) {
               _push2(ssrRenderComponent(_component_el_tooltip, {
-                content: "切换到富文本编辑",
+                content: "\u5207\u6362\u5230\u5BCC\u6587\u672C\u7F16\u8F91",
                 placement: "top"
               }, {
                 default: withCtx((_2, _push3, _parent3, _scopeId2) => {
@@ -2173,10 +2178,10 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                     }, {
                       default: withCtx((_3, _push4, _parent4, _scopeId3) => {
                         if (_push4) {
-                          _push4(`富文本`);
+                          _push4(`\u5BCC\u6587\u672C`);
                         } else {
                           return [
-                            createTextVNode("富文本")
+                            createTextVNode("\u5BCC\u6587\u672C")
                           ];
                         }
                       }),
@@ -2189,7 +2194,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                         onClick: ($event) => toggleMode()
                       }, {
                         default: withCtx(() => [
-                          createTextVNode("富文本")
+                          createTextVNode("\u5BCC\u6587\u672C")
                         ]),
                         _: 1
                       }, 8, ["onClick"])
@@ -2201,7 +2206,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
             } else {
               return [
                 createVNode(_component_el_tooltip, {
-                  content: "切换到富文本编辑",
+                  content: "\u5207\u6362\u5230\u5BCC\u6587\u672C\u7F16\u8F91",
                   placement: "top"
                 }, {
                   default: withCtx(() => [
@@ -2210,7 +2215,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                       onClick: ($event) => toggleMode()
                     }, {
                       default: withCtx(() => [
-                        createTextVNode("富文本")
+                        createTextVNode("\u5BCC\u6587\u672C")
                       ]),
                       _: 1
                     }, 8, ["onClick"])
@@ -2235,7 +2240,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
         _push(`<!---->`);
       }
       if (mode.value === "markdown") {
-        _push(`<div class="markdown-editor-wrapper" data-v-c7fe8ab0><textarea class="markdown-textarea" placeholder="使用 Markdown 语法编写内容..." spellcheck="false" data-v-c7fe8ab0>${ssrInterpolate(markdownContent.value)}</textarea><div class="markdown-preview" data-v-c7fe8ab0><div class="preview-label" data-v-c7fe8ab0>预览</div><div class="preview-content" data-v-c7fe8ab0>${unref(sanitizeHtml)(previewHtml.value) ?? ""}</div></div></div>`);
+        _push(`<div class="markdown-editor-wrapper" data-v-c7fe8ab0><textarea class="markdown-textarea" placeholder="\u4F7F\u7528 Markdown \u8BED\u6CD5\u7F16\u5199\u5185\u5BB9..." spellcheck="false" data-v-c7fe8ab0>${ssrInterpolate(markdownContent.value)}</textarea><div class="markdown-preview" data-v-c7fe8ab0><div class="preview-label" data-v-c7fe8ab0>\u9884\u89C8</div><div class="preview-content" data-v-c7fe8ab0>${(_a = unref(sanitizeHtml)(previewHtml.value)) != null ? _a : ""}</div></div></div>`);
       } else {
         _push(`<!---->`);
       }

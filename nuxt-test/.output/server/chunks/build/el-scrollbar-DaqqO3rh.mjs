@@ -192,9 +192,10 @@ var thumb_vue_vue_type_script_setup_true_lang_default = /* @__PURE__ */ defineCo
     }));
     const offsetRatio = computed(() => instance.value[bar.value.offset] ** 2 / scrollbar.wrapElement[bar.value.scrollSize] / props.ratio / thumb.value[bar.value.offset]);
     const clickThumbHandler = (e) => {
+      var _a;
       e.stopPropagation();
       if (e.ctrlKey || [1, 2].includes(e.button)) return;
-      (void 0).getSelection()?.removeAllRanges();
+      (_a = (void 0).getSelection()) == null ? void 0 : _a.removeAllRanges();
       startDrag(e);
       const el = e.currentTarget;
       if (!el) return;
@@ -291,7 +292,7 @@ var bar_vue_vue_type_script_setup_true_lang_default = /* @__PURE__ */ defineComp
       }
     };
     const update = () => {
-      const wrap = scrollbar?.wrapElement;
+      const wrap = scrollbar == null ? void 0 : scrollbar.wrapElement;
       if (!wrap) return;
       const offsetHeight = wrap.offsetHeight - 4;
       const offsetWidth = wrap.offsetWidth - 4;
@@ -381,7 +382,8 @@ var scrollbar_vue_vue_type_script_setup_true_lang_default = /* @__PURE__ */ defi
       return [ns.e("view"), props.viewClass];
     });
     const shouldSkipDirection = (direction2) => {
-      return distanceScrollState[direction2] ?? false;
+      var _a;
+      return (_a = distanceScrollState[direction2]) != null ? _a : false;
     };
     const DIRECTION_PAIRS = {
       top: "bottom",
@@ -398,8 +400,9 @@ var scrollbar_vue_vue_type_script_setup_true_lang_default = /* @__PURE__ */ defi
       if (!oppositeArrived && distanceScrollState[oppositeDirection]) distanceScrollState[oppositeDirection] = false;
     };
     const handleScroll = () => {
+      var _a;
       if (wrapRef.value) {
-        barRef.value?.handleScroll(wrapRef.value);
+        (_a = barRef.value) == null ? void 0 : _a.handleScroll(wrapRef.value);
         const prevTop = wrapScrollTop;
         const prevLeft = wrapScrollLeft;
         wrapScrollTop = wrapRef.value.scrollTop;
@@ -442,15 +445,16 @@ var scrollbar_vue_vue_type_script_setup_true_lang_default = /* @__PURE__ */ defi
       wrapRef.value.scrollLeft = value;
     };
     const update = () => {
-      barRef.value?.update();
+      var _a, _b;
+      (_a = barRef.value) == null ? void 0 : _a.update();
       distanceScrollState[direction] = false;
-      if (wrapRef.value) barRef.value?.handleScroll(wrapRef.value);
+      if (wrapRef.value) (_b = barRef.value) == null ? void 0 : _b.handleScroll(wrapRef.value);
     };
     watch(() => props.noresize, (noresize) => {
       if (noresize) {
-        stopResizeObserver?.();
-        stopWrapResizeObserver?.();
-        stopResizeListener?.();
+        stopResizeObserver == null ? void 0 : stopResizeObserver();
+        stopWrapResizeObserver == null ? void 0 : stopWrapResizeObserver();
+        stopResizeListener == null ? void 0 : stopResizeListener();
       } else {
         ({ stop: stopResizeObserver } = useResizeObserver(resizeRef, update));
         ({ stop: stopWrapResizeObserver } = useResizeObserver(wrapRef, update));

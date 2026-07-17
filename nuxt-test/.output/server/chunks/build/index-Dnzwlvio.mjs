@@ -46,7 +46,10 @@ const _sfc_main$1 = /* @__PURE__ */ defineComponent({
     const props = __props;
     const imageError = ref(false);
     const formattedDate = computed(
-      () => (props.article.createdAt || "").replace("T", " ").slice(0, 16) ?? ""
+      () => {
+        var _a;
+        return (_a = (props.article.createdAt || "").replace("T", " ").slice(0, 16)) != null ? _a : "";
+      }
     );
     const displaySummary = computed(() => {
       if (props.article.summary) return props.article.summary;
@@ -56,7 +59,10 @@ const _sfc_main$1 = /* @__PURE__ */ defineComponent({
       }
       return "";
     });
-    const coverUrl = computed(() => props.article.coverImage ?? "");
+    const coverUrl = computed(() => {
+      var _a;
+      return (_a = props.article.coverImage) != null ? _a : "";
+    });
     return (_ctx, _push, _parent, _attrs) => {
       _push(`<div${ssrRenderAttrs(mergeProps({ class: "article-card" }, _attrs))} data-v-057b0cea><div class="card-cover" data-v-057b0cea>`);
       if (coverUrl.value && !imageError.value) {
@@ -66,7 +72,7 @@ const _sfc_main$1 = /* @__PURE__ */ defineComponent({
           background: `linear-gradient(135deg, hsl(${__props.article.id * 137 % 360}, 70%, 60%), hsl(${(__props.article.id * 137 + 60) % 360}, 70%, 40%))`
         })}" data-v-057b0cea><span class="placeholder-text" data-v-057b0cea>${ssrInterpolate(__props.article.title.charAt(0))}</span></div>`);
       }
-      _push(`</div><div class="card-body" data-v-057b0cea><div class="card-meta" data-v-057b0cea><span class="date" data-v-057b0cea>${ssrInterpolate(formattedDate.value)}</span></div><h3 class="card-title" data-v-057b0cea>${ssrInterpolate(__props.article.title)}</h3><p class="card-summary" data-v-057b0cea>${ssrInterpolate(displaySummary.value)}</p><div class="card-footer" data-v-057b0cea><span class="author" data-v-057b0cea>👤 ${ssrInterpolate(__props.article.author.username)}</span><span class="views" data-v-057b0cea>👁 ${ssrInterpolate(__props.article.viewCount)}</span></div></div></div>`);
+      _push(`</div><div class="card-body" data-v-057b0cea><div class="card-meta" data-v-057b0cea><span class="date" data-v-057b0cea>${ssrInterpolate(formattedDate.value)}</span></div><h3 class="card-title" data-v-057b0cea>${ssrInterpolate(__props.article.title)}</h3><p class="card-summary" data-v-057b0cea>${ssrInterpolate(displaySummary.value)}</p><div class="card-footer" data-v-057b0cea><span class="author" data-v-057b0cea>\u{1F464} ${ssrInterpolate(__props.article.author.username)}</span><span class="views" data-v-057b0cea>\u{1F441} ${ssrInterpolate(__props.article.viewCount)}</span></div></div></div>`);
     };
   }
 });
@@ -93,17 +99,18 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
     const categories = ref([]);
     const tags = ref([]);
     async function loadArticles() {
+      var _a, _b;
       loading.value = true;
       try {
         const res = await getPublished(currentPage.value, pageSize.value, {
-          categoryId: activeCategoryId.value ?? void 0,
-          tagId: activeTagId.value ?? void 0,
+          categoryId: (_a = activeCategoryId.value) != null ? _a : void 0,
+          tagId: (_b = activeTagId.value) != null ? _b : void 0,
           keyword: searchKeyword.value || void 0
         });
         articles.value = res.content;
         total.value = res.totalElements;
       } catch {
-        ElMessage.error("加载文章失败，请稍后重试");
+        ElMessage.error("\u52A0\u8F7D\u6587\u7AE0\u5931\u8D25\uFF0C\u8BF7\u7A0D\u540E\u91CD\u8BD5");
         articles.value = [];
         total.value = 0;
       } finally {
@@ -136,7 +143,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
       _push(ssrRenderComponent(_component_el_input, {
         modelValue: searchKeyword.value,
         "onUpdate:modelValue": ($event) => searchKeyword.value = $event,
-        placeholder: "搜索文章...",
+        placeholder: "\u641C\u7D22\u6587\u7AE0...",
         clearable: "",
         "prefix-icon": unref(search_default),
         size: "large",
@@ -211,7 +218,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
         });
         _push(`<!--]--></div>`);
       } else if (articles.value.length === 0) {
-        _push(ssrRenderComponent(_component_el_empty, { description: "暂无文章" }, {
+        _push(ssrRenderComponent(_component_el_empty, { description: "\u6682\u65E0\u6587\u7AE0" }, {
           default: withCtx((_, _push2, _parent2, _scopeId) => {
             if (_push2) {
               if (activeCategoryId.value || activeTagId.value || searchKeyword.value) {
@@ -226,10 +233,10 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                 }, {
                   default: withCtx((_2, _push3, _parent3, _scopeId2) => {
                     if (_push3) {
-                      _push3(` 清空筛选条件 `);
+                      _push3(` \u6E05\u7A7A\u7B5B\u9009\u6761\u4EF6 `);
                     } else {
                       return [
-                        createTextVNode(" 清空筛选条件 ")
+                        createTextVNode(" \u6E05\u7A7A\u7B5B\u9009\u6761\u4EF6 ")
                       ];
                     }
                   }),
@@ -251,7 +258,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                   }
                 }, {
                   default: withCtx(() => [
-                    createTextVNode(" 清空筛选条件 ")
+                    createTextVNode(" \u6E05\u7A7A\u7B5B\u9009\u6761\u4EF6 ")
                   ]),
                   _: 1
                 }, 8, ["onClick"])) : createCommentVNode("", true)
@@ -287,7 +294,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
       } else {
         _push(`<!---->`);
       }
-      _push(`</div><aside class="sidebar" data-v-6573ad44><div class="widget" data-v-6573ad44><h3 class="widget-title" data-v-6573ad44>📂 分类</h3>`);
+      _push(`</div><aside class="sidebar" data-v-6573ad44><div class="widget" data-v-6573ad44><h3 class="widget-title" data-v-6573ad44>\u{1F4C2} \u5206\u7C7B</h3>`);
       if (categories.value.length) {
         _push(`<ul class="category-list" data-v-6573ad44><!--[-->`);
         ssrRenderList(categories.value, (cat) => {
@@ -295,9 +302,9 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
         });
         _push(`<!--]--></ul>`);
       } else {
-        _push(`<p class="empty-hint" data-v-6573ad44>暂无分类</p>`);
+        _push(`<p class="empty-hint" data-v-6573ad44>\u6682\u65E0\u5206\u7C7B</p>`);
       }
-      _push(`</div><div class="widget" data-v-6573ad44><h3 class="widget-title" data-v-6573ad44>🏷️ 标签</h3>`);
+      _push(`</div><div class="widget" data-v-6573ad44><h3 class="widget-title" data-v-6573ad44>\u{1F3F7}\uFE0F \u6807\u7B7E</h3>`);
       if (tags.value.length) {
         _push(`<div class="tag-cloud" data-v-6573ad44><!--[-->`);
         ssrRenderList(tags.value, (tag) => {
@@ -322,7 +329,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
         });
         _push(`<!--]--></div>`);
       } else {
-        _push(`<p class="empty-hint" data-v-6573ad44>暂无标签</p>`);
+        _push(`<p class="empty-hint" data-v-6573ad44>\u6682\u65E0\u6807\u7B7E</p>`);
       }
       _push(`</div></aside></div></div>`);
     };

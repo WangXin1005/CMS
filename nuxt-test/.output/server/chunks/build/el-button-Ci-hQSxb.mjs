@@ -140,7 +140,10 @@ For more detail, please visit: ${ref2}
 };
 const useProp = (name) => {
   const vm = getCurrentInstance();
-  return computed(() => vm?.proxy?.$props?.[name]);
+  return computed(() => {
+    var _a, _b;
+    return (_b = (_a = vm == null ? void 0 : vm.proxy) == null ? void 0 : _a.$props) == null ? void 0 : _b[name];
+  });
 };
 const useFormSize = (fallback, ignore = {}) => {
   const emptyRef = ref(void 0);
@@ -148,13 +151,14 @@ const useFormSize = (fallback, ignore = {}) => {
   const globalConfig = ignore.global ? emptyRef : useGlobalSize();
   const form = ignore.form ? { size: void 0 } : inject(formContextKey, void 0);
   const formItem = ignore.formItem ? { size: void 0 } : inject(formItemContextKey, void 0);
-  return computed(() => size.value || unref(fallback) || formItem?.size || form?.size || globalConfig.value || "");
+  return computed(() => size.value || unref(fallback) || (formItem == null ? void 0 : formItem.size) || (form == null ? void 0 : form.size) || globalConfig.value || "");
 };
 const useFormDisabled = (fallback) => {
   const disabled = useProp("disabled");
   const form = inject(formContextKey, void 0);
   return computed(() => {
-    return disabled.value ?? unref(fallback) ?? form?.disabled ?? false;
+    var _a, _b, _c;
+    return (_c = (_b = (_a = disabled.value) != null ? _a : unref(fallback)) != null ? _b : form == null ? void 0 : form.disabled) != null ? _c : false;
   });
 };
 const useFormItem = () => {
@@ -169,7 +173,8 @@ const useFormItemInputId = (props, { formItemContext, disableIdGeneration, disab
   getCurrentInstance();
   const inputId = ref();
   const isLabeledByFormItem = computed(() => {
-    return !!(!(props.label || props.ariaLabel) && formItemContext && formItemContext.inputIds && formItemContext.inputIds?.length <= 1);
+    var _a;
+    return !!(!(props.label || props.ariaLabel) && formItemContext && formItemContext.inputIds && ((_a = formItemContext.inputIds) == null ? void 0 : _a.length) <= 1);
   });
   return {
     isLabeledByFormItem,
@@ -187,16 +192,34 @@ const useButton = (props, emit) => {
   const buttonGroupContext = inject(buttonGroupContextKey, void 0);
   const globalConfig = useGlobalConfig("button");
   const { form } = useFormItem();
-  const _size = useFormSize(computed(() => buttonGroupContext?.size));
+  const _size = useFormSize(computed(() => buttonGroupContext == null ? void 0 : buttonGroupContext.size));
   const _disabled = useFormDisabled();
   const _ref = ref();
   const slots = useSlots();
-  const _type = computed(() => props.type || buttonGroupContext?.type || globalConfig.value?.type || "");
-  const autoInsertSpace = computed(() => props.autoInsertSpace ?? globalConfig.value?.autoInsertSpace ?? false);
-  const _plain = computed(() => props.plain ?? globalConfig.value?.plain ?? false);
-  const _round = computed(() => props.round ?? globalConfig.value?.round ?? false);
-  const _text = computed(() => props.text ?? globalConfig.value?.text ?? false);
-  const _dashed = computed(() => props.dashed ?? globalConfig.value?.dashed ?? false);
+  const _type = computed(() => {
+    var _a;
+    return props.type || (buttonGroupContext == null ? void 0 : buttonGroupContext.type) || ((_a = globalConfig.value) == null ? void 0 : _a.type) || "";
+  });
+  const autoInsertSpace = computed(() => {
+    var _a, _b, _c;
+    return (_c = (_b = props.autoInsertSpace) != null ? _b : (_a = globalConfig.value) == null ? void 0 : _a.autoInsertSpace) != null ? _c : false;
+  });
+  const _plain = computed(() => {
+    var _a, _b, _c;
+    return (_c = (_b = props.plain) != null ? _b : (_a = globalConfig.value) == null ? void 0 : _a.plain) != null ? _c : false;
+  });
+  const _round = computed(() => {
+    var _a, _b, _c;
+    return (_c = (_b = props.round) != null ? _b : (_a = globalConfig.value) == null ? void 0 : _a.round) != null ? _c : false;
+  });
+  const _text = computed(() => {
+    var _a, _b, _c;
+    return (_c = (_b = props.text) != null ? _b : (_a = globalConfig.value) == null ? void 0 : _a.text) != null ? _c : false;
+  });
+  const _dashed = computed(() => {
+    var _a, _b, _c;
+    return (_c = (_b = props.dashed) != null ? _b : (_a = globalConfig.value) == null ? void 0 : _a.dashed) != null ? _c : false;
+  });
   const _props = computed(() => {
     if (props.tag === "button") return {
       ariaDisabled: _disabled.value || props.loading,
@@ -207,10 +230,11 @@ const useButton = (props, emit) => {
     return {};
   });
   const shouldAddSpace = computed(() => {
-    const defaultSlot = slots.default?.();
-    if (autoInsertSpace.value && defaultSlot?.length === 1) {
+    var _a;
+    const defaultSlot = (_a = slots.default) == null ? void 0 : _a.call(slots);
+    if (autoInsertSpace.value && (defaultSlot == null ? void 0 : defaultSlot.length) === 1) {
       const slot = defaultSlot[0];
-      if (slot?.type === Text) {
+      if ((slot == null ? void 0 : slot.type) === Text) {
         const text = slot.children;
         return new RegExp("^\\p{Unified_Ideograph}{2}$", "u").test(text.trim());
       }
@@ -222,7 +246,7 @@ const useButton = (props, emit) => {
       evt.stopPropagation();
       return;
     }
-    if (props.nativeType === "reset") form?.resetFields();
+    if (props.nativeType === "reset") form == null ? void 0 : form.resetFields();
     emit("click", evt);
   };
   return {
