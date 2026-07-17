@@ -1,0 +1,19 @@
+# 不参与 Docker 构建的文件和目录
+.git
+.gitignore
+.dockerignore
+.env
+node_modules
+nuxt-test/node_modules
+nuxt-test/.nuxt
+nuxt-test/.cache
+nuxt-test/dist
+java-backend/target/*
+!java-backend/target/*.jar
+uploads
+*.md
+*.log
+.vscode
+.idea
+*.tmp
+*.bak
