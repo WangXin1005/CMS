@@ -19,7 +19,7 @@ public class TagService {
     }
 
     public List<Tag> listAll() {
-        return tagRepository.findAllByOrderByCreatedAtDesc();
+        return tagRepository.findAllByOrderBySortOrderAscCreatedAtDesc();
     }
 
     public Tag getById(Long id) {
@@ -43,6 +43,17 @@ public class TagService {
         if (name != null) tag.setName(name);
         if (slug != null) tag.setSlug(slug);
         return tagRepository.save(tag);
+    }
+
+    public void reorder(java.util.List<java.util.Map<String, Object>> orders) {
+        for (java.util.Map<String, Object> item : orders) {
+            Long id = ((Number) item.get("id")).longValue();
+            Integer sortOrder = (Integer) item.get("sortOrder");
+            tagRepository.findById(id).ifPresent(tag -> {
+                tag.setSortOrder(sortOrder);
+                tagRepository.save(tag);
+            });
+        }
     }
 
     @Transactional

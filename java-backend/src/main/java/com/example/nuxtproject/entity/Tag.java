@@ -28,6 +28,9 @@ public class Tag {
     @Column(unique = true, nullable = false, length = 100)
     private String slug;
 
+    @Schema(description = "排序权重，越小越靠前")
+    private Integer sortOrder = 0;
+
     @Schema(description = "创建时间")
     @Column(updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
@@ -47,4 +50,6 @@ public class Tag {
     public void setSlug(String slug) { this.slug = slug; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+    public Integer getSortOrder() { return sortOrder; }
+    public void setSortOrder(Integer sortOrder) { this.sortOrder = sortOrder; }
 }

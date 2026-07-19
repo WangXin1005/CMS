@@ -67,6 +67,13 @@ public class TagController {
         }
         return ResponseEntity.ok(Map.of("message", "标签更新成功"));
     }
+    @PutMapping("/api/admin/tags/reorder")
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN')")
+    @Operation(summary = "批量更新标签排序")
+    public ResponseEntity<?> reorder(@RequestBody List<Map<String, Object>> orders) {
+        tagService.reorder(orders);
+        return ResponseEntity.ok(Map.of("message", "排序更新成功"));
+    }
 
     @DeleteMapping("/api/admin/tags/{id}")
     @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN')")

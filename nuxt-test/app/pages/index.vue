@@ -72,7 +72,7 @@ async function loadSidebar() {
     tags.value = []
   }
   await nextTick()
-  checkOverflow()
+  await checkOverflow()
 }
 
 function handleSearch() {
@@ -277,12 +277,12 @@ onMounted(async () => {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-}
-
-.filter-items.collapsed {
-  max-height: 27px;
-  overflow: hidden;
   padding-top: 2px;
+}
+/* 折叠状态：限制高度并隐藏溢出 */
+.filter-items.collapsed {
+  max-height: 30px;
+  overflow: hidden;
 }
 
 .expand-row {
@@ -311,6 +311,7 @@ onMounted(async () => {
   transition: all 0.25s ease;
   white-space: nowrap;
   font-weight: 500;
+  line-height: 1.3;
 }
 
 .filter-chip:hover {

@@ -27,9 +27,13 @@ export const useTag = () => {
     const res = await request.put(`/admin/tags/${id}`, data)
     return res.data
   }
+  const reorder = async (orders: { id: number; sortOrder: number }[]) => {
+    const res = await request.put('/admin/tags/reorder', orders)
+    return res.data
+  }
   const remove = async (id: number) => {
     const res = await request.delete(`/admin/tags/${id}`)
     return res.data
   }
-  return { getList, getBySlug, create, update, remove }
+  return { getList, getBySlug, create, update, remove, reorder }
 }

@@ -1,6 +1,6 @@
 <!-- categories - 分类管理页（懒加载+拖拽排序） -->
 <script lang="ts" setup>
-import { ref, computed, onMounted, nextTick } from "vue";
+import { ref, computed, onMounted, nextTick, watch } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { Plus, Rank } from "@element-plus/icons-vue";
 import Sortable from "sortablejs";
@@ -19,6 +19,7 @@ const allLoaded = ref(false);
 const showEndMarker = computed(() => allLoaded.value && categories.value.length * 42 > (tableHeight.value || 400));
 const loadingMore = ref(false);
 const tableRef = ref();
+const tableKey = ref(0); // 用于强制表格刷新
 
 const displayCategories = computed(() => {
   const items = categories.value.slice(0, displayCount.value);
@@ -27,6 +28,10 @@ const displayCategories = computed(() => {
 });
 
 const columnCount = 5;
+function tableRowClassName({ row }: any) {
+  return row._isEndMarker ? 'end-marker-row' : ''
+}
+
 function tableSpanMethod({ row, columnIndex }) {
   if (row._isEndMarker) {
     if (columnIndex === 0) return [1, columnCount];
@@ -62,15 +67,22 @@ function initSortable() {
     sortableInstance = Sortable.create(el, {
       handle: ".drag-handle", animation: 200,
       onEnd: async (evt) => {
-        const list = categories.value;
-        const displayList = list.slice(0, displayCount.value);
-        const [moved] = displayList.splice(evt.oldIndex, 1);
-        displayList.splice(evt.newIndex, 0, moved);
-        for (let i = 0; i < displayList.length; i++) list[i] = displayList[i];
-        categories.value = [...list];
-        const orders = list.map((item, idx) => ({ id: item.id, sortOrder: idx }));
-        try { await reorder(orders); ElMessage.success("排序已保存"); }
-        catch { await loadData(); }
+        // 先销毁 Sortable 避免 DOM 冲突
+        if (sortableInstance) { sortableInstance.destroy(); sortableInstance = null }
+        // 更新本地数据
+        const list = [...categories.value]
+        const [moved] = list.splice(evt.oldIndex, 1)
+        list.splice(evt.newIndex, 0, moved)
+        categories.value = list
+        const orders = list.map((item, idx) => ({ id: item.id, sortOrder: idx }))
+        try {
+          await reorder(orders)
+          ElMessage.success("排序已保存")
+        } catch { /* 排序失败回退 */ }
+        // 从后端刷新数据
+        await loadData()
+        // 强制表格重建
+        tableKey.value++
       },
     });
   });
@@ -109,6 +121,9 @@ function handleScroll() {
 }
 
 onMounted(async () => { await nextTick(); await loadData(); initSortable(); });
+
+// tableKey 变化后重建 Sortable（表格 DOM 已重建）
+watch(tableKey, () => { nextTick(() => initSortable()) });
 </script>
 
 <template>
@@ -117,7 +132,7 @@ onMounted(async () => { await nextTick(); await loadData(); initSortable(); });
     <div class="page-header"><h2>分类管理</h2><el-button v-if="!isGuest" type="primary" :icon="Plus" @click="openCreate">新增分类</el-button></div>
     <!-- page-card 作为表格外容器，填充剩余空间，底边距窗口 25px -->
     <div ref="wrapperRef" class="page-card" style="flex:1; min-height:0">
-      <el-table ref="tableRef" :data="displayCategories" v-loading="loading" :span-method="tableSpanMethod" style="width: 100%" :max-height="tableHeight" @scroll="handleScroll" stripe>
+      <el-table ref="tableRef" :data="displayCategories" :key="tableKey" v-loading="loading" :span-method="tableSpanMethod" :row-class-name="tableRowClassName" style="width: 100%" :max-height="tableHeight" @scroll="handleScroll" stripe>
           <el-table-column label="排序" width="55" class-name="drag-handle-col" align="center">
             <template #default="{ row }">
               <div v-if="row._isEndMarker" style="text-align:center;color:#999;font-size:13px;padding:2px 0;line-height:1.2;width:100%">已加载全部</div>

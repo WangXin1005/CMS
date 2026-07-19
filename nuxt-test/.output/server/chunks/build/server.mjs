@@ -650,7 +650,7 @@ const _routes = [
     name: "categories",
     path: "/categories",
     meta: { "middleware": "auth" },
-    component: () => import('./categories-rR7cL6m3.mjs')
+    component: () => import('./categories-DmwaRewf.mjs')
   },
   {
     name: "comments",
@@ -692,7 +692,7 @@ const _routes = [
     name: "tags",
     path: "/tags",
     meta: { "middleware": "auth" },
-    component: () => import('./tags-CKlw4SeY.mjs')
+    component: () => import('./tags-ByUA_jPf.mjs')
   },
   {
     name: "user",
@@ -704,7 +704,7 @@ const _routes = [
     name: "index",
     path: "/",
     meta: __nuxt_page_meta || {},
-    component: () => import('./index-D-w56jqK.mjs')
+    component: () => import('./index-lg-hBTYc.mjs')
   }
 ];
 const _wrapInTransition = (props, children) => {
