@@ -11,7 +11,7 @@ export default defineNuxtPlugin(() => {
 
   router.afterEach((to) => {
     // 跳过登录页和公开首页
-    if (to.path === '/login' || to.path === '/') return
+    if (to.path === '/login' || to.path === '/' || to.path.startsWith('/article/')) return
 
     // cookie 有 token 但 sessionStorage 无标记 → 浏览器重启 → 清 cookie 跳登录
     if (token.value && !sessionStorage.getItem('auth_session')) {

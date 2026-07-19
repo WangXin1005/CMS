@@ -67,15 +67,15 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
       icp_number: ""
     });
     const settingKeys = [
-      { key: "site_name", label: "\u7F51\u7AD9\u540D\u79F0", type: "text" },
-      { key: "site_description", label: "\u7F51\u7AD9\u63CF\u8FF0", type: "textarea" },
+      { key: "site_name", label: "网站名称", type: "text" },
+      { key: "site_description", label: "网站描述", type: "textarea" },
       { key: "site_logo", label: "Logo", type: "image" },
-      { key: "icp_number", label: "\u5907\u6848\u53F7", type: "text" }
+      { key: "icp_number", label: "备案号", type: "text" }
     ];
     async function saveSetting(key) {
       try {
         await request.put(`/admin/settings/${key}`, { value: settings.value[key] });
-        ElMessage.success("\u4FDD\u5B58\u6210\u529F");
+        ElMessage.success("保存成功");
       } catch {
       }
     }
@@ -87,7 +87,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
             (s) => request.put(`/admin/settings/${s.key}`, { value: settings.value[s.key] })
           )
         );
-        ElMessage.success("\u5168\u90E8\u8BBE\u7F6E\u5DF2\u4FDD\u5B58");
+        ElMessage.success("全部设置已保存");
       } catch {
       } finally {
         loading.value = false;
@@ -101,7 +101,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
       const _component_el_dialog = ElDialog;
       const _component_el_empty = ElEmpty;
       const _directive_loading = vLoading;
-      _push(`<div${ssrRenderAttrs(mergeProps({ style: { "flex": "1", "min-height": "0", "display": "flex", "flex-direction": "column" } }, _attrs))}><div class="page-header"><h2>\u7AD9\u70B9\u8BBE\u7F6E</h2>`);
+      _push(`<div${ssrRenderAttrs(mergeProps({ style: { "flex": "1", "min-height": "0", "display": "flex", "flex-direction": "column" } }, _attrs))}><div class="page-header"><h2>站点设置</h2>`);
       _push(ssrRenderComponent(_component_el_button, {
         type: "primary",
         loading: loading.value,
@@ -109,10 +109,10 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
       }, {
         default: withCtx((_, _push2, _parent2, _scopeId) => {
           if (_push2) {
-            _push2(`\u4FDD\u5B58\u5168\u90E8`);
+            _push2(`保存全部`);
           } else {
             return [
-              createTextVNode("\u4FDD\u5B58\u5168\u90E8")
+              createTextVNode("保存全部")
             ];
           }
         }),
@@ -137,7 +137,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                       _push3(ssrRenderComponent(_component_el_input, {
                         modelValue: settings.value[s.key],
                         "onUpdate:modelValue": ($event) => settings.value[s.key] = $event,
-                        placeholder: `\u8BF7\u8F93\u5165${s.label}`
+                        placeholder: `请输入${s.label}`
                       }, null, _parent3, _scopeId2));
                     } else if (s.type === "textarea") {
                       _push3(ssrRenderComponent(_component_el_input, {
@@ -145,14 +145,14 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                         "onUpdate:modelValue": ($event) => settings.value[s.key] = $event,
                         type: "textarea",
                         rows: 3,
-                        placeholder: `\u8BF7\u8F93\u5165${s.label}`
+                        placeholder: `请输入${s.label}`
                       }, null, _parent3, _scopeId2));
                     } else if (s.type === "image") {
                       _push3(`<!--[--><div style="${ssrRenderStyle({ "display": "flex", "align-items": "center", "gap": "8px", "width": "100%" })}"${_scopeId2}>`);
                       _push3(ssrRenderComponent(_component_el_input, {
                         modelValue: settings.value[s.key],
                         "onUpdate:modelValue": ($event) => settings.value[s.key] = $event,
-                        placeholder: "\u70B9\u51FB\u53F3\u4FA7\u6309\u94AE\u9009\u62E9\u56FE\u7247",
+                        placeholder: "点击右侧按钮选择图片",
                         readonly: "",
                         style: { "flex": "1" }
                       }, null, _parent3, _scopeId2));
@@ -162,10 +162,10 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                       }, {
                         default: withCtx((_3, _push4, _parent4, _scopeId3) => {
                           if (_push4) {
-                            _push4(`\u9009\u62E9`);
+                            _push4(`选择`);
                           } else {
                             return [
-                              createTextVNode("\u9009\u62E9")
+                              createTextVNode("选择")
                             ];
                           }
                         }),
@@ -189,10 +189,10 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                     }, {
                       default: withCtx((_3, _push4, _parent4, _scopeId3) => {
                         if (_push4) {
-                          _push4(`\u4FDD\u5B58`);
+                          _push4(`保存`);
                         } else {
                           return [
-                            createTextVNode("\u4FDD\u5B58")
+                            createTextVNode("保存")
                           ];
                         }
                       }),
@@ -204,20 +204,20 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                         key: 0,
                         modelValue: settings.value[s.key],
                         "onUpdate:modelValue": ($event) => settings.value[s.key] = $event,
-                        placeholder: `\u8BF7\u8F93\u5165${s.label}`
+                        placeholder: `请输入${s.label}`
                       }, null, 8, ["modelValue", "onUpdate:modelValue", "placeholder"])) : s.type === "textarea" ? (openBlock(), createBlock(_component_el_input, {
                         key: 1,
                         modelValue: settings.value[s.key],
                         "onUpdate:modelValue": ($event) => settings.value[s.key] = $event,
                         type: "textarea",
                         rows: 3,
-                        placeholder: `\u8BF7\u8F93\u5165${s.label}`
+                        placeholder: `请输入${s.label}`
                       }, null, 8, ["modelValue", "onUpdate:modelValue", "placeholder"])) : s.type === "image" ? (openBlock(), createBlock(Fragment, { key: 2 }, [
                         createVNode("div", { style: { "display": "flex", "align-items": "center", "gap": "8px", "width": "100%" } }, [
                           createVNode(_component_el_input, {
                             modelValue: settings.value[s.key],
                             "onUpdate:modelValue": ($event) => settings.value[s.key] = $event,
-                            placeholder: "\u70B9\u51FB\u53F3\u4FA7\u6309\u94AE\u9009\u62E9\u56FE\u7247",
+                            placeholder: "点击右侧按钮选择图片",
                             readonly: "",
                             style: { "flex": "1" }
                           }, null, 8, ["modelValue", "onUpdate:modelValue"]),
@@ -226,7 +226,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                             style: { "flex-shrink": "0" }
                           }, {
                             default: withCtx(() => [
-                              createTextVNode("\u9009\u62E9")
+                              createTextVNode("选择")
                             ]),
                             _: 1
                           })
@@ -244,7 +244,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                         onClick: ($event) => saveSetting(s.key)
                       }, {
                         default: withCtx(() => [
-                          createTextVNode("\u4FDD\u5B58")
+                          createTextVNode("保存")
                         ]),
                         _: 1
                       }, 8, ["onClick"])
@@ -267,20 +267,20 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                       key: 0,
                       modelValue: settings.value[s.key],
                       "onUpdate:modelValue": ($event) => settings.value[s.key] = $event,
-                      placeholder: `\u8BF7\u8F93\u5165${s.label}`
+                      placeholder: `请输入${s.label}`
                     }, null, 8, ["modelValue", "onUpdate:modelValue", "placeholder"])) : s.type === "textarea" ? (openBlock(), createBlock(_component_el_input, {
                       key: 1,
                       modelValue: settings.value[s.key],
                       "onUpdate:modelValue": ($event) => settings.value[s.key] = $event,
                       type: "textarea",
                       rows: 3,
-                      placeholder: `\u8BF7\u8F93\u5165${s.label}`
+                      placeholder: `请输入${s.label}`
                     }, null, 8, ["modelValue", "onUpdate:modelValue", "placeholder"])) : s.type === "image" ? (openBlock(), createBlock(Fragment, { key: 2 }, [
                       createVNode("div", { style: { "display": "flex", "align-items": "center", "gap": "8px", "width": "100%" } }, [
                         createVNode(_component_el_input, {
                           modelValue: settings.value[s.key],
                           "onUpdate:modelValue": ($event) => settings.value[s.key] = $event,
-                          placeholder: "\u70B9\u51FB\u53F3\u4FA7\u6309\u94AE\u9009\u62E9\u56FE\u7247",
+                          placeholder: "点击右侧按钮选择图片",
                           readonly: "",
                           style: { "flex": "1" }
                         }, null, 8, ["modelValue", "onUpdate:modelValue"]),
@@ -289,7 +289,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                           style: { "flex-shrink": "0" }
                         }, {
                           default: withCtx(() => [
-                            createTextVNode("\u9009\u62E9")
+                            createTextVNode("选择")
                           ]),
                           _: 1
                         })
@@ -307,7 +307,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                       onClick: ($event) => saveSetting(s.key)
                     }, {
                       default: withCtx(() => [
-                        createTextVNode("\u4FDD\u5B58")
+                        createTextVNode("保存")
                       ]),
                       _: 1
                     }, 8, ["onClick"])
@@ -324,7 +324,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
       _push(ssrRenderComponent(_component_el_dialog, {
         modelValue: mediaDialogVisible.value,
         "onUpdate:modelValue": ($event) => mediaDialogVisible.value = $event,
-        title: "\u9009\u62E9\u56FE\u7247",
+        title: "选择图片",
         width: "700",
         "destroy-on-close": ""
       }, {
@@ -332,7 +332,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
           if (_push2) {
             _push2(`<div${ssrRenderAttrs(mergeProps({ style: { "display": "flex", "flex-wrap": "wrap", "gap": "12px", "min-height": "100px" } }, ssrGetDirectiveProps(_ctx, _directive_loading, mediaLoading.value)))}${_scopeId}>`);
             if (!mediaLoading.value && mediaList.value.length === 0) {
-              _push2(ssrRenderComponent(_component_el_empty, { description: "\u6682\u65E0\u56FE\u7247" }, null, _parent2, _scopeId));
+              _push2(ssrRenderComponent(_component_el_empty, { description: "暂无图片" }, null, _parent2, _scopeId));
             } else {
               _push2(`<!---->`);
             }
@@ -346,7 +346,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
               withDirectives((openBlock(), createBlock("div", { style: { "display": "flex", "flex-wrap": "wrap", "gap": "12px", "min-height": "100px" } }, [
                 !mediaLoading.value && mediaList.value.length === 0 ? (openBlock(), createBlock(_component_el_empty, {
                   key: 0,
-                  description: "\u6682\u65E0\u56FE\u7247"
+                  description: "暂无图片"
                 })) : createCommentVNode("", true),
                 (openBlock(true), createBlock(Fragment, null, renderList(mediaList.value, (m) => {
                   return openBlock(), createBlock("div", {

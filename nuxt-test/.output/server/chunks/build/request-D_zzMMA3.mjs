@@ -123,7 +123,7 @@ const withPropsDefaultsSetter = (target) => {
 };
 const withInstall = (main, extra) => {
   main.install = (app) => {
-    for (const comp of [main, ...Object.values(extra != null ? extra : {})]) app.component(comp.name, comp);
+    for (const comp of [main, ...Object.values(extra ?? {})]) app.component(comp.name, comp);
   };
   if (extra) for (const [key, comp] of Object.entries(extra)) main[key] = comp;
   withPropsDefaultsSetter(main);
@@ -168,9 +168,9 @@ const buildProp = (prop, key) => {
       if (values) {
         allowedValues = Array.from(values);
         if (hasOwn(prop, "default")) allowedValues.push(defaultValue);
-        valid || (valid = allowedValues.includes(val));
+        valid ||= allowedValues.includes(val);
       }
-      if (validator) valid || (valid = validator(val));
+      if (validator) valid ||= validator(val);
       if (!valid && allowedValues.length > 0) {
         const allowValuesText = [...new Set(allowedValues)].map((value) => JSON.stringify(value)).join(", ");
         warn(`Invalid prop: validation failed${key ? ` for prop "${key}"` : ""}. Expected one of [${allowValuesText}], got value ${JSON.stringify(val)}.`);
@@ -940,14 +940,13 @@ const removeClass = (el, cls) => {
   el.classList.remove(...classNameToArray(cls));
 };
 const getStyle = (element, styleName) => {
-  var _a;
   if (!isClient || !element || !styleName || isShadowRoot(element)) return "";
   let key = camelize(styleName);
   if (key === "float") key = "cssFloat";
   try {
     const style = element.style[key];
     if (style) return style;
-    const computed2 = (_a = (void 0).defaultView) == null ? void 0 : _a.getComputedStyle(element, "");
+    const computed2 = (void 0).defaultView?.getComputedStyle(element, "");
     return computed2 ? computed2[key] : "";
   } catch {
     return element.style[key];
@@ -1169,10 +1168,7 @@ var en_default = {
   }
 };
 const buildTranslator = (locale) => (path, option) => translate(path, option, unref(locale));
-const translate = (path, option, locale) => get(locale, path, path).replace(/\{(\w+)\}/g, (_, key) => {
-  var _a;
-  return `${(_a = option == null ? void 0 : option[key]) != null ? _a : `{${key}}`}`;
-});
+const translate = (path, option, locale) => get(locale, path, path).replace(/\{(\w+)\}/g, (_, key) => `${option?.[key] ?? `{${key}}`}`);
 const buildLocaleContext = (locale) => {
   return {
     lang: computed(() => unref(locale).name),
@@ -1244,31 +1240,18 @@ const configProviderContextKey = /* @__PURE__ */ Symbol();
 const globalConfig = ref();
 function useGlobalConfig(key, defaultValue = void 0) {
   const config = getCurrentInstance() ? inject(configProviderContextKey, globalConfig) : globalConfig;
-  if (key) return computed(() => {
-    var _a, _b;
-    return (_b = (_a = config.value) == null ? void 0 : _a[key]) != null ? _b : defaultValue;
-  });
+  if (key) return computed(() => config.value?.[key] ?? defaultValue);
   else return config;
 }
 function useGlobalComponentSettings(block, sizeFallback) {
   const config = useGlobalConfig();
-  const ns = useNamespace(block, computed(() => {
-    var _a;
-    return ((_a = config.value) == null ? void 0 : _a.namespace) || "el";
-  }));
-  const locale = useLocale(computed(() => {
-    var _a;
-    return (_a = config.value) == null ? void 0 : _a.locale;
-  }));
+  const ns = useNamespace(block, computed(() => config.value?.namespace || "el"));
+  const locale = useLocale(computed(() => config.value?.locale));
   const zIndex = useZIndex(computed(() => {
-    var _a;
-    const zIndex2 = (_a = config.value) == null ? void 0 : _a.zIndex;
+    const zIndex2 = config.value?.zIndex;
     return isNil(zIndex2) || Number.isNaN(zIndex2) ? defaultInitialZIndex : zIndex2;
   }));
-  const size = computed(() => {
-    var _a;
-    return unref(sizeFallback) || ((_a = config.value) == null ? void 0 : _a.size) || "";
-  });
+  const size = computed(() => unref(sizeFallback) || config.value?.size || "");
   provideGlobalConfig(computed(() => unref(config) || {}));
   return {
     ns,
@@ -1287,7 +1270,7 @@ const provideGlobalConfig = (config, app, global = false) => {
   }
   const context = computed(() => {
     const cfg = unref(config);
-    if (!(oldConfig == null ? void 0 : oldConfig.value)) return cfg;
+    if (!oldConfig?.value) return cfg;
     return mergeConfig(oldConfig.value, cfg);
   });
   provideFn(configProviderContextKey, context);
@@ -1579,9 +1562,8 @@ const flattedChildren = (children) => {
   const vNodes = isArray(children) ? children : [children];
   const result = [];
   vNodes.forEach((child) => {
-    var _a;
     if (isArray(child)) result.push(...flattedChildren(child));
-    else if (isVNode(child) && ((_a = child.component) == null ? void 0 : _a.subTree)) result.push(child, ...flattedChildren(child.component.subTree));
+    else if (isVNode(child) && child.component?.subTree) result.push(child, ...flattedChildren(child.component.subTree));
     else if (isVNode(child) && isArray(child.children)) result.push(...flattedChildren(child.children));
     else if (isVNode(child) && child.shapeFlag === 2) result.push(...flattedChildren(child.type()));
     else result.push(child);
@@ -1866,11 +1848,9 @@ const NAME = "ElOnlyChild";
 const OnlyChild = /* @__PURE__ */ defineComponent({
   name: NAME,
   setup(_, { slots, attrs }) {
-    var _a, _b;
-    const forwardRefDirective = useForwardRefDirective((_b = (_a = inject(FORWARD_REF_INJECTION_KEY)) == null ? void 0 : _a.setForwardRef) != null ? _b : NOOP);
+    const forwardRefDirective = useForwardRefDirective(inject(FORWARD_REF_INJECTION_KEY)?.setForwardRef ?? NOOP);
     return () => {
-      var _a2;
-      const defaultSlot = (_a2 = slots.default) == null ? void 0 : _a2.call(slots, attrs);
+      const defaultSlot = slots.default?.(attrs);
       if (!defaultSlot) return null;
       const [firstLegitNode, length] = findFirstLegitChild(defaultSlot);
       if (!firstLegitNode) {
@@ -2014,8 +1994,8 @@ const createFocusOutPreventedEvent = (detail) => {
 };
 const composeEventHandlers = (theirsHandler, oursHandler, { checkForDefaultPrevented = true } = {}) => {
   const handleEvent = (event) => {
-    const shouldPrevent = theirsHandler == null ? void 0 : theirsHandler(event);
-    if (checkForDefaultPrevented === false || !shouldPrevent) return oursHandler == null ? void 0 : oursHandler(event);
+    const shouldPrevent = theirsHandler?.(event);
+    if (checkForDefaultPrevented === false || !shouldPrevent) return oursHandler?.(event);
   };
   return handleEvent;
 };
@@ -2211,20 +2191,11 @@ const usePopper = (referenceElementRef, popperElementRef, opts = {}) => {
     instanceRef.value = createPopper(referenceElement, popperElement, unref(options));
   });
   return {
-    state: computed(() => {
-      var _a;
-      return { ...((_a = unref(instanceRef)) == null ? void 0 : _a.state) || {} };
-    }),
+    state: computed(() => ({ ...unref(instanceRef)?.state || {} })),
     styles: computed(() => unref(states).styles),
     attributes: computed(() => unref(states).attributes),
-    update: () => {
-      var _a;
-      return (_a = unref(instanceRef)) == null ? void 0 : _a.update();
-    },
-    forceUpdate: () => {
-      var _a;
-      return (_a = unref(instanceRef)) == null ? void 0 : _a.forceUpdate();
-    },
+    update: () => unref(instanceRef)?.update(),
+    forceUpdate: () => unref(instanceRef)?.forceUpdate(),
     instanceRef: computed(() => unref(instanceRef))
   };
 };
@@ -2243,7 +2214,7 @@ const buildPopperOptions = (props, modifiers = []) => {
     ...popperOptions,
     modifiers: [...genModifiers(props), ...modifiers]
   };
-  deriveExtraModifiers(options, popperOptions == null ? void 0 : popperOptions.modifiers);
+  deriveExtraModifiers(options, popperOptions?.modifiers);
   return options;
 };
 const unwrapMeasurableEl = ($el) => {
@@ -2255,7 +2226,7 @@ function genModifiers(options) {
   return [
     {
       name: "offset",
-      options: { offset: [0, offset != null ? offset : 12] }
+      options: { offset: [0, offset ?? 12] }
     },
     {
       name: "preventOverflow",
@@ -2280,7 +2251,7 @@ function genModifiers(options) {
   ];
 }
 function deriveExtraModifiers(options, modifiers) {
-  if (modifiers) options.modifiers = [...options.modifiers, ...modifiers != null ? modifiers : []];
+  if (modifiers) options.modifiers = [...options.modifiers, ...modifiers ?? []];
 }
 const DEFAULT_ARROW_OFFSET = 0;
 const usePopperContent = (props) => {
@@ -2294,9 +2265,8 @@ const usePopperContent = (props) => {
     };
   });
   const arrowModifier = computed(() => {
-    var _a;
     const arrowEl = unref(arrowRef);
-    const offset = (_a = unref(arrowOffset)) != null ? _a : DEFAULT_ARROW_OFFSET;
+    const offset = unref(arrowOffset) ?? DEFAULT_ARROW_OFFSET;
     return {
       name: "arrow",
       enabled: !isUndefined$1(arrowEl),
@@ -2319,7 +2289,7 @@ const usePopperContent = (props) => {
   watch(instanceRef, (instance) => popperInstanceRef.value = instance, { flush: "sync" });
   let stopResizeObserver;
   watch(() => props.visible, (visible) => {
-    stopResizeObserver == null ? void 0 : stopResizeObserver();
+    stopResizeObserver?.();
     stopResizeObserver = void 0;
     if (visible) stopResizeObserver = useResizeObserver(contentRef, update).stop;
   });
@@ -2375,8 +2345,7 @@ const usePopperContentFocusTrap = (props, emit) => {
     emit("focus");
   };
   const onFocusAfterReleased = (event) => {
-    var _a;
-    if (((_a = event.detail) == null ? void 0 : _a.focusReason) !== "pointer") {
+    if (event.detail?.focusReason !== "pointer") {
       focusStartRef.value = "first";
       emit("blur");
     }
@@ -2590,10 +2559,7 @@ var content_vue_vue_type_script_setup_true_lang_default = /* @__PURE__ */ define
     const { selector } = usePopperContainerId();
     const ns = useNamespace("tooltip");
     const contentRef = ref();
-    const popperContentRef = computedEager(() => {
-      var _a;
-      return (_a = contentRef.value) == null ? void 0 : _a.popperContentRef;
-    });
+    const popperContentRef = computedEager(() => contentRef.value?.popperContentRef);
     let stopHandle;
     const { controlled, id, open, trigger, onClose, onOpen, onShow, onHide, onBeforeShow, onBeforeHide } = inject(TOOLTIP_INJECTION_KEY, void 0);
     const transitionClass = computed(() => {
@@ -2611,10 +2577,7 @@ var content_vue_vue_type_script_setup_true_lang_default = /* @__PURE__ */ define
     const appendTo = computed(() => {
       return props.appendTo || selector.value;
     });
-    const contentStyle = computed(() => {
-      var _a;
-      return (_a = props.style) != null ? _a : {};
-    });
+    const contentStyle = computed(() => props.style ?? {});
     const ariaHidden = ref(true);
     const onTransitionLeave = () => {
       onHide();
@@ -2631,12 +2594,11 @@ var content_vue_vue_type_script_setup_true_lang_default = /* @__PURE__ */ define
       if (isTriggerType(unref(trigger), "hover")) onClose();
     });
     const onBeforeEnter = () => {
-      var _a, _b;
-      (_b = (_a = contentRef.value) == null ? void 0 : _a.updatePopper) == null ? void 0 : _b.call(_a);
-      onBeforeShow == null ? void 0 : onBeforeShow();
+      contentRef.value?.updatePopper?.();
+      onBeforeShow?.();
     };
     const onBeforeLeave = () => {
-      onBeforeHide == null ? void 0 : onBeforeHide();
+      onBeforeHide?.();
     };
     const onAfterShow = () => {
       onShow();
@@ -2645,13 +2607,12 @@ var content_vue_vue_type_script_setup_true_lang_default = /* @__PURE__ */ define
       if (!props.virtualTriggering) onClose();
     };
     const isFocusInsideContent = (event) => {
-      var _a;
-      const popperContent = (_a = contentRef.value) == null ? void 0 : _a.popperContentRef;
-      const activeElement = (event == null ? void 0 : event.relatedTarget) || (void 0).activeElement;
-      return popperContent == null ? void 0 : popperContent.contains(activeElement);
+      const popperContent = contentRef.value?.popperContentRef;
+      const activeElement = event?.relatedTarget || (void 0).activeElement;
+      return popperContent?.contains(activeElement);
     };
     watch(() => unref(open), (val) => {
-      if (!val) stopHandle == null ? void 0 : stopHandle();
+      if (!val) stopHandle?.();
       else {
         ariaHidden.value = false;
         stopHandle = onClickOutside(popperContentRef, () => {
@@ -2766,9 +2727,8 @@ var tooltip_vue_vue_type_script_setup_true_lang_default = /* @__PURE__ */ define
     const popperRef = ref();
     const contentRef = ref();
     const updatePopper = () => {
-      var _a;
       const popperComponent = unref(popperRef);
-      if (popperComponent) (_a = popperComponent.popperInstanceRef) == null ? void 0 : _a.update();
+      if (popperComponent) popperComponent.popperInstanceRef?.update();
     };
     const open = ref(false);
     const toggleReason = ref();
@@ -2817,8 +2777,7 @@ var tooltip_vue_vue_type_script_setup_true_lang_default = /* @__PURE__ */ define
       if (!disabled && isBoolean(props.visible)) open.value = props.visible;
     });
     const isFocusInsideContent = (event) => {
-      var _a;
-      return (_a = contentRef.value) == null ? void 0 : _a.isFocusInsideContent(event);
+      return contentRef.value?.isFocusInsideContent(event);
     };
     __expose({
       /**
@@ -2965,12 +2924,12 @@ function createDocumentHandler(el, binding) {
   return function(mouseup, mousedown) {
     const popperRef = binding.instance.popperRef;
     const mouseUpTarget = mouseup.target;
-    const mouseDownTarget = mousedown == null ? void 0 : mousedown.target;
+    const mouseDownTarget = mousedown?.target;
     const isBound = !binding || !binding.instance;
     const isTargetExists = !mouseUpTarget || !mouseDownTarget;
     const isContainedByEl = el.contains(mouseUpTarget) || el.contains(mouseDownTarget);
     const isSelf = el === mouseUpTarget;
-    const isTargetExcluded = excludes.length && excludes.some((item) => item == null ? void 0 : item.contains(mouseUpTarget)) || excludes.length && excludes.includes(mouseDownTarget);
+    const isTargetExcluded = excludes.length && excludes.some((item) => item?.contains(mouseUpTarget)) || excludes.length && excludes.includes(mouseDownTarget);
     const isContainedByPopper = popperRef && (popperRef.contains(mouseUpTarget) || popperRef.contains(mouseDownTarget));
     if (isBound || isTargetExists || isContainedByEl || isSelf || isTargetExcluded || isContainedByPopper) return;
     binding.value(mouseup, mousedown);
@@ -3084,12 +3043,11 @@ var badge_vue_vue_type_script_setup_true_lang_default = /* @__PURE__ */ defineCo
       return `${props.value}`;
     });
     const style = computed(() => {
-      var _a;
       return [{
         backgroundColor: props.color,
         marginRight: addUnit(-props.offset[0]),
         marginTop: addUnit(props.offset[1])
-      }, (_a = props.badgeStyle) != null ? _a : {}];
+      }, props.badgeStyle ?? {}];
     });
     __expose({
       /** @description badge content */
@@ -3187,13 +3145,12 @@ defineComponent({
   setup(props, { slots }) {
     const config = provideGlobalConfig(props);
     watch(() => props.message, (val) => {
-      var _a, _b;
-      Object.assign(messageConfig, (_b = (_a = config == null ? void 0 : config.value) == null ? void 0 : _a.message) != null ? _b : {}, val != null ? val : {});
+      Object.assign(messageConfig, config?.value?.message ?? {}, val ?? {});
     }, {
       immediate: true,
       deep: true
     });
-    return () => renderSlot(slots, "default", { config: config == null ? void 0 : config.value });
+    return () => renderSlot(slots, "default", { config: config?.value });
   }
 });
 var collapse_transition_vue_vue_type_script_setup_true_lang_default = /* @__PURE__ */ defineComponent({
@@ -3423,30 +3380,12 @@ var sub_menu_default = defineComponent({
       active
     });
     const ulStyle = useMenuCssVar(rootMenu.props, subMenu.level + 1);
-    const subMenuPopperOffset = computed(() => {
-      var _a;
-      return (_a = props.popperOffset) != null ? _a : rootMenu.props.popperOffset;
-    });
-    const subMenuPopperClass = computed(() => {
-      var _a;
-      return (_a = props.popperClass) != null ? _a : rootMenu.props.popperClass;
-    });
-    const subMenuPopperStyle = computed(() => {
-      var _a;
-      return (_a = props.popperStyle) != null ? _a : rootMenu.props.popperStyle;
-    });
-    const subMenuShowTimeout = computed(() => {
-      var _a;
-      return (_a = props.showTimeout) != null ? _a : rootMenu.props.showTimeout;
-    });
-    const subMenuHideTimeout = computed(() => {
-      var _a;
-      return (_a = props.hideTimeout) != null ? _a : rootMenu.props.hideTimeout;
-    });
-    const doDestroy = () => {
-      var _a, _b, _c;
-      return (_c = (_b = (_a = vPopper.value) == null ? void 0 : _a.popperRef) == null ? void 0 : _b.popperInstanceRef) == null ? void 0 : _c.destroy();
-    };
+    const subMenuPopperOffset = computed(() => props.popperOffset ?? rootMenu.props.popperOffset);
+    const subMenuPopperClass = computed(() => props.popperClass ?? rootMenu.props.popperClass);
+    const subMenuPopperStyle = computed(() => props.popperStyle ?? rootMenu.props.popperStyle);
+    const subMenuShowTimeout = computed(() => props.showTimeout ?? rootMenu.props.showTimeout);
+    const subMenuHideTimeout = computed(() => props.hideTimeout ?? rootMenu.props.hideTimeout);
+    const doDestroy = () => vPopper.value?.popperRef?.popperInstanceRef?.destroy();
     const handleCollapseToggle = (value) => {
       if (!value) doDestroy();
     };
@@ -3459,32 +3398,30 @@ var sub_menu_default = defineComponent({
       });
     };
     const handleMouseenter = (event, showTimeout = subMenuShowTimeout.value) => {
-      var _a;
       if (event.type === "focus") return;
       if (rootMenu.props.menuTrigger === "click" && rootMenu.props.mode === "horizontal" || !rootMenu.props.collapse && rootMenu.props.mode === "vertical" || props.disabled) {
         subMenu.mouseInChild.value = true;
         return;
       }
       subMenu.mouseInChild.value = true;
-      timeout == null ? void 0 : timeout();
+      timeout?.();
       ({ stop: timeout } = useTimeoutFn(() => {
         rootMenu.openMenu(props.index, indexPath.value);
       }, showTimeout));
-      if (appendToBody.value) (_a = parentMenu.value.vnode.el) == null ? void 0 : _a.dispatchEvent(new MouseEvent("mouseenter"));
+      if (appendToBody.value) parentMenu.value.vnode.el?.dispatchEvent(new MouseEvent("mouseenter"));
       if (event.type === "mouseenter" && event.target) nextTick(() => {
         focusElement(event.target, { preventScroll: true });
       });
     };
     const handleMouseleave = (deepDispatch = false) => {
-      var _a;
       if (rootMenu.props.menuTrigger === "click" && rootMenu.props.mode === "horizontal" || !rootMenu.props.collapse && rootMenu.props.mode === "vertical") {
         subMenu.mouseInChild.value = false;
         return;
       }
-      timeout == null ? void 0 : timeout();
+      timeout?.();
       subMenu.mouseInChild.value = false;
       ({ stop: timeout } = useTimeoutFn(() => !mouseInChild.value && rootMenu.closeMenu(props.index, indexPath.value), subMenuHideTimeout.value));
-      if (appendToBody.value && deepDispatch) (_a = subMenu.handleMouseleave) == null ? void 0 : _a.call(subMenu, true);
+      if (appendToBody.value && deepDispatch) subMenu.handleMouseleave?.(true);
     };
     watch(() => rootMenu.props.collapse, (value) => handleCollapseToggle(Boolean(value)));
     {
@@ -3504,8 +3441,7 @@ var sub_menu_default = defineComponent({
     }
     expose({ opened });
     return () => {
-      var _a;
-      const titleTag = [(_a = slots.title) == null ? void 0 : _a.call(slots), h(ElIcon, {
+      const titleTag = [slots.title?.(), h(ElIcon, {
         class: nsSubMenu.e("icon-arrow"),
         style: { transform: opened.value ? props.expandCloseIcon && props.expandOpenIcon || props.collapseCloseIcon && props.collapseOpenIcon && rootMenu.props.collapse ? "none" : "rotateZ(180deg)" : "none" }
       }, { default: () => isString(subMenuTitleIcon.value) ? h(instance.appContext.components[subMenuTitleIcon.value]) : h(subMenuTitleIcon.value) })];
@@ -3525,26 +3461,23 @@ var sub_menu_default = defineComponent({
         transition: menuTransitionName.value,
         gpuAcceleration: false
       }, {
-        content: () => {
-          var _a2;
-          return h("div", {
-            class: [
-              nsMenu.m(mode.value),
-              nsMenu.m("popup-container"),
-              subMenuPopperClass.value
-            ],
-            onMouseenter: (evt) => handleMouseenter(evt, 100),
-            onMouseleave: () => handleMouseleave(true),
-            onFocus: (evt) => handleMouseenter(evt, 100)
-          }, [h("ul", {
-            class: [
-              nsMenu.b(),
-              nsMenu.m("popup"),
-              nsMenu.m(`popup-${currentPlacement.value}`)
-            ],
-            style: ulStyle.value
-          }, [(_a2 = slots.default) == null ? void 0 : _a2.call(slots)])]);
-        },
+        content: () => h("div", {
+          class: [
+            nsMenu.m(mode.value),
+            nsMenu.m("popup-container"),
+            subMenuPopperClass.value
+          ],
+          onMouseenter: (evt) => handleMouseenter(evt, 100),
+          onMouseleave: () => handleMouseleave(true),
+          onFocus: (evt) => handleMouseenter(evt, 100)
+        }, [h("ul", {
+          class: [
+            nsMenu.b(),
+            nsMenu.m("popup"),
+            nsMenu.m(`popup-${currentPlacement.value}`)
+          ],
+          style: ulStyle.value
+        }, [slots.default?.()])]),
         default: () => h("div", {
           class: nsSubMenu.e("title"),
           onClick: handleClick
@@ -3553,14 +3486,11 @@ var sub_menu_default = defineComponent({
         class: nsSubMenu.e("title"),
         ref: verticalTitleRef,
         onClick: handleClick
-      }, titleTag), h(ElCollapseTransition, {}, { default: () => {
-        var _a2;
-        return withDirectives(h("ul", {
-          role: "menu",
-          class: [nsMenu.b(), nsMenu.m("inline")],
-          style: ulStyle.value
-        }, [(_a2 = slots.default) == null ? void 0 : _a2.call(slots)]), [[vShow, opened.value]]);
-      } })]);
+      }, titleTag), h(ElCollapseTransition, {}, { default: () => withDirectives(h("ul", {
+        role: "menu",
+        class: [nsMenu.b(), nsMenu.m("inline")],
+        style: ulStyle.value
+      }, [slots.default?.()]), [[vShow, opened.value]]) })]);
       return h("li", {
         class: [
           nsSubMenu.b(),
@@ -3825,9 +3755,8 @@ var menu_default = defineComponent({
       }
     };
     const updateActiveIndex = (val) => {
-      var _a, _b;
       const itemsInData = items.value;
-      activeIndex.value = (_b = (_a = itemsInData[val] || activeIndex.value && itemsInData[activeIndex.value] || itemsInData[props.defaultActive]) == null ? void 0 : _a.index) != null ? _b : val;
+      activeIndex.value = (itemsInData[val] || activeIndex.value && itemsInData[activeIndex.value] || itemsInData[props.defaultActive])?.index ?? val;
     };
     const calcMenuItemWidth = (menuItem) => {
       const computedStyle = getComputedStyle(menuItem);
@@ -3885,7 +3814,7 @@ var menu_default = defineComponent({
     let resizeStopper;
     watchEffect(() => {
       if (props.mode === "horizontal" && props.ellipsis) resizeStopper = useResizeObserver(menu, handleResize).stop;
-      else resizeStopper == null ? void 0 : resizeStopper();
+      else resizeStopper?.();
     });
     const mouseInChild = ref(false);
     {
@@ -3938,16 +3867,15 @@ var menu_default = defineComponent({
     }
     const ulStyle = useMenuCssVar(props, 0);
     return () => {
-      var _a, _b;
-      let slot = (_b = (_a = slots.default) == null ? void 0 : _a.call(slots)) != null ? _b : [];
+      let slot = slots.default?.() ?? [];
       const vShowMore = [];
       if (props.mode === "horizontal" && menu.value) {
         const originalSlot = flattedChildren(slot).filter((vnode) => {
-          return (vnode == null ? void 0 : vnode.shapeFlag) !== 8;
+          return vnode?.shapeFlag !== 8;
         });
         const slotDefault = sliceIndex.value === -1 ? originalSlot : originalSlot.slice(0, sliceIndex.value);
         const slotMore = sliceIndex.value === -1 ? [] : originalSlot.slice(sliceIndex.value);
-        if ((slotMore == null ? void 0 : slotMore.length) && props.ellipsis) {
+        if (slotMore?.length && props.ellipsis) {
           slot = slotDefault;
           vShowMore.push(h(sub_menu_default, {
             ref: subMenu,
@@ -4319,14 +4247,13 @@ var message_vue_vue_type_script_setup_true_lang_default = /* @__PURE__ */ define
       }, props.duration));
     }
     function clearTimer() {
-      stopTimer == null ? void 0 : stopTimer();
+      stopTimer?.();
     }
     function close() {
       visible.value = false;
       nextTick(() => {
-        var _a;
         if (!isStartTransition.value) {
-          (_a = props.onClose) == null ? void 0 : _a.call(props);
+          props.onClose?.();
           emit("destroy");
         }
       });
@@ -4463,7 +4390,7 @@ const createMessage = ({ appendTo, ...options }, context) => {
     ...options,
     id,
     onClose: () => {
-      userOnClose == null ? void 0 : userOnClose();
+      userOnClose?.();
       closeMessage(instance);
     },
     onDestroy: () => {
@@ -4491,10 +4418,7 @@ const message = (options = {}, context) => {
   const normalized = normalizeOptions(options);
   const instances = getOrCreatePlacementInstances(normalized.placement || "top");
   if (normalized.grouping && instances.length) {
-    const instance2 = instances.find(({ vnode: vm }) => {
-      var _a;
-      return ((_a = vm.props) == null ? void 0 : _a.message) === normalized.message;
-    });
+    const instance2 = instances.find(({ vnode: vm }) => vm.props?.message === normalized.message);
     if (instance2) {
       instance2.props.repeatNum += 1;
       instance2.props.type = normalized.type;
@@ -4548,9 +4472,8 @@ const __nuxt_component_1 = defineComponent({
     }
     provide(clientOnlySymbol, true);
     return () => {
-      var _a;
       if (mounted.value) {
-        const vnodes = (_a = slots.default) == null ? void 0 : _a.call(slots);
+        const vnodes = slots.default?.();
         if (vnodes && vnodes.length === 1) {
           return [cloneVNode(vnodes[0], attrs)];
         }
@@ -4579,7 +4502,6 @@ const createUseAsyncData = defineKeyedFunctionFactory({
   name: "createUseAsyncData",
   factory(options = {}) {
     function useAsyncData2(...args) {
-      var _a, _b, _c, _d, _e, _f, _g;
       const autoKey = typeof args[args.length - 1] === "string" ? args.pop() : void 0;
       if (_isAutoKeyNeeded(args[0], args[1])) {
         args.unshift(autoKey);
@@ -4607,13 +4529,13 @@ const createUseAsyncData = defineKeyedFunctionFactory({
           opts[key2] = factoryOptions[key2];
         }
       }
-      (_a = opts.server) != null ? _a : opts.server = true;
-      (_b = opts.default) != null ? _b : opts.default = getDefault;
-      (_c = opts.getCachedData) != null ? _c : opts.getCachedData = getDefaultCachedData;
-      (_d = opts.lazy) != null ? _d : opts.lazy = false;
-      (_e = opts.immediate) != null ? _e : opts.immediate = true;
-      (_f = opts.deep) != null ? _f : opts.deep = asyncDataDefaults.deep;
-      (_g = opts.dedupe) != null ? _g : opts.dedupe = "cancel";
+      opts.server ??= true;
+      opts.default ??= getDefault;
+      opts.getCachedData ??= getDefaultCachedData;
+      opts.lazy ??= false;
+      opts.immediate ??= true;
+      opts.deep ??= asyncDataDefaults.deep;
+      opts.dedupe ??= "cancel";
       if (shouldFactoryOptionsOverride) {
         for (const key2 in factoryOptions) {
           if (factoryOptions[key2] === void 0) {
@@ -4626,7 +4548,7 @@ const createUseAsyncData = defineKeyedFunctionFactory({
       function createInitialFetch() {
         const initialFetchOptions = { cause: "initial", dedupe: opts.dedupe };
         const existing = nuxtApp._asyncData[key.value];
-        if (!(existing == null ? void 0 : existing._init)) {
+        if (!existing?._init) {
           initialFetchOptions.cachedData = opts.getCachedData(key.value, nuxtApp, { cause: "initial" });
           nuxtApp._asyncData[key.value] = buildAsyncData(nuxtApp, key.value, _handler, opts, initialFetchOptions.cachedData);
           nuxtApp._asyncData[key.value]._initialCachedData = initialFetchOptions.cachedData;
@@ -4650,25 +4572,12 @@ const createUseAsyncData = defineKeyedFunctionFactory({
         }
       }
       const asyncReturn = {
-        data: writableComputedRef(() => {
-          var _a2;
-          return (_a2 = nuxtApp._asyncData[key.value]) == null ? void 0 : _a2.data;
-        }),
-        pending: writableComputedRef(() => {
-          var _a2;
-          return (_a2 = nuxtApp._asyncData[key.value]) == null ? void 0 : _a2.pending;
-        }),
-        status: writableComputedRef(() => {
-          var _a2;
-          return (_a2 = nuxtApp._asyncData[key.value]) == null ? void 0 : _a2.status;
-        }),
-        error: writableComputedRef(() => {
-          var _a2;
-          return (_a2 = nuxtApp._asyncData[key.value]) == null ? void 0 : _a2.error;
-        }),
+        data: writableComputedRef(() => nuxtApp._asyncData[key.value]?.data),
+        pending: writableComputedRef(() => nuxtApp._asyncData[key.value]?.pending),
+        status: writableComputedRef(() => nuxtApp._asyncData[key.value]?.status),
+        error: writableComputedRef(() => nuxtApp._asyncData[key.value]?.error),
         refresh: (...args2) => {
-          var _a2;
-          if (!((_a2 = nuxtApp._asyncData[key.value]) == null ? void 0 : _a2._init)) {
+          if (!nuxtApp._asyncData[key.value]?._init) {
             const initialFetch2 = createInitialFetch();
             return initialFetch2();
           }
@@ -4677,7 +4586,7 @@ const createUseAsyncData = defineKeyedFunctionFactory({
         execute: (...args2) => asyncReturn.refresh(...args2),
         clear: () => {
           const entry = nuxtApp._asyncData[key.value];
-          if (entry == null ? void 0 : entry._abortController) {
+          if (entry?._abortController) {
             try {
               entry._abortController.abort(new DOMException("AsyncData aborted by user.", "AbortError"));
             } finally {
@@ -4708,8 +4617,7 @@ createUseAsyncData.__nuxt_factory({
 function writableComputedRef(getter) {
   return computed({
     get() {
-      var _a;
-      return (_a = getter()) == null ? void 0 : _a.value;
+      return getter()?.value;
     },
     set(value) {
       const ref2 = getter();
@@ -4756,8 +4664,7 @@ function pick(obj, keys) {
   return newObj;
 }
 function buildAsyncData(nuxtApp, key, _handler, options, initialCachedData) {
-  var _a, _b;
-  (_b = (_a = nuxtApp.payload._errors)[key]) != null ? _b : _a[key] = void 0;
+  nuxtApp.payload._errors[key] ??= void 0;
   const hasCustomGetCachedData = options.getCachedData !== getDefaultCachedData;
   const handler = _handler ;
   const _ref = options.deep ? ref : shallowRef;
@@ -4773,16 +4680,15 @@ function buildAsyncData(nuxtApp, key, _handler, options, initialCachedData) {
     error: toRef(nuxtApp.payload._errors, key),
     status: shallowRef("idle"),
     execute: (...args) => {
-      var _a2, _b2;
       const [_opts, newValue = void 0] = args;
       const opts = _opts && newValue === void 0 && typeof _opts === "object" ? _opts : {};
       if (nuxtApp._asyncDataPromises[key]) {
-        if (((_a2 = opts.dedupe) != null ? _a2 : options.dedupe) === "defer") {
+        if ((opts.dedupe ?? options.dedupe) === "defer") {
           return nuxtApp._asyncDataPromises[key];
         }
       }
       {
-        const cachedData = "cachedData" in opts ? opts.cachedData : options.getCachedData(key, nuxtApp, { cause: (_b2 = opts.cause) != null ? _b2 : "refresh:manual" });
+        const cachedData = "cachedData" in opts ? opts.cachedData : options.getCachedData(key, nuxtApp, { cause: opts.cause ?? "refresh:manual" });
         if (cachedData !== void 0) {
           nuxtApp.payload.data[key] = asyncData.data.value = cachedData;
           asyncData.error.value = void 0;
@@ -4798,18 +4704,17 @@ function buildAsyncData(nuxtApp, key, _handler, options, initialCachedData) {
       const cleanupController = new AbortController();
       const promise = new Promise(
         (resolve, reject) => {
-          var _a3, _b3;
           try {
-            const timeout = (_a3 = opts.timeout) != null ? _a3 : options.timeout;
-            const mergedSignal = mergeAbortSignals([(_b3 = asyncData._abortController) == null ? void 0 : _b3.signal, opts == null ? void 0 : opts.signal], cleanupController.signal, timeout);
+            const timeout = opts.timeout ?? options.timeout;
+            const mergedSignal = mergeAbortSignals([asyncData._abortController?.signal, opts?.signal], cleanupController.signal, timeout);
             if (mergedSignal.aborted) {
               const reason = mergedSignal.reason;
-              reject(reason instanceof Error ? reason : new DOMException(String(reason != null ? reason : "Aborted"), "AbortError"));
+              reject(reason instanceof Error ? reason : new DOMException(String(reason ?? "Aborted"), "AbortError"));
               return;
             }
             mergedSignal.addEventListener("abort", () => {
               const reason = mergedSignal.reason;
-              reject(reason instanceof Error ? reason : new DOMException(String(reason != null ? reason : "Aborted"), "AbortError"));
+              reject(reason instanceof Error ? reason : new DOMException(String(reason ?? "Aborted"), "AbortError"));
             }, { once: true, signal: cleanupController.signal });
             return Promise.resolve(handler(nuxtApp, { signal: mergedSignal })).then(resolve, reject);
           } catch (err) {
@@ -4832,11 +4737,10 @@ function buildAsyncData(nuxtApp, key, _handler, options, initialCachedData) {
         asyncData.error.value = void 0;
         asyncData.status.value = "success";
       }).catch((error) => {
-        var _a3;
         if (nuxtApp._asyncDataPromises[key] !== promise) {
           return nuxtApp._asyncDataPromises[key];
         }
-        if ((_a3 = asyncData._abortController) == null ? void 0 : _a3.signal.aborted) {
+        if (asyncData._abortController?.signal.aborted) {
           return nuxtApp._asyncDataPromises[key];
         }
         if (typeof DOMException !== "undefined" && error instanceof DOMException && error.name === "AbortError") {
@@ -4861,15 +4765,13 @@ function buildAsyncData(nuxtApp, key, _handler, options, initialCachedData) {
     _init: true,
     _hash: void 0,
     _off: () => {
-      var _a2;
       unsubRefreshAsyncData();
-      if ((_a2 = nuxtApp._asyncData[key]) == null ? void 0 : _a2._init) {
+      if (nuxtApp._asyncData[key]?._init) {
         nuxtApp._asyncData[key]._init = false;
       }
       if (!hasCustomGetCachedData) {
         nextTick(() => {
-          var _a3;
-          if (!((_a3 = nuxtApp._asyncData[key]) == null ? void 0 : _a3._init)) {
+          if (!nuxtApp._asyncData[key]?._init) {
             clearNuxtDataByKey(nuxtApp, key);
             asyncData.execute = () => Promise.resolve();
           }
@@ -4889,10 +4791,9 @@ const getDefaultCachedData = (key, nuxtApp, ctx) => {
   }
 };
 function mergeAbortSignals(signals, cleanupSignal, timeout) {
-  var _a, _b, _c;
   const list = signals.filter((s) => !!s);
   if (typeof timeout === "number" && timeout >= 0) {
-    const timeoutSignal = (_a = AbortSignal.timeout) == null ? void 0 : _a.call(AbortSignal, timeout);
+    const timeoutSignal = AbortSignal.timeout?.(timeout);
     if (timeoutSignal) {
       list.push(timeoutSignal);
     }
@@ -4903,7 +4804,7 @@ function mergeAbortSignals(signals, cleanupSignal, timeout) {
   const controller = new AbortController();
   for (const sig of list) {
     if (sig.aborted) {
-      const reason = (_b = sig.reason) != null ? _b : new DOMException("Aborted", "AbortError");
+      const reason = sig.reason ?? new DOMException("Aborted", "AbortError");
       try {
         controller.abort(reason);
       } catch {
@@ -4913,9 +4814,8 @@ function mergeAbortSignals(signals, cleanupSignal, timeout) {
     }
   }
   const onAbort = () => {
-    var _a2;
     const abortedSignal = list.find((s) => s.aborted);
-    const reason = (_a2 = abortedSignal == null ? void 0 : abortedSignal.reason) != null ? _a2 : new DOMException("Aborted", "AbortError");
+    const reason = abortedSignal?.reason ?? new DOMException("Aborted", "AbortError");
     try {
       controller.abort(reason);
     } catch {
@@ -4923,14 +4823,13 @@ function mergeAbortSignals(signals, cleanupSignal, timeout) {
     }
   };
   for (const sig of list) {
-    (_c = sig.addEventListener) == null ? void 0 : _c.call(sig, "abort", onAbort, { once: true, signal: cleanupSignal });
+    sig.addEventListener?.("abort", onAbort, { once: true, signal: cleanupSignal });
   }
   return controller.signal;
 }
 function generateOptionSegments(opts) {
-  var _a;
   const segments = [
-    ((_a = toValue(opts.method)) == null ? void 0 : _a.toUpperCase()) || "GET",
+    toValue(opts.method)?.toUpperCase() || "GET",
     toValue(opts.baseURL)
   ];
   for (const _obj of [opts.query || opts.params]) {
@@ -5048,12 +4947,11 @@ const request = axios.create({
 request.interceptors.response.use(
   (response) => response,
   (error) => {
-    var _a, _b, _c, _d;
-    if ((_b = (_a = error.response) == null ? void 0 : _a.data) == null ? void 0 : _b.message) {
+    if (error.response?.data?.message) {
       ElMessage.error(error.response.data.message);
     }
-    if (((_c = error.response) == null ? void 0 : _c.status) === 401) {
-      const url = ((_d = error.config) == null ? void 0 : _d.url) || "";
+    if (error.response?.status === 401) {
+      const url = error.config?.url || "";
       if (!url.includes("/users/check") && !url.includes("/users/init") && !url.includes("/auth/register") && !url.includes("/auth/login")) {
         navigateTo("/login");
       }

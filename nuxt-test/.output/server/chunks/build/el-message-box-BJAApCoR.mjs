@@ -171,16 +171,14 @@ var index_vue_vue_type_script_lang_default = defineComponent({
       if (props.boxType === "prompt" && val) validate();
     }, { immediate: true });
     watch(() => visible.value, (val) => {
-      var _a, _b;
       if (val) {
-        if (props.boxType !== "prompt") if (state.autofocus) focusStartRef.value = (_b = (_a = confirmRef.value) == null ? void 0 : _a.$el) != null ? _b : rootRef.value;
+        if (props.boxType !== "prompt") if (state.autofocus) focusStartRef.value = confirmRef.value?.$el ?? rootRef.value;
         else focusStartRef.value = rootRef.value;
         state.zIndex = nextZIndex();
       }
       if (props.boxType !== "prompt") return;
       if (val) nextTick().then(() => {
-        var _a2;
-        if (inputRef.value && inputRef.value.$el) if (state.autofocus) focusStartRef.value = (_a2 = getInputElement()) != null ? _a2 : rootRef.value;
+        if (inputRef.value && inputRef.value.$el) if (state.autofocus) focusStartRef.value = getInputElement() ?? rootRef.value;
         else focusStartRef.value = rootRef.value;
       });
       else {
@@ -201,17 +199,15 @@ var index_vue_vue_type_script_lang_default = defineComponent({
     };
     const overlayEvent = useSameTarget(handleWrapperClick);
     const handleInputEnter = (e) => {
-      var _a;
-      if (state.inputType !== "textarea" && !((_a = inputRef.value) == null ? void 0 : _a.isComposing)) {
+      if (state.inputType !== "textarea" && !inputRef.value?.isComposing) {
         e.preventDefault();
         return handleAction2("confirm");
       }
     };
     const handleAction2 = (action) => {
-      var _a;
       if (props.boxType === "prompt" && action === "confirm" && !validate()) return;
       state.action = action;
-      if (state.beforeClose) (_a = state.beforeClose) == null ? void 0 : _a.call(state, action, state, doClose);
+      if (state.beforeClose) state.beforeClose?.(action, state, doClose);
       else doClose();
     };
     const validate = () => {
@@ -242,9 +238,8 @@ var index_vue_vue_type_script_lang_default = defineComponent({
       return true;
     };
     const getInputElement = () => {
-      var _a, _b;
-      const inputRefs = (_a = inputRef.value) == null ? void 0 : _a.$refs;
-      return (_b = inputRefs == null ? void 0 : inputRefs.input) != null ? _b : inputRefs == null ? void 0 : inputRefs.textarea;
+      const inputRefs = inputRef.value?.$refs;
+      return inputRefs?.input ?? inputRefs?.textarea;
     };
     const handleClose = () => {
       handleAction2("close");
@@ -475,8 +470,7 @@ const getAppendToElement = (props) => {
   return appendTo;
 };
 const handleAction = (vnode, action) => {
-  var _a;
-  const vm = (_a = vnode.component) == null ? void 0 : _a.proxy;
+  const vm = vnode.component?.proxy;
   return () => vm.handleAction(action);
 };
 const initInstance = (props, container, appContext = null) => {
@@ -525,7 +519,7 @@ function MessageBox(options, appContext = null) {
   if (isString(options) || isVNode(options)) options = { message: options };
   else callback = options.callback;
   return new Promise((resolve, reject) => {
-    const vm = showMessage(options, appContext != null ? appContext : MessageBox._context);
+    const vm = showMessage(options, appContext ?? MessageBox._context);
     messageInstance.set(vm, {
       options,
       callback,

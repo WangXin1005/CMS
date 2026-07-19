@@ -57,12 +57,12 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
     const loading = ref(false);
     const { tableHeight } = useTableHeight(0);
     const roleOptions = [
-      { value: "USER", label: "\u666E\u901A\u7528\u6237" },
-      { value: "ADMIN", label: "\u7BA1\u7406\u5458" },
-      { value: "GUEST", label: "\u8BBF\u5BA2" }
+      { value: "USER", label: "普通用户" },
+      { value: "ADMIN", label: "管理员" },
+      { value: "GUEST", label: "访客" }
     ];
     const roleTagType = { SUPERADMIN: "danger", ADMIN: "warning", USER: "success", GUEST: "info" };
-    const roleLabel = { SUPERADMIN: "\u8D85\u7EA7\u7BA1\u7406\u5458", ADMIN: "\u7BA1\u7406\u5458", USER: "\u7528\u6237", GUEST: "\u8BBF\u5BA2" };
+    const roleLabel = { SUPERADMIN: "超级管理员", ADMIN: "管理员", USER: "用户", GUEST: "访客" };
     const dialogVisible = ref(false);
     const dialogTitle = ref("");
     const editingId = ref(null);
@@ -90,7 +90,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
       if (!editingId.value) {
         const taken = await checkUsername(val);
         if (taken) {
-          nameError.value = "\u7528\u6237\u540D\u5DF2\u88AB\u4F7F\u7528";
+          nameError.value = "用户名已被使用";
           return;
         }
       }
@@ -111,12 +111,11 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
       pwdError.value = validatePassword(val) || "";
     }
     async function loadData() {
-      var _a, _b;
       loading.value = true;
       try {
         const res = await getUserList(currentPage.value, pageSize.value);
-        tableData.value = (_a = res.content) != null ? _a : [];
-        total.value = (_b = res.totalElements) != null ? _b : 0;
+        tableData.value = res.content ?? [];
+        total.value = res.totalElements ?? 0;
       } catch {
         tableData.value = [];
         total.value = 0;
@@ -126,15 +125,14 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
     }
     function openCreate() {
       editingId.value = null;
-      dialogTitle.value = "\u65B0\u589E\u7528\u6237";
+      dialogTitle.value = "新增用户";
       form.value = { username: "", email: "", password: "", role: "USER" };
       dialogVisible.value = true;
     }
     function openEdit(row) {
-      var _a, _b, _c;
       editingId.value = row.id;
-      dialogTitle.value = "\u7F16\u8F91\u7528\u6237";
-      form.value = { username: (_a = row.username) != null ? _a : "", email: (_b = row.email) != null ? _b : "", password: "", role: (_c = row.role) != null ? _c : "USER" };
+      dialogTitle.value = "编辑用户";
+      form.value = { username: row.username ?? "", email: row.email ?? "", password: "", role: row.role ?? "USER" };
       dialogVisible.value = true;
     }
     async function handleSubmit() {
@@ -152,10 +150,10 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
       try {
         if (editingId.value) {
           await updateUser(editingId.value, { username: form.value.username, email: form.value.email, role: form.value.role });
-          ElMessage.success("\u7528\u6237\u66F4\u65B0\u6210\u529F");
+          ElMessage.success("用户更新成功");
         } else {
           await createUser(form.value);
-          ElMessage.success("\u7528\u6237\u521B\u5EFA\u6210\u529F");
+          ElMessage.success("用户创建成功");
         }
         dialogVisible.value = false;
         await loadData();
@@ -166,9 +164,9 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
     }
     async function handleDelete(id, username) {
       try {
-        await ElMessageBox.confirm(`\u786E\u5B9A\u5220\u9664\u7528\u6237 "${username}"\uFF1F\u6B64\u64CD\u4F5C\u4E0D\u53EF\u6062\u590D`, "\u786E\u8BA4\u5220\u9664", { confirmButtonText: "\u786E\u5B9A", cancelButtonText: "\u53D6\u6D88", type: "warning" });
+        await ElMessageBox.confirm(`确定删除用户 "${username}"？此操作不可恢复`, "确认删除", { confirmButtonText: "确定", cancelButtonText: "取消", type: "warning" });
         await deleteUser(id);
-        ElMessage.success("\u7528\u6237\u5DF2\u5220\u9664");
+        ElMessage.success("用户已删除");
         await loadData();
       } catch {
       }
@@ -186,7 +184,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
       const _component_el_select = ElSelect;
       const _component_el_option = ElOption;
       const _directive_loading = vLoading;
-      _push(`<div${ssrRenderAttrs(mergeProps({ style: { "flex": "1", "min-height": "0", "display": "flex", "flex-direction": "column" } }, _attrs))}><div class="page-header"><h2>\u7528\u6237\u7BA1\u7406</h2>`);
+      _push(`<div${ssrRenderAttrs(mergeProps({ style: { "flex": "1", "min-height": "0", "display": "flex", "flex-direction": "column" } }, _attrs))}><div class="page-header"><h2>用户管理</h2>`);
       _push(ssrRenderComponent(_component_el_button, {
         type: "primary",
         icon: unref(plus_default),
@@ -194,10 +192,10 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
       }, {
         default: withCtx((_, _push2, _parent2, _scopeId) => {
           if (_push2) {
-            _push2(`\u65B0\u589E\u7528\u6237`);
+            _push2(`新增用户`);
           } else {
             return [
-              createTextVNode("\u65B0\u589E\u7528\u6237")
+              createTextVNode("新增用户")
             ];
           }
         }),
@@ -207,7 +205,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
       _push(ssrRenderComponent(_component_el_input, {
         modelValue: search.value,
         "onUpdate:modelValue": ($event) => search.value = $event,
-        placeholder: "\u641C\u7D22\u7528\u6237...",
+        placeholder: "搜索用户...",
         "prefix-icon": unref(search_default),
         style: { "width": "260px" },
         clearable: ""
@@ -221,10 +219,10 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
       }, ssrGetDirectiveProps(_ctx, _directive_loading, loading.value)), {
         empty: withCtx((_, _push2, _parent2, _scopeId) => {
           if (_push2) {
-            _push2(`<div style="${ssrRenderStyle({ "padding": "40px 0", "color": "#909399" })}"${_scopeId}>\u6682\u65E0\u6570\u636E</div>`);
+            _push2(`<div style="${ssrRenderStyle({ "padding": "40px 0", "color": "#909399" })}"${_scopeId}>暂无数据</div>`);
           } else {
             return [
-              createVNode("div", { style: { "padding": "40px 0", "color": "#909399" } }, "\u6682\u65E0\u6570\u636E")
+              createVNode("div", { style: { "padding": "40px 0", "color": "#909399" } }, "暂无数据")
             ];
           }
         }),
@@ -232,23 +230,23 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
           if (_push2) {
             _push2(ssrRenderComponent(_component_el_table_column, {
               type: "index",
-              label: "\u5E8F\u53F7",
+              label: "序号",
               width: "60",
               index: (i) => (currentPage.value - 1) * pageSize.value + i + 1
             }, null, _parent2, _scopeId));
             _push2(ssrRenderComponent(_component_el_table_column, {
               prop: "username",
-              label: "\u7528\u6237\u540D",
+              label: "用户名",
               width: "120"
             }, null, _parent2, _scopeId));
             _push2(ssrRenderComponent(_component_el_table_column, {
               prop: "email",
-              label: "\u90AE\u7BB1",
+              label: "邮箱",
               width: "200"
             }, null, _parent2, _scopeId));
             _push2(ssrRenderComponent(_component_el_table_column, {
               prop: "role",
-              label: "\u89D2\u8272",
+              label: "角色",
               width: "130"
             }, {
               default: withCtx(({ row }, _push3, _parent3, _scopeId2) => {
@@ -286,7 +284,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
             }, _parent2, _scopeId));
             _push2(ssrRenderComponent(_component_el_table_column, {
               prop: "createdAt",
-              label: "\u521B\u5EFA\u65F6\u95F4",
+              label: "创建时间",
               width: "170"
             }, {
               default: withCtx(({ row }, _push3, _parent3, _scopeId2) => {
@@ -301,7 +299,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
               _: 1
             }, _parent2, _scopeId));
             _push2(ssrRenderComponent(_component_el_table_column, {
-              label: "\u64CD\u4F5C",
+              label: "操作",
               "min-width": "150",
               fixed: "right"
             }, {
@@ -315,10 +313,10 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                   }, {
                     default: withCtx((_2, _push4, _parent4, _scopeId3) => {
                       if (_push4) {
-                        _push4(`\u7F16\u8F91`);
+                        _push4(`编辑`);
                       } else {
                         return [
-                          createTextVNode("\u7F16\u8F91")
+                          createTextVNode("编辑")
                         ];
                       }
                     }),
@@ -333,10 +331,10 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                     }, {
                       default: withCtx((_2, _push4, _parent4, _scopeId3) => {
                         if (_push4) {
-                          _push4(`\u5220\u9664`);
+                          _push4(`删除`);
                         } else {
                           return [
-                            createTextVNode("\u5220\u9664")
+                            createTextVNode("删除")
                           ];
                         }
                       }),
@@ -354,7 +352,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                       onClick: ($event) => openEdit(row)
                     }, {
                       default: withCtx(() => [
-                        createTextVNode("\u7F16\u8F91")
+                        createTextVNode("编辑")
                       ]),
                       _: 1
                     }, 8, ["onClick"]),
@@ -366,7 +364,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                       onClick: ($event) => handleDelete(row.id, row.username)
                     }, {
                       default: withCtx(() => [
-                        createTextVNode("\u5220\u9664")
+                        createTextVNode("删除")
                       ]),
                       _: 1
                     }, 8, ["onClick"])) : createCommentVNode("", true)
@@ -379,23 +377,23 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
             return [
               createVNode(_component_el_table_column, {
                 type: "index",
-                label: "\u5E8F\u53F7",
+                label: "序号",
                 width: "60",
                 index: (i) => (currentPage.value - 1) * pageSize.value + i + 1
               }, null, 8, ["index"]),
               createVNode(_component_el_table_column, {
                 prop: "username",
-                label: "\u7528\u6237\u540D",
+                label: "用户名",
                 width: "120"
               }),
               createVNode(_component_el_table_column, {
                 prop: "email",
-                label: "\u90AE\u7BB1",
+                label: "邮箱",
                 width: "200"
               }),
               createVNode(_component_el_table_column, {
                 prop: "role",
-                label: "\u89D2\u8272",
+                label: "角色",
                 width: "130"
               }, {
                 default: withCtx(({ row }) => [
@@ -413,7 +411,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
               }),
               createVNode(_component_el_table_column, {
                 prop: "createdAt",
-                label: "\u521B\u5EFA\u65F6\u95F4",
+                label: "创建时间",
                 width: "170"
               }, {
                 default: withCtx(({ row }) => [
@@ -422,7 +420,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                 _: 1
               }),
               createVNode(_component_el_table_column, {
-                label: "\u64CD\u4F5C",
+                label: "操作",
                 "min-width": "150",
                 fixed: "right"
               }, {
@@ -434,7 +432,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                     onClick: ($event) => openEdit(row)
                   }, {
                     default: withCtx(() => [
-                      createTextVNode("\u7F16\u8F91")
+                      createTextVNode("编辑")
                     ]),
                     _: 1
                   }, 8, ["onClick"]),
@@ -446,7 +444,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                     onClick: ($event) => handleDelete(row.id, row.username)
                   }, {
                     default: withCtx(() => [
-                      createTextVNode("\u5220\u9664")
+                      createTextVNode("删除")
                     ]),
                     _: 1
                   }, 8, ["onClick"])) : createCommentVNode("", true)
@@ -484,10 +482,10 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
             }, {
               default: withCtx((_2, _push3, _parent3, _scopeId2) => {
                 if (_push3) {
-                  _push3(`\u53D6\u6D88`);
+                  _push3(`取消`);
                 } else {
                   return [
-                    createTextVNode("\u53D6\u6D88")
+                    createTextVNode("取消")
                   ];
                 }
               }),
@@ -501,10 +499,10 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
             }, {
               default: withCtx((_2, _push3, _parent3, _scopeId2) => {
                 if (_push3) {
-                  _push3(`${ssrInterpolate(editingId.value ? "\u4FDD\u5B58\u4FEE\u6539" : "\u786E\u8BA4\u521B\u5EFA")}`);
+                  _push3(`${ssrInterpolate(editingId.value ? "保存修改" : "确认创建")}`);
                 } else {
                   return [
-                    createTextVNode(toDisplayString(editingId.value ? "\u4FDD\u5B58\u4FEE\u6539" : "\u786E\u8BA4\u521B\u5EFA"), 1)
+                    createTextVNode(toDisplayString(editingId.value ? "保存修改" : "确认创建"), 1)
                   ];
                 }
               }),
@@ -516,7 +514,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                 onClick: ($event) => dialogVisible.value = false
               }, {
                 default: withCtx(() => [
-                  createTextVNode("\u53D6\u6D88")
+                  createTextVNode("取消")
                 ]),
                 _: 1
               }, 8, ["onClick"]),
@@ -527,7 +525,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                 onClick: ($event) => handleSubmit()
               }, {
                 default: withCtx(() => [
-                  createTextVNode(toDisplayString(editingId.value ? "\u4FDD\u5B58\u4FEE\u6539" : "\u786E\u8BA4\u521B\u5EFA"), 1)
+                  createTextVNode(toDisplayString(editingId.value ? "保存修改" : "确认创建"), 1)
                 ]),
                 _: 1
               }, 8, ["disabled", "loading", "onClick"])
@@ -545,7 +543,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
               default: withCtx((_2, _push3, _parent3, _scopeId2) => {
                 if (_push3) {
                   _push3(ssrRenderComponent(_component_el_form_item, {
-                    label: "\u7528\u6237\u540D",
+                    label: "用户名",
                     required: "",
                     error: nameError.value
                   }, {
@@ -554,7 +552,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                         _push4(ssrRenderComponent(_component_el_input, {
                           modelValue: form.value.username,
                           "onUpdate:modelValue": ($event) => form.value.username = $event,
-                          placeholder: "4~15\u4F4D\uFF0C\u5B57\u6BCD\u548C\u6570\u5B57",
+                          placeholder: "4~15位，字母和数字",
                           maxlength: "15",
                           onBlur: ($event) => onNameBlur(form.value.username)
                         }, null, _parent4, _scopeId3));
@@ -563,7 +561,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                           createVNode(_component_el_input, {
                             modelValue: form.value.username,
                             "onUpdate:modelValue": ($event) => form.value.username = $event,
-                            placeholder: "4~15\u4F4D\uFF0C\u5B57\u6BCD\u548C\u6570\u5B57",
+                            placeholder: "4~15位，字母和数字",
                             maxlength: "15",
                             onBlur: ($event) => onNameBlur(form.value.username)
                           }, null, 8, ["modelValue", "onUpdate:modelValue", "onBlur"])
@@ -573,7 +571,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                     _: 1
                   }, _parent3, _scopeId2));
                   _push3(ssrRenderComponent(_component_el_form_item, {
-                    label: "\u90AE\u7BB1",
+                    label: "邮箱",
                     required: "",
                     error: mailError.value
                   }, {
@@ -582,7 +580,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                         _push4(ssrRenderComponent(_component_el_input, {
                           modelValue: form.value.email,
                           "onUpdate:modelValue": ($event) => form.value.email = $event,
-                          placeholder: "\u8BF7\u8F93\u5165\u90AE\u7BB1",
+                          placeholder: "请输入邮箱",
                           onBlur: ($event) => onMailBlur(form.value.email)
                         }, null, _parent4, _scopeId3));
                       } else {
@@ -590,7 +588,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                           createVNode(_component_el_input, {
                             modelValue: form.value.email,
                             "onUpdate:modelValue": ($event) => form.value.email = $event,
-                            placeholder: "\u8BF7\u8F93\u5165\u90AE\u7BB1",
+                            placeholder: "请输入邮箱",
                             onBlur: ($event) => onMailBlur(form.value.email)
                           }, null, 8, ["modelValue", "onUpdate:modelValue", "onBlur"])
                         ];
@@ -600,7 +598,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                   }, _parent3, _scopeId2));
                   if (!editingId.value) {
                     _push3(ssrRenderComponent(_component_el_form_item, {
-                      label: "\u5BC6\u7801",
+                      label: "密码",
                       required: "",
                       error: pwdError.value
                     }, {
@@ -610,7 +608,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                             modelValue: form.value.password,
                             "onUpdate:modelValue": ($event) => form.value.password = $event,
                             type: "password",
-                            placeholder: "\u8BF7\u8F93\u5165\u5BC6\u7801\uFF0C12~16\u4F4D\u542B\u5927\u5C0F\u5199\u5B57\u6BCD\u3001\u6570\u5B57\u3001\u7279\u6B8A\u7B26\u53F7",
+                            placeholder: "请输入密码，12~16位含大小写字母、数字、特殊符号",
                             "show-password": "",
                             onBlur: ($event) => onPwdBlur(form.value.password)
                           }, null, _parent4, _scopeId3));
@@ -620,7 +618,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                               modelValue: form.value.password,
                               "onUpdate:modelValue": ($event) => form.value.password = $event,
                               type: "password",
-                              placeholder: "\u8BF7\u8F93\u5165\u5BC6\u7801\uFF0C12~16\u4F4D\u542B\u5927\u5C0F\u5199\u5B57\u6BCD\u3001\u6570\u5B57\u3001\u7279\u6B8A\u7B26\u53F7",
+                              placeholder: "请输入密码，12~16位含大小写字母、数字、特殊符号",
                               "show-password": "",
                               onBlur: ($event) => onPwdBlur(form.value.password)
                             }, null, 8, ["modelValue", "onUpdate:modelValue", "onBlur"])
@@ -633,7 +631,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                     _push3(`<!---->`);
                   }
                   _push3(ssrRenderComponent(_component_el_form_item, {
-                    label: "\u89D2\u8272",
+                    label: "角色",
                     required: ""
                   }, {
                     default: withCtx((_3, _push4, _parent4, _scopeId3) => {
@@ -641,7 +639,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                         _push4(ssrRenderComponent(_component_el_select, {
                           modelValue: form.value.role,
                           "onUpdate:modelValue": ($event) => form.value.role = $event,
-                          placeholder: "\u9009\u62E9\u89D2\u8272",
+                          placeholder: "选择角色",
                           style: { "width": "100%" }
                         }, {
                           default: withCtx((_4, _push5, _parent5, _scopeId4) => {
@@ -674,7 +672,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                           createVNode(_component_el_select, {
                             modelValue: form.value.role,
                             "onUpdate:modelValue": ($event) => form.value.role = $event,
-                            placeholder: "\u9009\u62E9\u89D2\u8272",
+                            placeholder: "选择角色",
                             style: { "width": "100%" }
                           }, {
                             default: withCtx(() => [
@@ -696,7 +694,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                 } else {
                   return [
                     createVNode(_component_el_form_item, {
-                      label: "\u7528\u6237\u540D",
+                      label: "用户名",
                       required: "",
                       error: nameError.value
                     }, {
@@ -704,7 +702,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                         createVNode(_component_el_input, {
                           modelValue: form.value.username,
                           "onUpdate:modelValue": ($event) => form.value.username = $event,
-                          placeholder: "4~15\u4F4D\uFF0C\u5B57\u6BCD\u548C\u6570\u5B57",
+                          placeholder: "4~15位，字母和数字",
                           maxlength: "15",
                           onBlur: ($event) => onNameBlur(form.value.username)
                         }, null, 8, ["modelValue", "onUpdate:modelValue", "onBlur"])
@@ -712,7 +710,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                       _: 1
                     }, 8, ["error"]),
                     createVNode(_component_el_form_item, {
-                      label: "\u90AE\u7BB1",
+                      label: "邮箱",
                       required: "",
                       error: mailError.value
                     }, {
@@ -720,7 +718,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                         createVNode(_component_el_input, {
                           modelValue: form.value.email,
                           "onUpdate:modelValue": ($event) => form.value.email = $event,
-                          placeholder: "\u8BF7\u8F93\u5165\u90AE\u7BB1",
+                          placeholder: "请输入邮箱",
                           onBlur: ($event) => onMailBlur(form.value.email)
                         }, null, 8, ["modelValue", "onUpdate:modelValue", "onBlur"])
                       ]),
@@ -728,7 +726,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                     }, 8, ["error"]),
                     !editingId.value ? (openBlock(), createBlock(_component_el_form_item, {
                       key: 0,
-                      label: "\u5BC6\u7801",
+                      label: "密码",
                       required: "",
                       error: pwdError.value
                     }, {
@@ -737,7 +735,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                           modelValue: form.value.password,
                           "onUpdate:modelValue": ($event) => form.value.password = $event,
                           type: "password",
-                          placeholder: "\u8BF7\u8F93\u5165\u5BC6\u7801\uFF0C12~16\u4F4D\u542B\u5927\u5C0F\u5199\u5B57\u6BCD\u3001\u6570\u5B57\u3001\u7279\u6B8A\u7B26\u53F7",
+                          placeholder: "请输入密码，12~16位含大小写字母、数字、特殊符号",
                           "show-password": "",
                           onBlur: ($event) => onPwdBlur(form.value.password)
                         }, null, 8, ["modelValue", "onUpdate:modelValue", "onBlur"])
@@ -745,14 +743,14 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                       _: 1
                     }, 8, ["error"])) : createCommentVNode("", true),
                     createVNode(_component_el_form_item, {
-                      label: "\u89D2\u8272",
+                      label: "角色",
                       required: ""
                     }, {
                       default: withCtx(() => [
                         createVNode(_component_el_select, {
                           modelValue: form.value.role,
                           "onUpdate:modelValue": ($event) => form.value.role = $event,
-                          placeholder: "\u9009\u62E9\u89D2\u8272",
+                          placeholder: "选择角色",
                           style: { "width": "100%" }
                         }, {
                           default: withCtx(() => [
@@ -784,7 +782,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
               }, {
                 default: withCtx(() => [
                   createVNode(_component_el_form_item, {
-                    label: "\u7528\u6237\u540D",
+                    label: "用户名",
                     required: "",
                     error: nameError.value
                   }, {
@@ -792,7 +790,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                       createVNode(_component_el_input, {
                         modelValue: form.value.username,
                         "onUpdate:modelValue": ($event) => form.value.username = $event,
-                        placeholder: "4~15\u4F4D\uFF0C\u5B57\u6BCD\u548C\u6570\u5B57",
+                        placeholder: "4~15位，字母和数字",
                         maxlength: "15",
                         onBlur: ($event) => onNameBlur(form.value.username)
                       }, null, 8, ["modelValue", "onUpdate:modelValue", "onBlur"])
@@ -800,7 +798,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                     _: 1
                   }, 8, ["error"]),
                   createVNode(_component_el_form_item, {
-                    label: "\u90AE\u7BB1",
+                    label: "邮箱",
                     required: "",
                     error: mailError.value
                   }, {
@@ -808,7 +806,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                       createVNode(_component_el_input, {
                         modelValue: form.value.email,
                         "onUpdate:modelValue": ($event) => form.value.email = $event,
-                        placeholder: "\u8BF7\u8F93\u5165\u90AE\u7BB1",
+                        placeholder: "请输入邮箱",
                         onBlur: ($event) => onMailBlur(form.value.email)
                       }, null, 8, ["modelValue", "onUpdate:modelValue", "onBlur"])
                     ]),
@@ -816,7 +814,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                   }, 8, ["error"]),
                   !editingId.value ? (openBlock(), createBlock(_component_el_form_item, {
                     key: 0,
-                    label: "\u5BC6\u7801",
+                    label: "密码",
                     required: "",
                     error: pwdError.value
                   }, {
@@ -825,7 +823,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                         modelValue: form.value.password,
                         "onUpdate:modelValue": ($event) => form.value.password = $event,
                         type: "password",
-                        placeholder: "\u8BF7\u8F93\u5165\u5BC6\u7801\uFF0C12~16\u4F4D\u542B\u5927\u5C0F\u5199\u5B57\u6BCD\u3001\u6570\u5B57\u3001\u7279\u6B8A\u7B26\u53F7",
+                        placeholder: "请输入密码，12~16位含大小写字母、数字、特殊符号",
                         "show-password": "",
                         onBlur: ($event) => onPwdBlur(form.value.password)
                       }, null, 8, ["modelValue", "onUpdate:modelValue", "onBlur"])
@@ -833,14 +831,14 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                     _: 1
                   }, 8, ["error"])) : createCommentVNode("", true),
                   createVNode(_component_el_form_item, {
-                    label: "\u89D2\u8272",
+                    label: "角色",
                     required: ""
                   }, {
                     default: withCtx(() => [
                       createVNode(_component_el_select, {
                         modelValue: form.value.role,
                         "onUpdate:modelValue": ($event) => form.value.role = $event,
-                        placeholder: "\u9009\u62E9\u89D2\u8272",
+                        placeholder: "选择角色",
                         style: { "width": "100%" }
                       }, {
                         default: withCtx(() => [

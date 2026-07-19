@@ -203,7 +203,6 @@ const dialogInjectionKey = /* @__PURE__ */ Symbol("dialogInjectionKey");
 const DEFAULT_DIALOG_TRANSITION = "dialog-fade";
 const COMPONENT_NAME = "ElDialog";
 const useDialog = (props, targetRef) => {
-  var _a;
   const emit = getCurrentInstance().emit;
   const { nextZIndex } = useZIndex();
   let lastPosition = "";
@@ -212,19 +211,13 @@ const useDialog = (props, targetRef) => {
   const visible = ref(false);
   const closed = ref(false);
   const rendered = ref(false);
-  const zIndex = ref((_a = props.zIndex) != null ? _a : nextZIndex());
+  const zIndex = ref(props.zIndex ?? nextZIndex());
   const closing = ref(false);
   let openTimer = void 0;
   let closeTimer = void 0;
   const config = useGlobalConfig();
-  const namespace = computed(() => {
-    var _a2, _b;
-    return (_b = (_a2 = config.value) == null ? void 0 : _a2.namespace) != null ? _b : "el";
-  });
-  const globalConfig = computed(() => {
-    var _a2;
-    return (_a2 = config.value) == null ? void 0 : _a2.dialog;
-  });
+  const namespace = computed(() => config.value?.namespace ?? "el");
+  const globalConfig = computed(() => config.value?.dialog);
   const style = computed(() => {
     const style2 = {};
     const varPrefix = `--${namespace.value}-dialog`;
@@ -235,26 +228,16 @@ const useDialog = (props, targetRef) => {
     }
     return style2;
   });
-  const _draggable = computed(() => {
-    var _a2, _b, _c;
-    return ((_c = (_b = props.draggable) != null ? _b : (_a2 = globalConfig.value) == null ? void 0 : _a2.draggable) != null ? _c : false) && !props.fullscreen;
-  });
-  const _alignCenter = computed(() => {
-    var _a2, _b, _c;
-    return (_c = (_b = props.alignCenter) != null ? _b : (_a2 = globalConfig.value) == null ? void 0 : _a2.alignCenter) != null ? _c : false;
-  });
-  const _overflow = computed(() => {
-    var _a2, _b, _c;
-    return (_c = (_b = props.overflow) != null ? _b : (_a2 = globalConfig.value) == null ? void 0 : _a2.overflow) != null ? _c : false;
-  });
+  const _draggable = computed(() => (props.draggable ?? globalConfig.value?.draggable ?? false) && !props.fullscreen);
+  const _alignCenter = computed(() => props.alignCenter ?? globalConfig.value?.alignCenter ?? false);
+  const _overflow = computed(() => props.overflow ?? globalConfig.value?.overflow ?? false);
   const penetrable = computed(() => props.modalPenetrable && !props.modal && !props.fullscreen);
   const overlayDialogStyle = computed(() => {
     if (_alignCenter.value) return { display: "flex" };
     return {};
   });
   const transitionConfig = computed(() => {
-    var _a2, _b, _c;
-    const transition = (_c = (_b = props.transition) != null ? _b : (_a2 = globalConfig.value) == null ? void 0 : _a2.transition) != null ? _c : "dialog-fade";
+    const transition = props.transition ?? globalConfig.value?.transition ?? "dialog-fade";
     const baseConfig = {
       name: transition,
       onAfterEnter: afterEnter,
@@ -297,14 +280,14 @@ const useDialog = (props, targetRef) => {
     emit("close");
   }
   function open() {
-    closeTimer == null ? void 0 : closeTimer();
-    openTimer == null ? void 0 : openTimer();
+    closeTimer?.();
+    openTimer?.();
     if (props.openDelay && props.openDelay > 0) ({ stop: openTimer } = useTimeoutFn(() => doOpen(), props.openDelay));
     else doOpen();
   }
   function close() {
-    openTimer == null ? void 0 : openTimer();
-    closeTimer == null ? void 0 : closeTimer();
+    openTimer?.();
+    closeTimer?.();
     if (props.closeDelay && props.closeDelay > 0) ({ stop: closeTimer } = useTimeoutFn(() => doClose(), props.closeDelay));
     else doClose();
   }
@@ -334,8 +317,7 @@ const useDialog = (props, targetRef) => {
     emit("closeAutoFocus");
   }
   function onFocusoutPrevented(event) {
-    var _a2;
-    if (((_a2 = event.detail) == null ? void 0 : _a2.focusReason) === "pointer") event.preventDefault();
+    if (event.detail?.focusReason === "pointer") event.preventDefault();
   }
   if (props.lockScroll) useLockscreen(visible);
   function onCloseRequested() {
@@ -346,17 +328,15 @@ const useDialog = (props, targetRef) => {
     zIndex.value = nextZIndex();
   }
   watch(() => props.zIndex, () => {
-    var _a2;
-    zIndex.value = (_a2 = props.zIndex) != null ? _a2 : nextZIndex();
+    zIndex.value = props.zIndex ?? nextZIndex();
   });
   watch(() => props.modelValue, (val) => {
-    var _a2;
     if (val) {
       closed.value = false;
       closing.value = false;
       open();
       rendered.value = true;
-      zIndex.value = (_a2 = props.zIndex) != null ? _a2 : nextZIndex();
+      zIndex.value = props.zIndex ?? nextZIndex();
       nextTick(() => {
         emit("open");
         if (targetRef.value) {
@@ -517,8 +497,7 @@ var dialog_vue_vue_type_script_setup_true_lang_default = /* @__PURE__ */ defineC
     });
     const overlayEvent = useSameTarget(onModalClick);
     const resetPosition = () => {
-      var _a;
-      (_a = dialogContentRef.value) == null ? void 0 : _a.resetPosition();
+      dialogContentRef.value?.resetPosition();
     };
     __expose({
       /** @description whether the dialog is visible */
@@ -532,101 +511,98 @@ var dialog_vue_vue_type_script_setup_true_lang_default = /* @__PURE__ */ defineC
         to: __props.appendTo,
         disabled: __props.appendTo !== "body" ? false : !__props.appendToBody
       }, [createVNode(Transition, mergeProps(unref(transitionConfig), { persisted: "" }), {
-        default: withCtx(() => {
-          var _a;
-          return [withDirectives(createVNode(unref(ElOverlay), {
-            "custom-mask-event": "",
-            mask: __props.modal,
-            "overlay-class": [
-              (_a = __props.modalClass) != null ? _a : "",
-              `${unref(ns).namespace.value}-modal-dialog`,
-              unref(ns).is("penetrable", unref(penetrable))
-            ],
-            "z-index": unref(zIndex)
+        default: withCtx(() => [withDirectives(createVNode(unref(ElOverlay), {
+          "custom-mask-event": "",
+          mask: __props.modal,
+          "overlay-class": [
+            __props.modalClass ?? "",
+            `${unref(ns).namespace.value}-modal-dialog`,
+            unref(ns).is("penetrable", unref(penetrable))
+          ],
+          "z-index": unref(zIndex)
+        }, {
+          default: withCtx(() => [createElementVNode("div", {
+            role: "dialog",
+            "aria-modal": "true",
+            "aria-label": __props.title || void 0,
+            "aria-labelledby": !__props.title ? unref(titleId) : void 0,
+            "aria-describedby": unref(bodyId),
+            class: normalizeClass([`${unref(ns).namespace.value}-overlay-dialog`, unref(ns).is("closing", unref(closing))]),
+            style: normalizeStyle(unref(overlayDialogStyle)),
+            onClick: _cache[0] || (_cache[0] = (...args) => unref(overlayEvent).onClick && unref(overlayEvent).onClick(...args)),
+            onMousedown: _cache[1] || (_cache[1] = (...args) => unref(overlayEvent).onMousedown && unref(overlayEvent).onMousedown(...args)),
+            onMouseup: _cache[2] || (_cache[2] = (...args) => unref(overlayEvent).onMouseup && unref(overlayEvent).onMouseup(...args))
+          }, [createVNode(unref(focus_trap_default$1), {
+            loop: "",
+            trapped: unref(visible),
+            "focus-start-el": "container",
+            onFocusAfterTrapped: unref(onOpenAutoFocus),
+            onFocusAfterReleased: unref(onCloseAutoFocus),
+            onFocusoutPrevented: unref(onFocusoutPrevented),
+            onReleaseRequested: unref(onCloseRequested)
           }, {
-            default: withCtx(() => [createElementVNode("div", {
-              role: "dialog",
-              "aria-modal": "true",
-              "aria-label": __props.title || void 0,
-              "aria-labelledby": !__props.title ? unref(titleId) : void 0,
-              "aria-describedby": unref(bodyId),
-              class: normalizeClass([`${unref(ns).namespace.value}-overlay-dialog`, unref(ns).is("closing", unref(closing))]),
-              style: normalizeStyle(unref(overlayDialogStyle)),
-              onClick: _cache[0] || (_cache[0] = (...args) => unref(overlayEvent).onClick && unref(overlayEvent).onClick(...args)),
-              onMousedown: _cache[1] || (_cache[1] = (...args) => unref(overlayEvent).onMousedown && unref(overlayEvent).onMousedown(...args)),
-              onMouseup: _cache[2] || (_cache[2] = (...args) => unref(overlayEvent).onMouseup && unref(overlayEvent).onMouseup(...args))
-            }, [createVNode(unref(focus_trap_default$1), {
-              loop: "",
-              trapped: unref(visible),
-              "focus-start-el": "container",
-              onFocusAfterTrapped: unref(onOpenAutoFocus),
-              onFocusAfterReleased: unref(onCloseAutoFocus),
-              onFocusoutPrevented: unref(onFocusoutPrevented),
-              onReleaseRequested: unref(onCloseRequested)
-            }, {
-              default: withCtx(() => [unref(rendered) ? (openBlock(), createBlock(dialog_content_default, mergeProps({
+            default: withCtx(() => [unref(rendered) ? (openBlock(), createBlock(dialog_content_default, mergeProps({
+              key: 0,
+              ref_key: "dialogContentRef",
+              ref: dialogContentRef
+            }, _ctx.$attrs, {
+              center: __props.center,
+              "align-center": unref(_alignCenter),
+              "close-icon": __props.closeIcon,
+              draggable: unref(_draggable),
+              overflow: unref(_overflow),
+              fullscreen: __props.fullscreen,
+              "header-class": __props.headerClass,
+              "body-class": __props.bodyClass,
+              "footer-class": __props.footerClass,
+              "show-close": __props.showClose,
+              title: __props.title,
+              "aria-level": __props.headerAriaLevel,
+              onClose: unref(handleClose),
+              onMousedown: unref(bringToFront)
+            }), createSlots({
+              header: withCtx(() => [!_ctx.$slots.title ? renderSlot(_ctx.$slots, "header", {
                 key: 0,
-                ref_key: "dialogContentRef",
-                ref: dialogContentRef
-              }, _ctx.$attrs, {
-                center: __props.center,
-                "align-center": unref(_alignCenter),
-                "close-icon": __props.closeIcon,
-                draggable: unref(_draggable),
-                overflow: unref(_overflow),
-                fullscreen: __props.fullscreen,
-                "header-class": __props.headerClass,
-                "body-class": __props.bodyClass,
-                "footer-class": __props.footerClass,
-                "show-close": __props.showClose,
-                title: __props.title,
-                "aria-level": __props.headerAriaLevel,
-                onClose: unref(handleClose),
-                onMousedown: unref(bringToFront)
-              }), createSlots({
-                header: withCtx(() => [!_ctx.$slots.title ? renderSlot(_ctx.$slots, "header", {
-                  key: 0,
-                  close: unref(handleClose),
-                  titleId: unref(titleId),
-                  titleClass: unref(ns).e("title")
-                }) : renderSlot(_ctx.$slots, "title", { key: 1 })]),
-                default: withCtx(() => [renderSlot(_ctx.$slots, "default")]),
-                _: 2
-              }, [_ctx.$slots.footer ? {
-                name: "footer",
-                fn: withCtx(() => [renderSlot(_ctx.$slots, "footer")]),
-                key: "0"
-              } : void 0]), 1040, [
-                "center",
-                "align-center",
-                "close-icon",
-                "draggable",
-                "overflow",
-                "fullscreen",
-                "header-class",
-                "body-class",
-                "footer-class",
-                "show-close",
-                "title",
-                "aria-level",
-                "onClose",
-                "onMousedown"
-              ])) : createCommentVNode("v-if", true)]),
-              _: 3
-            }, 8, [
-              "trapped",
-              "onFocusAfterTrapped",
-              "onFocusAfterReleased",
-              "onFocusoutPrevented",
-              "onReleaseRequested"
-            ])], 46, _hoisted_1)]),
+                close: unref(handleClose),
+                titleId: unref(titleId),
+                titleClass: unref(ns).e("title")
+              }) : renderSlot(_ctx.$slots, "title", { key: 1 })]),
+              default: withCtx(() => [renderSlot(_ctx.$slots, "default")]),
+              _: 2
+            }, [_ctx.$slots.footer ? {
+              name: "footer",
+              fn: withCtx(() => [renderSlot(_ctx.$slots, "footer")]),
+              key: "0"
+            } : void 0]), 1040, [
+              "center",
+              "align-center",
+              "close-icon",
+              "draggable",
+              "overflow",
+              "fullscreen",
+              "header-class",
+              "body-class",
+              "footer-class",
+              "show-close",
+              "title",
+              "aria-level",
+              "onClose",
+              "onMousedown"
+            ])) : createCommentVNode("v-if", true)]),
             _: 3
           }, 8, [
-            "mask",
-            "overlay-class",
-            "z-index"
-          ]), [[vShow, unref(visible)]])];
-        }),
+            "trapped",
+            "onFocusAfterTrapped",
+            "onFocusAfterReleased",
+            "onFocusoutPrevented",
+            "onReleaseRequested"
+          ])], 46, _hoisted_1)]),
+          _: 3
+        }, 8, [
+          "mask",
+          "overlay-class",
+          "z-index"
+        ]), [[vShow, unref(visible)]])]),
         _: 3
       }, 16)], 8, ["to", "disabled"]);
     };

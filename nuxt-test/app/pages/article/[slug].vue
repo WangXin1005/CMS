@@ -55,21 +55,25 @@ onMounted(async () => {
   <div v-if="!loading && article" class="article-detail-layout">
     <!-- 主内容 -->
     <div class="detail-main">
-      <div class="back-bar">
-        <el-button size="small" class="back-btn" @click="router.back()">
-          <svg viewBox="0 0 24 24" width="14" height="14" style="margin-right: 2px">
-            <path fill="currentColor" d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
-          </svg>
-          返回
-        </el-button>
-      </div>
-      <div class="article-header">
-        <h1 class="article-title">{{ article.title }}</h1>
-        <div class="article-meta">
-          <span>👤 {{ article.author?.username }}</span>
-          <span>📅 {{ formattedDate }}</span>
-          <span>👁 {{ article.viewCount }} 次阅读</span>
+      <div class="sticky-header">
+        <div class="back-bar">
+          <el-button size="small" class="back-btn" @click="router.back()">
+            <svg viewBox="0 0 24 24" width="14" height="14" style="margin-right: 2px">
+              <path fill="currentColor" d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
+            </svg>
+            返回
+          </el-button>
         </div>
+        <div class="article-header">
+          <h1 class="article-title">{{ article.title }}</h1>
+          <div class="article-meta">
+            <span>👤 {{ article.author?.username }}</span>
+            <span>📅 {{ formattedDate }}</span>
+            <span>👁 {{ article.viewCount }} 次阅读</span>
+          </div>
+        </div>
+
+
       </div>
 
       <!-- 封面图 -->
@@ -120,6 +124,7 @@ onMounted(async () => {
   background: #fff;
   border-radius: 12px;
   padding: 40px;
+  padding-top: 150px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
@@ -164,6 +169,7 @@ onMounted(async () => {
   line-height: 1.9;
   color: #2c3e50;
 }
+
 .article-content :deep(h2) {
   font-size: 24px;
   font-weight: 700;
@@ -172,23 +178,28 @@ onMounted(async () => {
   border-bottom: 1px solid #f0f0f0;
   color: #1a1a1a;
 }
+
 .article-content :deep(h3) {
   font-size: 20px;
   font-weight: 600;
   margin: 28px 0 12px;
   color: #1a1a1a;
 }
+
 .article-content :deep(p) {
   margin: 0 0 16px;
 }
+
 .article-content :deep(ul),
 .article-content :deep(ol) {
   padding-left: 24px;
   margin: 12px 0 16px;
 }
+
 .article-content :deep(li) {
   margin: 6px 0;
 }
+
 .article-content :deep(code) {
   background: #f0f2f5;
   padding: 2px 8px;
@@ -196,6 +207,7 @@ onMounted(async () => {
   font-size: 14px;
   color: #e74c3c;
 }
+
 .article-content :deep(pre) {
   background: #1e1e2e;
   color: #cdd6f4;
@@ -206,12 +218,14 @@ onMounted(async () => {
   font-size: 14px;
   line-height: 1.6;
 }
+
 .article-content :deep(pre code) {
   background: none;
   padding: 0;
   color: inherit;
   font-size: inherit;
 }
+
 .article-content :deep(blockquote) {
   border-left: 4px solid #667eea;
   margin: 16px 0 24px;
@@ -220,19 +234,23 @@ onMounted(async () => {
   border-radius: 0 8px 8px 0;
   color: #555;
 }
+
 .article-content :deep(blockquote p) {
   margin: 0;
 }
+
 .article-content :deep(img) {
   max-width: 100%;
   border-radius: 8px;
   margin: 16px 0;
   display: block;
 }
+
 .article-content :deep(strong) {
   font-weight: 700;
   color: #1a1a1a;
 }
+
 .article-content :deep(a) {
   color: #667eea;
   text-decoration: underline;
@@ -259,10 +277,25 @@ onMounted(async () => {
   border-radius: 12px;
 }
 
+// ===== 粘性头部 =====
+.sticky-header {
+  position: fixed;
+  top: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 40;
+  background: rgba(248, 249, 250, 0.94);
+  backdrop-filter: blur(8px);
+  padding: 16px 40px 4px 40px;
+  width: calc(100% - 32px);
+  max-width: 1168px;
+}
+
 // ===== 响应式 =====
 .back-bar {
   margin-bottom: 20px;
 }
+
 .back-bar .el-button {
   font-size: 13px;
   color: #666;
@@ -271,6 +304,7 @@ onMounted(async () => {
   display: inline-flex;
   align-items: center;
 }
+
 .back-bar .el-button:hover {
   color: #409eff;
   background: #f0f7ff;
@@ -282,13 +316,13 @@ onMounted(async () => {
     flex-direction: column;
     padding: 16px;
   }
+
   .detail-main {
     padding: 20px;
   }
+
   .article-title {
     font-size: 24px;
   }
 }
-
-
 </style>

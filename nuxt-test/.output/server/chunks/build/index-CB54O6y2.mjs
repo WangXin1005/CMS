@@ -232,9 +232,8 @@ var switch_vue_vue_type_script_setup_true_lang_default = /* @__PURE__ */ defineC
       emit(INPUT_EVENT, props.inactiveValue);
     }
     watch(checked, (val) => {
-      var _a;
       input.value.checked = val;
-      if (props.validateEvent) (_a = formItem == null ? void 0 : formItem.validate) == null ? void 0 : _a.call(formItem, "change").catch(NOOP);
+      if (props.validateEvent) formItem?.validate?.("change").catch(NOOP);
     });
     const handleChange = () => {
       const val = checked.value ? props.inactiveValue : props.activeValue;
@@ -262,8 +261,7 @@ var switch_vue_vue_type_script_setup_true_lang_default = /* @__PURE__ */ defineC
       else if (shouldChange) handleChange();
     };
     const focus = () => {
-      var _a, _b;
-      (_b = (_a = input.value) == null ? void 0 : _a.focus) == null ? void 0 : _b.call(_a);
+      input.value?.focus?.();
     };
     __expose({
       /**
@@ -365,23 +363,21 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
     const isGuest = computed(() => role.value === "GUEST");
     const roleLevel = { SUPERADMIN: 3, ADMIN: 2, USER: 1, GUEST: 0 };
     function canEdit(row) {
-      var _a, _b, _c;
       if (isGuest.value) return false;
       if (role.value === "SUPERADMIN") return true;
-      if (((_a = row.author) == null ? void 0 : _a.username) === currentUsername.value) return true;
+      if (row.author?.username === currentUsername.value) return true;
       if (role.value === "ADMIN") {
-        const lv = (_c = roleLevel[((_b = row.author) == null ? void 0 : _b.role) || ""]) != null ? _c : -1;
+        const lv = roleLevel[row.author?.role || ""] ?? -1;
         return lv <= 1;
       }
       return false;
     }
     function canEditPreview() {
-      var _a, _b, _c, _d;
       if (isGuest.value) return false;
       if (role.value === "SUPERADMIN") return true;
-      const authorName = (_b = (_a = dialogArticle.value) == null ? void 0 : _a.author) == null ? void 0 : _b.username;
+      const authorName = dialogArticle.value?.author?.username;
       if (authorName === currentUsername.value) return true;
-      const authorRole = ((_d = (_c = dialogArticle.value) == null ? void 0 : _c.author) == null ? void 0 : _d.role) || "";
+      const authorRole = dialogArticle.value?.author?.role || "";
       if (role.value === "ADMIN") return roleLevel[authorRole] <= 1;
       return false;
     }
@@ -428,9 +424,8 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
       loadData();
     }
     function handleTableScroll() {
-      var _a, _b;
       if (allLoaded.value || loading.value || loadingMore.value || loadLocked.value) return;
-      const el = (_b = (_a = tableRef.value) == null ? void 0 : _a.$el) == null ? void 0 : _b.querySelector(".el-table__body-wrapper");
+      const el = tableRef.value?.$el?.querySelector(".el-table__body-wrapper");
       if (!el) return;
       const dist = el.scrollHeight - el.scrollTop - el.clientHeight;
       if (dist <= 60) {
@@ -439,10 +434,9 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
         loadData(true);
       }
     }
-    const statusLabel = { PUBLISHED: "\u5DF2\u53D1\u5E03", DRAFT: "\u8349\u7A3F" };
+    const statusLabel = { PUBLISHED: "已发布", DRAFT: "草稿" };
     const statusType = { PUBLISHED: "success", DRAFT: "warning" };
     async function loadData(append = false) {
-      var _a, _b, _c;
       if (append) {
         loadingMore.value = true;
       } else {
@@ -457,17 +451,17 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
         } else {
           res = await getMyArticles(currentPage.value, pageSize.value, statusFilter.value, searchKeyword.value || void 0, filterCategoryId.value, filterTagId.value);
         }
-        const items = (_a = res.content) != null ? _a : [];
+        const items = res.content ?? [];
         if (append) {
           articles.value = articles.value.concat(items);
         } else {
           articles.value = items;
         }
-        total.value = (_b = res.totalElements) != null ? _b : 0;
+        total.value = res.totalElements ?? 0;
         if (items.length === 0 || items.length < pageSize.value) {
           allLoaded.value = true;
         }
-        if (articles.value.length >= ((_c = res.totalElements) != null ? _c : 0)) {
+        if (articles.value.length >= (res.totalElements ?? 0)) {
           allLoaded.value = true;
         }
       } catch {
@@ -489,10 +483,10 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
     }
     async function handleDelete(id) {
       try {
-        await ElMessageBox.confirm("\u786E\u5B9A\u5220\u9664\u6B64\u6587\u7AE0\uFF1F\u6B64\u64CD\u4F5C\u4E0D\u53EF\u6062\u590D", "\u786E\u8BA4\u5220\u9664", { confirmButtonText: "\u786E\u5B9A", cancelButtonText: "\u53D6\u6D88", type: "warning" });
+        await ElMessageBox.confirm("确定删除此文章？此操作不可恢复", "确认删除", { confirmButtonText: "确定", cancelButtonText: "取消", type: "warning" });
         if (isAdmin.value) await remove(id);
         else await removeMyArticle(id);
-        ElMessage.success("\u5220\u9664\u6210\u529F");
+        ElMessage.success("删除成功");
         await loadData();
       } catch {
       }
@@ -504,7 +498,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
         else await updateMyArticle(row.id, { visibility: targetVis });
         const item = articles.value.find((a) => a.id === row.id);
         if (item) item.visibility = targetVis;
-        ElMessage.success(targetVis === "PRIVATE" ? "\u5DF2\u8BBE\u4E3A\u79C1\u5BC6" : "\u5DF2\u8BBE\u4E3A\u516C\u5F00");
+        ElMessage.success(targetVis === "PRIVATE" ? "已设为私密" : "已设为公开");
       } catch {
       }
     }
@@ -530,7 +524,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
       const _component_el_switch = ElSwitch;
       const _component_el_dialog = ElDialog;
       const _directive_loading = vLoading;
-      _push(`<div${ssrRenderAttrs(mergeProps({ style: { "flex": "1", "min-height": "0", "display": "flex", "flex-direction": "column" } }, _attrs))} data-v-073238ef><div class="page-header" data-v-073238ef><h2 data-v-073238ef>\u6587\u7AE0\u7BA1\u7406</h2>`);
+      _push(`<div${ssrRenderAttrs(mergeProps({ style: { "flex": "1", "min-height": "0", "display": "flex", "flex-direction": "column" } }, _attrs))} data-v-073238ef><div class="page-header" data-v-073238ef><h2 data-v-073238ef>文章管理</h2>`);
       if (!isGuest.value) {
         _push(ssrRenderComponent(_component_el_button, {
           type: "primary",
@@ -539,10 +533,10 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
         }, {
           default: withCtx((_, _push2, _parent2, _scopeId) => {
             if (_push2) {
-              _push2(`\u5199\u6587\u7AE0`);
+              _push2(`写文章`);
             } else {
               return [
-                createTextVNode("\u5199\u6587\u7AE0")
+                createTextVNode("写文章")
               ];
             }
           }),
@@ -555,7 +549,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
       _push(ssrRenderComponent(_component_el_input, {
         modelValue: keyword.value,
         "onUpdate:modelValue": ($event) => keyword.value = $event,
-        placeholder: "\u641C\u7D22\u6587\u7AE0\u6807\u9898...",
+        placeholder: "搜索文章标题...",
         style: { "width": "240px" },
         clearable: "",
         onKeyup: onSearch
@@ -610,10 +604,10 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
       }, {
         default: withCtx((_, _push2, _parent2, _scopeId) => {
           if (_push2) {
-            _push2(`\u641C\u7D22`);
+            _push2(`搜索`);
           } else {
             return [
-              createTextVNode("\u641C\u7D22")
+              createTextVNode("搜索")
             ];
           }
         }),
@@ -623,7 +617,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
       _push(ssrRenderComponent(_component_el_select, {
         modelValue: filterCategoryId.value,
         "onUpdate:modelValue": ($event) => filterCategoryId.value = $event,
-        placeholder: "\u5206\u7C7B\u7B5B\u9009",
+        placeholder: "分类筛选",
         clearable: "",
         style: { "width": "140px" },
         onChange: ($event) => loadData()
@@ -656,7 +650,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
       _push(ssrRenderComponent(_component_el_select, {
         modelValue: filterTagId.value,
         "onUpdate:modelValue": ($event) => filterTagId.value = $event,
-        placeholder: "\u6807\u7B7E\u7B5B\u9009",
+        placeholder: "标签筛选",
         clearable: "",
         style: { "width": "140px" },
         onChange: ($event) => loadData()
@@ -689,7 +683,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
       _push(ssrRenderComponent(_component_el_select, {
         modelValue: statusFilter.value,
         "onUpdate:modelValue": ($event) => statusFilter.value = $event,
-        placeholder: "\u53D1\u5E03\u72B6\u6001",
+        placeholder: "发布状态",
         clearable: "",
         style: { "width": "120px" },
         onChange: onStatusChange
@@ -697,21 +691,21 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
         default: withCtx((_, _push2, _parent2, _scopeId) => {
           if (_push2) {
             _push2(ssrRenderComponent(_component_el_option, {
-              label: "\u5DF2\u53D1\u5E03",
+              label: "已发布",
               value: "PUBLISHED"
             }, null, _parent2, _scopeId));
             _push2(ssrRenderComponent(_component_el_option, {
-              label: "\u8349\u7A3F",
+              label: "草稿",
               value: "DRAFT"
             }, null, _parent2, _scopeId));
           } else {
             return [
               createVNode(_component_el_option, {
-                label: "\u5DF2\u53D1\u5E03",
+                label: "已发布",
                 value: "PUBLISHED"
               }),
               createVNode(_component_el_option, {
-                label: "\u8349\u7A3F",
+                label: "草稿",
                 value: "DRAFT"
               })
             ];
@@ -723,7 +717,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
         _push(ssrRenderComponent(_component_el_select, {
           modelValue: filterAuthorId.value,
           "onUpdate:modelValue": ($event) => filterAuthorId.value = $event,
-          placeholder: "\u4F5C\u8005\u7B5B\u9009",
+          placeholder: "作者筛选",
           clearable: "",
           style: { "width": "140px" },
           onChange: ($event) => loadData()
@@ -769,23 +763,23 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
       }, ssrGetDirectiveProps(_ctx, _directive_loading, loading.value)), {
         empty: withCtx((_, _push2, _parent2, _scopeId) => {
           if (_push2) {
-            _push2(`<div style="${ssrRenderStyle({ "padding": "40px 0", "color": "#909399" })}" data-v-073238ef${_scopeId}>\u6682\u65E0\u6570\u636E</div>`);
+            _push2(`<div style="${ssrRenderStyle({ "padding": "40px 0", "color": "#909399" })}" data-v-073238ef${_scopeId}>暂无数据</div>`);
           } else {
             return [
-              createVNode("div", { style: { "padding": "40px 0", "color": "#909399" } }, "\u6682\u65E0\u6570\u636E")
+              createVNode("div", { style: { "padding": "40px 0", "color": "#909399" } }, "暂无数据")
             ];
           }
         }),
         default: withCtx((_, _push2, _parent2, _scopeId) => {
           if (_push2) {
             _push2(ssrRenderComponent(_component_el_table_column, {
-              label: "\u5E8F\u53F7",
+              label: "序号",
               width: "55"
             }, {
               default: withCtx(({ row, $index }, _push3, _parent3, _scopeId2) => {
                 if (_push3) {
                   if (row._isEndMarker) {
-                    _push3(`<div style="${ssrRenderStyle({ "text-align": "center", "color": "#999", "font-size": "13px", "padding": "2px 0", "line-height": "1.2", "width": "100%" })}" data-v-073238ef${_scopeId2}>\u5DF2\u52A0\u8F7D\u5168\u90E8</div>`);
+                    _push3(`<div style="${ssrRenderStyle({ "text-align": "center", "color": "#999", "font-size": "13px", "padding": "2px 0", "line-height": "1.2", "width": "100%" })}" data-v-073238ef${_scopeId2}>已加载全部</div>`);
                   } else {
                     _push3(`<span data-v-073238ef${_scopeId2}>${ssrInterpolate($index + 1)}</span>`);
                   }
@@ -794,14 +788,14 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                     row._isEndMarker ? (openBlock(), createBlock("div", {
                       key: 0,
                       style: { "text-align": "center", "color": "#999", "font-size": "13px", "padding": "2px 0", "line-height": "1.2", "width": "100%" }
-                    }, "\u5DF2\u52A0\u8F7D\u5168\u90E8")) : (openBlock(), createBlock("span", { key: 1 }, toDisplayString($index + 1), 1))
+                    }, "已加载全部")) : (openBlock(), createBlock("span", { key: 1 }, toDisplayString($index + 1), 1))
                   ];
                 }
               }),
               _: 1
             }, _parent2, _scopeId));
             _push2(ssrRenderComponent(_component_el_table_column, {
-              label: "\u6807\u9898",
+              label: "标题",
               "min-width": "300"
             }, {
               default: withCtx(({ row }, _push3, _parent3, _scopeId2) => {
@@ -828,23 +822,22 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
               _: 1
             }, _parent2, _scopeId));
             _push2(ssrRenderComponent(_component_el_table_column, {
-              label: "\u5206\u7C7B",
+              label: "分类",
               width: "80"
             }, {
               default: withCtx(({ row }, _push3, _parent3, _scopeId2) => {
-                var _a, _b;
                 if (_push3) {
-                  _push3(`${ssrInterpolate(((_a = row.category) == null ? void 0 : _a.name) || "-")}`);
+                  _push3(`${ssrInterpolate(row.category?.name || "-")}`);
                 } else {
                   return [
-                    createTextVNode(toDisplayString(((_b = row.category) == null ? void 0 : _b.name) || "-"), 1)
+                    createTextVNode(toDisplayString(row.category?.name || "-"), 1)
                   ];
                 }
               }),
               _: 1
             }, _parent2, _scopeId));
             _push2(ssrRenderComponent(_component_el_table_column, {
-              label: "\u6807\u7B7E",
+              label: "标签",
               width: "150"
             }, {
               default: withCtx(({ row }, _push3, _parent3, _scopeId2) => {
@@ -898,7 +891,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
               _: 1
             }, _parent2, _scopeId));
             _push2(ssrRenderComponent(_component_el_table_column, {
-              label: "\u72B6\u6001",
+              label: "状态",
               width: "90"
             }, {
               default: withCtx(({ row }, _push3, _parent3, _scopeId2) => {
@@ -942,7 +935,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
             if (isAdmin.value) {
               _push2(ssrRenderComponent(_component_el_table_column, {
                 prop: "author.username",
-                label: "\u4F5C\u8005",
+                label: "作者",
                 width: "100"
               }, null, _parent2, _scopeId));
             } else {
@@ -950,7 +943,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
             }
             if (!isGuest.value) {
               _push2(ssrRenderComponent(_component_el_table_column, {
-                label: "\u53EF\u89C1\u6027",
+                label: "可见性",
                 width: "80",
                 align: "center"
               }, {
@@ -960,8 +953,8 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                       _push3(ssrRenderComponent(_component_el_switch, {
                         disabled: !canEdit(row) || row.status === "DRAFT",
                         "model-value": row.visibility === "PUBLIC",
-                        "active-text": "\u516C",
-                        "inactive-text": "\u79C1",
+                        "active-text": "公",
+                        "inactive-text": "私",
                         "inline-prompt": "",
                         size: "small",
                         onChange: ($event) => handleVisibilityChange({ ...row, visibility: row.visibility === "PUBLIC" ? "PRIVATE" : "PUBLIC" })
@@ -975,8 +968,8 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                         key: 0,
                         disabled: !canEdit(row) || row.status === "DRAFT",
                         "model-value": row.visibility === "PUBLIC",
-                        "active-text": "\u516C",
-                        "inactive-text": "\u79C1",
+                        "active-text": "公",
+                        "inactive-text": "私",
                         "inline-prompt": "",
                         size: "small",
                         onChange: ($event) => handleVisibilityChange({ ...row, visibility: row.visibility === "PUBLIC" ? "PRIVATE" : "PUBLIC" })
@@ -991,11 +984,11 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
             }
             _push2(ssrRenderComponent(_component_el_table_column, {
               prop: "viewCount",
-              label: "\u9605\u8BFB",
+              label: "阅读",
               width: "70"
             }, null, _parent2, _scopeId));
             _push2(ssrRenderComponent(_component_el_table_column, {
-              label: "\u521B\u5EFA\u65F6\u95F4",
+              label: "创建时间",
               width: "160",
               align: "center"
             }, {
@@ -1012,7 +1005,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
             }, _parent2, _scopeId));
             if (!isGuest.value) {
               _push2(ssrRenderComponent(_component_el_table_column, {
-                label: "\u64CD\u4F5C",
+                label: "操作",
                 width: "130",
                 fixed: "right"
               }, {
@@ -1029,10 +1022,10 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                       }, {
                         default: withCtx((_2, _push4, _parent4, _scopeId3) => {
                           if (_push4) {
-                            _push4(`\u7F16\u8F91`);
+                            _push4(`编辑`);
                           } else {
                             return [
-                              createTextVNode("\u7F16\u8F91")
+                              createTextVNode("编辑")
                             ];
                           }
                         }),
@@ -1047,10 +1040,10 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                       }, {
                         default: withCtx((_2, _push4, _parent4, _scopeId3) => {
                           if (_push4) {
-                            _push4(`\u5220\u9664`);
+                            _push4(`删除`);
                           } else {
                             return [
-                              createTextVNode("\u5220\u9664")
+                              createTextVNode("删除")
                             ];
                           }
                         }),
@@ -1074,7 +1067,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                           onClick: ($event) => goEdit(row.id)
                         }, {
                           default: withCtx(() => [
-                            createTextVNode("\u7F16\u8F91")
+                            createTextVNode("编辑")
                           ]),
                           _: 1
                         }, 8, ["disabled", "onClick"]),
@@ -1086,7 +1079,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                           onClick: ($event) => handleDelete(row.id)
                         }, {
                           default: withCtx(() => [
-                            createTextVNode("\u5220\u9664")
+                            createTextVNode("删除")
                           ]),
                           _: 1
                         }, 8, ["disabled", "onClick"])
@@ -1102,19 +1095,19 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
           } else {
             return [
               createVNode(_component_el_table_column, {
-                label: "\u5E8F\u53F7",
+                label: "序号",
                 width: "55"
               }, {
                 default: withCtx(({ row, $index }) => [
                   row._isEndMarker ? (openBlock(), createBlock("div", {
                     key: 0,
                     style: { "text-align": "center", "color": "#999", "font-size": "13px", "padding": "2px 0", "line-height": "1.2", "width": "100%" }
-                  }, "\u5DF2\u52A0\u8F7D\u5168\u90E8")) : (openBlock(), createBlock("span", { key: 1 }, toDisplayString($index + 1), 1))
+                  }, "已加载全部")) : (openBlock(), createBlock("span", { key: 1 }, toDisplayString($index + 1), 1))
                 ]),
                 _: 1
               }),
               createVNode(_component_el_table_column, {
-                label: "\u6807\u9898",
+                label: "标题",
                 "min-width": "300"
               }, {
                 default: withCtx(({ row }) => [
@@ -1131,19 +1124,16 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                 _: 1
               }),
               createVNode(_component_el_table_column, {
-                label: "\u5206\u7C7B",
+                label: "分类",
                 width: "80"
               }, {
-                default: withCtx(({ row }) => {
-                  var _a;
-                  return [
-                    createTextVNode(toDisplayString(((_a = row.category) == null ? void 0 : _a.name) || "-"), 1)
-                  ];
-                }),
+                default: withCtx(({ row }) => [
+                  createTextVNode(toDisplayString(row.category?.name || "-"), 1)
+                ]),
                 _: 1
               }),
               createVNode(_component_el_table_column, {
-                label: "\u6807\u7B7E",
+                label: "标签",
                 width: "150"
               }, {
                 default: withCtx(({ row }) => [
@@ -1168,7 +1158,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                 _: 1
               }),
               createVNode(_component_el_table_column, {
-                label: "\u72B6\u6001",
+                label: "状态",
                 width: "90"
               }, {
                 default: withCtx(({ row }) => [
@@ -1188,12 +1178,12 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
               isAdmin.value ? (openBlock(), createBlock(_component_el_table_column, {
                 key: 0,
                 prop: "author.username",
-                label: "\u4F5C\u8005",
+                label: "作者",
                 width: "100"
               })) : createCommentVNode("", true),
               !isGuest.value ? (openBlock(), createBlock(_component_el_table_column, {
                 key: 1,
-                label: "\u53EF\u89C1\u6027",
+                label: "可见性",
                 width: "80",
                 align: "center"
               }, {
@@ -1202,8 +1192,8 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                     key: 0,
                     disabled: !canEdit(row) || row.status === "DRAFT",
                     "model-value": row.visibility === "PUBLIC",
-                    "active-text": "\u516C",
-                    "inactive-text": "\u79C1",
+                    "active-text": "公",
+                    "inactive-text": "私",
                     "inline-prompt": "",
                     size: "small",
                     onChange: ($event) => handleVisibilityChange({ ...row, visibility: row.visibility === "PUBLIC" ? "PRIVATE" : "PUBLIC" })
@@ -1213,11 +1203,11 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
               })) : createCommentVNode("", true),
               createVNode(_component_el_table_column, {
                 prop: "viewCount",
-                label: "\u9605\u8BFB",
+                label: "阅读",
                 width: "70"
               }),
               createVNode(_component_el_table_column, {
-                label: "\u521B\u5EFA\u65F6\u95F4",
+                label: "创建时间",
                 width: "160",
                 align: "center"
               }, {
@@ -1228,7 +1218,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
               }),
               !isGuest.value ? (openBlock(), createBlock(_component_el_table_column, {
                 key: 2,
-                label: "\u64CD\u4F5C",
+                label: "操作",
                 width: "130",
                 fixed: "right"
               }, {
@@ -1245,7 +1235,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                       onClick: ($event) => goEdit(row.id)
                     }, {
                       default: withCtx(() => [
-                        createTextVNode("\u7F16\u8F91")
+                        createTextVNode("编辑")
                       ]),
                       _: 1
                     }, 8, ["disabled", "onClick"]),
@@ -1257,7 +1247,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                       onClick: ($event) => handleDelete(row.id)
                     }, {
                       default: withCtx(() => [
-                        createTextVNode("\u5220\u9664")
+                        createTextVNode("删除")
                       ]),
                       _: 1
                     }, 8, ["disabled", "onClick"])
@@ -1274,7 +1264,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
       _push(ssrRenderComponent(_component_el_dialog, {
         modelValue: dialogVisible.value,
         "onUpdate:modelValue": ($event) => dialogVisible.value = $event,
-        title: "\u6587\u7AE0\u9884\u89C8",
+        title: "文章预览",
         width: "800",
         "destroy-on-close": "",
         top: "5vh"
@@ -1286,10 +1276,10 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
             }, {
               default: withCtx((_2, _push3, _parent3, _scopeId2) => {
                 if (_push3) {
-                  _push3(`\u5173\u95ED`);
+                  _push3(`关闭`);
                 } else {
                   return [
-                    createTextVNode("\u5173\u95ED")
+                    createTextVNode("关闭")
                   ];
                 }
               }),
@@ -1302,10 +1292,10 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
               }, {
                 default: withCtx((_2, _push3, _parent3, _scopeId2) => {
                   if (_push3) {
-                    _push3(`\u7F16\u8F91`);
+                    _push3(`编辑`);
                   } else {
                     return [
-                      createTextVNode("\u7F16\u8F91")
+                      createTextVNode("编辑")
                     ];
                   }
                 }),
@@ -1320,7 +1310,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                 onClick: ($event) => dialogVisible.value = false
               }, {
                 default: withCtx(() => [
-                  createTextVNode("\u5173\u95ED")
+                  createTextVNode("关闭")
                 ]),
                 _: 1
               }, 8, ["onClick"]),
@@ -1330,7 +1320,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                 onClick: handleDialogEdit
               }, {
                 default: withCtx(() => [
-                  createTextVNode("\u7F16\u8F91")
+                  createTextVNode("编辑")
                 ]),
                 _: 1
               })) : createCommentVNode("", true)
@@ -1338,10 +1328,9 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
           }
         }),
         default: withCtx((_, _push2, _parent2, _scopeId) => {
-          var _a, _b, _c, _d, _e;
           if (_push2) {
             if (dialogArticle.value) {
-              _push2(`<!--[--><div style="${ssrRenderStyle({ "margin-bottom": "16px", "padding-bottom": "12px", "border-bottom": "1px solid #ebeef5" })}" data-v-073238ef${_scopeId}><h3 style="${ssrRenderStyle({ "margin": "0 0 8px 0", "font-size": "20px" })}" data-v-073238ef${_scopeId}>${ssrInterpolate(dialogArticle.value.title)}</h3><div style="${ssrRenderStyle({ "display": "flex", "gap": "16px", "color": "#909399", "font-size": "13px" })}" data-v-073238ef${_scopeId}><span data-v-073238ef${_scopeId}>\u4F5C\u8005: ${ssrInterpolate((_a = dialogArticle.value.author) == null ? void 0 : _a.username)}</span><span data-v-073238ef${_scopeId}>\u5206\u7C7B: ${ssrInterpolate(((_b = dialogArticle.value.category) == null ? void 0 : _b.name) || "-")}</span><span data-v-073238ef${_scopeId}>${ssrInterpolate((dialogArticle.value.createdAt || "").replace("T", " ").slice(0, 16))}</span><span data-v-073238ef${_scopeId}>\u9605\u8BFB: ${ssrInterpolate(dialogArticle.value.viewCount || 0)}</span></div></div><div class="article-preview-content" style="${ssrRenderStyle({ "max-height": "60vh", "overflow": "auto", "line-height": "1.8" })}" data-v-073238ef${_scopeId}>${(_c = unref(sanitizeHtml)(dialogArticle.value.content || "")) != null ? _c : ""}</div><!--]-->`);
+              _push2(`<!--[--><div style="${ssrRenderStyle({ "margin-bottom": "16px", "padding-bottom": "12px", "border-bottom": "1px solid #ebeef5" })}" data-v-073238ef${_scopeId}><h3 style="${ssrRenderStyle({ "margin": "0 0 8px 0", "font-size": "20px" })}" data-v-073238ef${_scopeId}>${ssrInterpolate(dialogArticle.value.title)}</h3><div style="${ssrRenderStyle({ "display": "flex", "gap": "16px", "color": "#909399", "font-size": "13px" })}" data-v-073238ef${_scopeId}><span data-v-073238ef${_scopeId}>作者: ${ssrInterpolate(dialogArticle.value.author?.username)}</span><span data-v-073238ef${_scopeId}>分类: ${ssrInterpolate(dialogArticle.value.category?.name || "-")}</span><span data-v-073238ef${_scopeId}>${ssrInterpolate((dialogArticle.value.createdAt || "").replace("T", " ").slice(0, 16))}</span><span data-v-073238ef${_scopeId}>阅读: ${ssrInterpolate(dialogArticle.value.viewCount || 0)}</span></div></div><div class="article-preview-content" style="${ssrRenderStyle({ "max-height": "60vh", "overflow": "auto", "line-height": "1.8" })}" data-v-073238ef${_scopeId}>${unref(sanitizeHtml)(dialogArticle.value.content || "") ?? ""}</div><!--]-->`);
             } else {
               _push2(`<!---->`);
             }
@@ -1351,10 +1340,10 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                 createVNode("div", { style: { "margin-bottom": "16px", "padding-bottom": "12px", "border-bottom": "1px solid #ebeef5" } }, [
                   createVNode("h3", { style: { "margin": "0 0 8px 0", "font-size": "20px" } }, toDisplayString(dialogArticle.value.title), 1),
                   createVNode("div", { style: { "display": "flex", "gap": "16px", "color": "#909399", "font-size": "13px" } }, [
-                    createVNode("span", null, "\u4F5C\u8005: " + toDisplayString((_d = dialogArticle.value.author) == null ? void 0 : _d.username), 1),
-                    createVNode("span", null, "\u5206\u7C7B: " + toDisplayString(((_e = dialogArticle.value.category) == null ? void 0 : _e.name) || "-"), 1),
+                    createVNode("span", null, "作者: " + toDisplayString(dialogArticle.value.author?.username), 1),
+                    createVNode("span", null, "分类: " + toDisplayString(dialogArticle.value.category?.name || "-"), 1),
                     createVNode("span", null, toDisplayString((dialogArticle.value.createdAt || "").replace("T", " ").slice(0, 16)), 1),
-                    createVNode("span", null, "\u9605\u8BFB: " + toDisplayString(dialogArticle.value.viewCount || 0), 1)
+                    createVNode("span", null, "阅读: " + toDisplayString(dialogArticle.value.viewCount || 0), 1)
                   ])
                 ]),
                 createVNode("div", {

@@ -180,9 +180,8 @@ var descriptions_cell_default = defineComponent({
     return { descriptions: inject(descriptionsKey, {}) };
   },
   render() {
-    var _a, _b, _c, _d;
     const item = getNormalizedProps(this.cell);
-    const directives = (((_a = this.cell) == null ? void 0 : _a.dirs) || []).map((dire) => {
+    const directives = (this.cell?.dirs || []).map((dire) => {
       const { dir, arg, modifiers, value } = dire;
       return [
         dir,
@@ -193,14 +192,8 @@ var descriptions_cell_default = defineComponent({
     });
     const { border, direction } = this.descriptions;
     const isVertical = direction === "vertical";
-    const renderLabel = () => {
-      var _a2, _b2, _c2;
-      return ((_c2 = (_b2 = (_a2 = this.cell) == null ? void 0 : _a2.children) == null ? void 0 : _b2.label) == null ? void 0 : _c2.call(_b2)) || item.label;
-    };
-    const renderContent = () => {
-      var _a2, _b2, _c2;
-      return (_c2 = (_b2 = (_a2 = this.cell) == null ? void 0 : _a2.children) == null ? void 0 : _b2.default) == null ? void 0 : _c2.call(_b2);
-    };
+    const renderLabel = () => this.cell?.children?.label?.() || item.label;
+    const renderContent = () => this.cell?.children?.default?.();
     const span = item.span;
     const rowspan = item.rowspan;
     const align = item.align ? `is-${item.align}` : "";
@@ -208,7 +201,7 @@ var descriptions_cell_default = defineComponent({
     const className = item.className;
     const labelClassName = item.labelClassName;
     const style = {
-      width: addUnit(this.type === "label" ? (_c = (_b = item.labelWidth) != null ? _b : this.descriptions.labelWidth) != null ? _c : item.width : item.width),
+      width: addUnit(this.type === "label" ? item.labelWidth ?? this.descriptions.labelWidth ?? item.width : item.width),
       minWidth: addUnit(item.minWidth)
     };
     const ns = useNamespace("descriptions");
@@ -244,7 +237,7 @@ var descriptions_cell_default = defineComponent({
       default: {
         const label = renderLabel();
         const labelStyle = {};
-        const width = addUnit((_d = item.labelWidth) != null ? _d : this.descriptions.labelWidth);
+        const width = addUnit(item.labelWidth ?? this.descriptions.labelWidth);
         if (width) {
           labelStyle.width = width;
           labelStyle.display = "inline-block";
@@ -323,23 +316,19 @@ var description_vue_vue_type_script_setup_true_lang_default = /* @__PURE__ */ de
     };
     const getRows = () => {
       if (!slots.default) return [];
-      const children = flattedChildren(slots.default()).filter((node) => {
-        var _a;
-        return ((_a = node == null ? void 0 : node.type) == null ? void 0 : _a.name) === COMPONENT_NAME;
-      });
+      const children = flattedChildren(slots.default()).filter((node) => node?.type?.name === COMPONENT_NAME);
       const rows = [];
       let temp = [];
       let count = props.column;
       let totalSpan = 0;
       const rowspanTemp = [];
       children.forEach((node, index) => {
-        var _a, _b, _c;
-        const span = ((_a = node.props) == null ? void 0 : _a.span) || 1;
-        const rowspan = ((_b = node.props) == null ? void 0 : _b.rowspan) || 1;
+        const span = node.props?.span || 1;
+        const rowspan = node.props?.rowspan || 1;
         const rowNo = rows.length;
-        rowspanTemp[rowNo] || (rowspanTemp[rowNo] = 0);
+        rowspanTemp[rowNo] ||= 0;
         if (rowspan > 1) for (let i = 1; i < rowspan; i++) {
-          rowspanTemp[_c = rowNo + i] || (rowspanTemp[_c] = 0);
+          rowspanTemp[rowNo + i] ||= 0;
           rowspanTemp[rowNo + i]++;
           totalSpan++;
         }
@@ -385,9 +374,9 @@ const ElDescriptionsItem = withNoopInstall(DescriptionItem);
 const useLog = () => {
   const getLogs = async (page = 1, size = 20, filters) => {
     const params = { page, size };
-    if (filters == null ? void 0 : filters.username) params.username = filters.username;
-    if (filters == null ? void 0 : filters.action) params.action = filters.action;
-    if (filters == null ? void 0 : filters.entity) params.entity = filters.entity;
+    if (filters?.username) params.username = filters.username;
+    if (filters?.action) params.action = filters.action;
+    if (filters?.entity) params.entity = filters.entity;
     const res = await request.get("/admin/logs", { params });
     return res.data;
   };
@@ -410,27 +399,26 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
     const tagMap = ref({});
     const { tableHeight } = useTableHeight(0);
     const actionWeight = {
-      DELETE: { weight: 5, type: "danger", label: "\u5220\u9664" },
-      APPROVE: { weight: 3, type: "success", label: "\u901A\u8FC7" },
-      REJECT: { weight: 3, type: "warning", label: "\u9A73\u56DE" },
-      UPLOAD: { weight: 4, type: "success", label: "\u4E0A\u4F20" },
-      CREATE: { weight: 4, type: "success", label: "\u521B\u5EFA" },
-      UPDATE: { weight: 3, type: "warning", label: "\u4FEE\u6539" },
-      LOGOUT: { weight: 2, type: "info", label: "\u9000\u51FA" },
-      LOGIN: { weight: 1, type: "info", label: "\u767B\u5F55" },
-      OTHER: { weight: 0, type: "", label: "\u5176\u4ED6" }
+      DELETE: { weight: 5, type: "danger", label: "删除" },
+      APPROVE: { weight: 3, type: "success", label: "通过" },
+      REJECT: { weight: 3, type: "warning", label: "驳回" },
+      UPLOAD: { weight: 4, type: "success", label: "上传" },
+      CREATE: { weight: 4, type: "success", label: "创建" },
+      UPDATE: { weight: 3, type: "warning", label: "修改" },
+      LOGOUT: { weight: 2, type: "info", label: "退出" },
+      LOGIN: { weight: 1, type: "info", label: "登录" },
+      OTHER: { weight: 0, type: "", label: "其他" }
     };
     function actionStyle(action) {
-      var _a, _b;
-      const w = (_a = (actionWeight[action] || {}).weight) != null ? _a : 0;
-      const opacity = (_b = [0.55, 0.65, 0.8, 1, 1, 1][w]) != null ? _b : 0.6;
+      const w = (actionWeight[action] || {}).weight ?? 0;
+      const opacity = [0.55, 0.65, 0.8, 1, 1, 1][w] ?? 0.6;
       const fontWeight = w >= 4 ? 700 : w >= 3 ? 600 : 400;
       return { opacity, fontWeight };
     }
-    const actionMap = { CREATE: "\u521B\u5EFA", UPDATE: "\u4FEE\u6539", DELETE: "\u5220\u9664", UPLOAD: "\u4E0A\u4F20", APPROVE: "\u901A\u8FC7", REJECT: "\u9A73\u56DE", LOGIN: "\u767B\u5F55", LOGOUT: "\u9000\u51FA", OTHER: "\u5176\u4ED6" };
-    const roleMap = { SUPERADMIN: "\u8D85\u7EA7\u7BA1\u7406\u5458", ADMIN: "\u7BA1\u7406\u5458", USER: "\u7528\u6237", GUEST: "\u8BBF\u5BA2" };
-    const settingLabelMap = { site_name: "\u7F51\u7AD9\u540D\u79F0", site_description: "\u7F51\u7AD9\u63CF\u8FF0", site_logo: "Logo URL", icp_number: "\u5907\u6848\u53F7" };
-    const entityMap = { Article: "\u6587\u7AE0", Category: "\u5206\u7C7B", Tag: "\u6807\u7B7E", User: "\u7528\u6237", Comment: "\u8BC4\u8BBA", Media: "\u5A92\u4F53", SiteSetting: "\u7AD9\u70B9\u8BBE\u7F6E", Auth: "\u8BA4\u8BC1" };
+    const actionMap = { CREATE: "创建", UPDATE: "修改", DELETE: "删除", UPLOAD: "上传", APPROVE: "通过", REJECT: "驳回", LOGIN: "登录", LOGOUT: "退出", OTHER: "其他" };
+    const roleMap = { SUPERADMIN: "超级管理员", ADMIN: "管理员", USER: "用户", GUEST: "访客" };
+    const settingLabelMap = { site_name: "网站名称", site_description: "网站描述", site_logo: "Logo URL", icp_number: "备案号" };
+    const entityMap = { Article: "文章", Category: "分类", Tag: "标签", User: "用户", Comment: "评论", Media: "媒体", SiteSetting: "站点设置", Auth: "认证" };
     const entityOptions = Object.entries(entityMap).map(([value, label]) => ({ value, label }));
     const detailDialogVisible = ref(false);
     const detailRow = ref(null);
@@ -442,31 +430,31 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
     const updateDiff = computed(() => detailRow.value ? getUpdateDiff(detailRow.value) : null);
     function parseData(details) {
       if (!details) return { summary: "", data: "" };
-      const idx = details.indexOf(" | \u6570\u636E:");
+      const idx = details.indexOf(" | 数据:");
       if (idx === -1) return { summary: details, data: "" };
       return { summary: details.substring(0, idx), data: details.substring(idx + 6).trim() };
     }
     const fieldLabelMap = {
-      username: "\u7528\u6237\u540D",
-      email: "\u90AE\u7BB1",
-      role: "\u89D2\u8272",
-      password: "\u5BC6\u7801",
-      title: "\u6807\u9898",
-      content: "\u5185\u5BB9",
-      categoryId: "\u5206\u7C7B",
-      tagIds: "\u6807\u7B7E",
-      status: "\u72B6\u6001",
-      visibility: "\u53EF\u89C1\u6027",
-      name: "\u540D\u79F0",
-      description: "\u63CF\u8FF0",
-      oldPassword: "\u539F\u5BC6\u7801",
-      newPassword: "\u65B0\u5BC6\u7801",
-      value: "\u503C",
-      summary: "\u6458\u8981"
+      username: "用户名",
+      email: "邮箱",
+      role: "角色",
+      password: "密码",
+      title: "标题",
+      content: "内容",
+      categoryId: "分类",
+      tagIds: "标签",
+      status: "状态",
+      visibility: "可见性",
+      name: "名称",
+      description: "描述",
+      oldPassword: "原密码",
+      newPassword: "新密码",
+      value: "值",
+      summary: "摘要"
     };
-    const visibilityLabelMap = { PUBLIC: "\u516C\u5F00", PRIVATE: "\u79C1\u5BC6" };
-    const statusLabelMap = { DRAFT: "\u8349\u7A3F", PUBLISHED: "\u5DF2\u53D1\u5E03" };
-    const roleLabelMap = { SUPERADMIN: "\u8D85\u7EA7\u7BA1\u7406\u5458", ADMIN: "\u7BA1\u7406\u5458", USER: "\u666E\u901A\u7528\u6237", GUEST: "\u8BBF\u5BA2" };
+    const visibilityLabelMap = { PUBLIC: "公开", PRIVATE: "私密" };
+    const statusLabelMap = { DRAFT: "草稿", PUBLISHED: "已发布" };
+    const roleLabelMap = { SUPERADMIN: "超级管理员", ADMIN: "管理员", USER: "普通用户", GUEST: "访客" };
     function formatLogDesc(row) {
       if (row.action === "UPDATE") return null;
       const { data } = parseData(row.details);
@@ -478,12 +466,12 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
         }
       }
       const entityLabel = entityMap[row.entity] || row.entity;
-      const idStr = row.entityId ? "\uFF0CID\uFF1A" + row.entityId : "";
+      const idStr = row.entityId ? "，ID：" + row.entityId : "";
       function getName(obj) {
         if (!obj) return "";
         if (row.entity === "Article") return obj.title || "";
         if (row.entity === "User") {
-          const rl = roleMap[obj.role] || "\u7528\u6237";
+          const rl = roleMap[obj.role] || "用户";
           return rl + " " + (obj.username || "");
         }
         if (row.entity === "Media") return obj.originalName || obj.filename || "";
@@ -494,28 +482,28 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
       if (row.action === "CREATE") {
         const name = getName(parsed);
         const isArticleDraft = row.entity === "Article" && parsed && parsed.status === "DRAFT";
-        const prefix = isArticleDraft ? "\u521B\u5EFA\u8349\u7A3F" + entityLabel + " " : "\u521B\u5EFA" + entityLabel + " ";
+        const prefix = isArticleDraft ? "创建草稿" + entityLabel + " " : "创建" + entityLabel + " ";
         if (name) return { prefix, name, nameColor: "#67c23a", suffix: "" };
       }
       if (row.action === "DELETE") {
         const name = getName(parsed);
-        if (name) return { prefix: "\u5220\u9664" + entityLabel + " ", name, nameColor: "#f56c6c", suffixLabel: idStr ? "\uFF0CID\uFF1A" : "", suffixValue: row.entityId ? String(row.entityId) : "", suffixColor: "#f56c6c" };
-        return { prefix: "\u5220\u9664" + entityLabel, name: "", nameColor: "", suffixLabel: " ID\uFF1A", suffixValue: row.entityId ? String(row.entityId) : "", suffixColor: "#f56c6c" };
+        if (name) return { prefix: "删除" + entityLabel + " ", name, nameColor: "#f56c6c", suffixLabel: idStr ? "，ID：" : "", suffixValue: row.entityId ? String(row.entityId) : "", suffixColor: "#f56c6c" };
+        return { prefix: "删除" + entityLabel, name: "", nameColor: "", suffixLabel: " ID：", suffixValue: row.entityId ? String(row.entityId) : "", suffixColor: "#f56c6c" };
       }
       if (row.action === "UPLOAD") {
         const name = getName(parsed);
-        if (name) return { prefix: "\u4E0A\u4F20" + entityLabel + " ", name, nameColor: "#67c23a", suffix: "" };
+        if (name) return { prefix: "上传" + entityLabel + " ", name, nameColor: "#67c23a", suffix: "" };
       }
       if (row.action === "APPROVE" || row.action === "REJECT") {
         const name = getName(parsed);
-        const actLabel = row.action === "APPROVE" ? "\u901A\u8FC7" : "\u9A73\u56DE";
+        const actLabel = row.action === "APPROVE" ? "通过" : "驳回";
         const color = row.action === "APPROVE" ? "#67c23a" : "#f56c6c";
-        if (name) return { prefix: actLabel + entityLabel + " ", name, nameColor: color, suffixLabel: row.entityId ? "\uFF0CID\uFF1A" : "", suffixValue: row.entityId ? String(row.entityId) : "", suffixColor: color };
+        if (name) return { prefix: actLabel + entityLabel + " ", name, nameColor: color, suffixLabel: row.entityId ? "，ID：" : "", suffixValue: row.entityId ? String(row.entityId) : "", suffixColor: color };
       }
       if (row.action === "LOGIN" || row.action === "LOGOUT") {
         const name = parsed ? parsed.username || "" : row.username || "";
         const loginColor = row.result === "FAIL" ? "#f56c6c" : row.action === "LOGIN" ? "#67c23a" : "#f56c6c";
-        return { prefix: "\u7528\u6237 ", name, nameColor: loginColor, suffix: row.action === "LOGIN" ? " \u767B\u5F55" : " \u9000\u51FA", suffixColor: "" };
+        return { prefix: "用户 ", name, nameColor: loginColor, suffix: row.action === "LOGIN" ? " 登录" : " 退出", suffixColor: "" };
       }
       return null;
     }
@@ -572,12 +560,12 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
       return changes.length > 0 ? changes : null;
     }
     function stripHtml(html) {
-      if (!html || typeof html !== "string") return String(html != null ? html : "");
+      if (!html || typeof html !== "string") return String(html ?? "");
       return html.replace(/<br\s*\/?>/gi, "\n").replace(/<\/?(p|div|h[1-6]|li|blockquote|pre|hr|table|tr|ul|ol)[^>]*>/gi, "\n").replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&").replace(/&quot;/g, '"').replace(/\n{3,}/g, "\n\n").trim();
     }
     function computeCharDiff(oldStr, newStr) {
-      const o = stripHtml(String(oldStr != null ? oldStr : ""));
-      const n = stripHtml(String(newStr != null ? newStr : ""));
+      const o = stripHtml(String(oldStr ?? ""));
+      const n = stripHtml(String(newStr ?? ""));
       if (o === n) return [{ type: "same", text: o }];
       if (o.length <= 100 && n.length <= 100) {
         const m = o.length, len = n.length;
@@ -626,13 +614,13 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
       const result = [];
       if (samePrefix > 0) {
         const pre = o.slice(prefixStart, samePrefix);
-        result.push({ type: "same", text: (hasMoreLeft ? "\u2026" : "") + pre });
+        result.push({ type: "same", text: (hasMoreLeft ? "…" : "") + pre });
       }
       if (oldMid) result.push({ type: "delete", text: oldMid });
       if (newMid) result.push({ type: "insert", text: newMid });
       if (sameSuffix > 0) {
         const suf = o.slice(o.length - sameSuffix, suffixEndOld);
-        result.push({ type: "same", text: suf + (hasMoreRight ? "\u2026" : "") });
+        result.push({ type: "same", text: suf + (hasMoreRight ? "…" : "") });
       }
       return result;
     }
@@ -643,7 +631,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
       return s.length > 0 && typeof val !== "object";
     }
     function formatDiffVal(val, key) {
-      if (val === null || val === void 0) return "(\u7A7A)";
+      if (val === null || val === void 0) return "(空)";
       if (key === "categoryId" && val != null) {
         const id = typeof val === "object" ? val.id : Number(val);
         if (catMap.value[id]) return catMap.value[id];
@@ -663,7 +651,6 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
       return fieldLabelMap[key] || key;
     }
     async function loadData() {
-      var _a, _b;
       loading.value = true;
       try {
         const res = await getLogs(currentPage.value, pageSize.value, {
@@ -671,8 +658,8 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
           action: filterAction.value || void 0,
           entity: filterEntity.value || void 0
         });
-        logs.value = (_a = res.content) != null ? _a : [];
-        total.value = (_b = res.totalElements) != null ? _b : 0;
+        logs.value = res.content ?? [];
+        total.value = res.totalElements ?? 0;
       } catch {
         logs.value = [];
         total.value = 0;
@@ -685,7 +672,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
       loadData();
     }
     const resultStyle = { SUCCESS: "color: #67c23a; font-weight: bold;", FAIL: "color: #f56c6c; font-weight: bold;" };
-    const resultIcon = { SUCCESS: "\u2713", FAIL: "\u2717" };
+    const resultIcon = { SUCCESS: "✓", FAIL: "✗" };
     return (_ctx, _push, _parent, _attrs) => {
       const _component_el_input = ElInput;
       const _component_el_button = ElButton;
@@ -699,11 +686,11 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
       const _component_el_descriptions = ElDescriptions;
       const _component_el_descriptions_item = ElDescriptionsItem;
       const _directive_loading = vLoading;
-      _push(`<div${ssrRenderAttrs(mergeProps({ style: { "flex": "1", "min-height": "0", "display": "flex", "flex-direction": "column" } }, _attrs))}><div class="page-header"><h2>\u64CD\u4F5C\u65E5\u5FD7</h2></div><div class="page-card" style="${ssrRenderStyle({ "flex": "1", "min-height": "0" })}"><div class="filter-bar" style="${ssrRenderStyle({ "display": "flex", "gap": "12px", "flex-wrap": "wrap", "align-items": "center" })}">`);
+      _push(`<div${ssrRenderAttrs(mergeProps({ style: { "flex": "1", "min-height": "0", "display": "flex", "flex-direction": "column" } }, _attrs))}><div class="page-header"><h2>操作日志</h2></div><div class="page-card" style="${ssrRenderStyle({ "flex": "1", "min-height": "0" })}"><div class="filter-bar" style="${ssrRenderStyle({ "display": "flex", "gap": "12px", "flex-wrap": "wrap", "align-items": "center" })}">`);
       _push(ssrRenderComponent(_component_el_input, {
         modelValue: filterUsername.value,
         "onUpdate:modelValue": ($event) => filterUsername.value = $event,
-        placeholder: "\u7528\u6237\u540D",
+        placeholder: "用户名",
         clearable: "",
         style: { "width": "140px" },
         onClear: onFilter,
@@ -712,10 +699,10 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
       _push(ssrRenderComponent(_component_el_button, { onClick: onFilter }, {
         default: withCtx((_, _push2, _parent2, _scopeId) => {
           if (_push2) {
-            _push2(`\u641C\u7D22`);
+            _push2(`搜索`);
           } else {
             return [
-              createTextVNode("\u641C\u7D22")
+              createTextVNode("搜索")
             ];
           }
         }),
@@ -725,7 +712,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
       _push(ssrRenderComponent(_component_el_select, {
         modelValue: filterAction.value,
         "onUpdate:modelValue": ($event) => filterAction.value = $event,
-        placeholder: "\u64CD\u4F5C\u7C7B\u578B",
+        placeholder: "操作类型",
         clearable: "",
         style: { "width": "120px" },
         onChange: onFilter
@@ -733,61 +720,61 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
         default: withCtx((_, _push2, _parent2, _scopeId) => {
           if (_push2) {
             _push2(ssrRenderComponent(_component_el_option, {
-              label: "\u767B\u5F55",
+              label: "登录",
               value: "LOGIN"
             }, null, _parent2, _scopeId));
             _push2(ssrRenderComponent(_component_el_option, {
-              label: "\u9000\u51FA",
+              label: "退出",
               value: "LOGOUT"
             }, null, _parent2, _scopeId));
             _push2(ssrRenderComponent(_component_el_option, {
-              label: "\u521B\u5EFA",
+              label: "创建",
               value: "CREATE"
             }, null, _parent2, _scopeId));
             _push2(ssrRenderComponent(_component_el_option, {
-              label: "\u4FEE\u6539",
+              label: "修改",
               value: "UPDATE"
             }, null, _parent2, _scopeId));
             _push2(ssrRenderComponent(_component_el_option, {
-              label: "\u5220\u9664",
+              label: "删除",
               value: "DELETE"
             }, null, _parent2, _scopeId));
             _push2(ssrRenderComponent(_component_el_option, {
-              label: "\u901A\u8FC7",
+              label: "通过",
               value: "APPROVE"
             }, null, _parent2, _scopeId));
             _push2(ssrRenderComponent(_component_el_option, {
-              label: "\u9A73\u56DE",
+              label: "驳回",
               value: "REJECT"
             }, null, _parent2, _scopeId));
           } else {
             return [
               createVNode(_component_el_option, {
-                label: "\u767B\u5F55",
+                label: "登录",
                 value: "LOGIN"
               }),
               createVNode(_component_el_option, {
-                label: "\u9000\u51FA",
+                label: "退出",
                 value: "LOGOUT"
               }),
               createVNode(_component_el_option, {
-                label: "\u521B\u5EFA",
+                label: "创建",
                 value: "CREATE"
               }),
               createVNode(_component_el_option, {
-                label: "\u4FEE\u6539",
+                label: "修改",
                 value: "UPDATE"
               }),
               createVNode(_component_el_option, {
-                label: "\u5220\u9664",
+                label: "删除",
                 value: "DELETE"
               }),
               createVNode(_component_el_option, {
-                label: "\u901A\u8FC7",
+                label: "通过",
                 value: "APPROVE"
               }),
               createVNode(_component_el_option, {
-                label: "\u9A73\u56DE",
+                label: "驳回",
                 value: "REJECT"
               })
             ];
@@ -798,7 +785,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
       _push(ssrRenderComponent(_component_el_select, {
         modelValue: filterEntity.value,
         "onUpdate:modelValue": ($event) => filterEntity.value = $event,
-        placeholder: "\u64CD\u4F5C\u5BF9\u8C61",
+        placeholder: "操作对象",
         clearable: "",
         style: { "width": "140px" },
         onChange: onFilter
@@ -837,10 +824,10 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
       }, ssrGetDirectiveProps(_ctx, _directive_loading, loading.value)), {
         empty: withCtx((_, _push2, _parent2, _scopeId) => {
           if (_push2) {
-            _push2(`<div style="${ssrRenderStyle({ "padding": "40px 0", "color": "#909399" })}"${_scopeId}>\u6682\u65E0\u6570\u636E</div>`);
+            _push2(`<div style="${ssrRenderStyle({ "padding": "40px 0", "color": "#909399" })}"${_scopeId}>暂无数据</div>`);
           } else {
             return [
-              createVNode("div", { style: { "padding": "40px 0", "color": "#909399" } }, "\u6682\u65E0\u6570\u636E")
+              createVNode("div", { style: { "padding": "40px 0", "color": "#909399" } }, "暂无数据")
             ];
           }
         }),
@@ -848,20 +835,20 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
           if (_push2) {
             _push2(ssrRenderComponent(_component_el_table_column, {
               type: "index",
-              label: "\u5E8F\u53F7",
+              label: "序号",
               width: "55",
               align: "center",
               index: (i) => (currentPage.value - 1) * pageSize.value + i + 1
             }, null, _parent2, _scopeId));
             _push2(ssrRenderComponent(_component_el_table_column, {
               prop: "username",
-              label: "\u7528\u6237\u540D",
+              label: "用户名",
               "min-width": "100",
               align: "center",
               "header-align": "center"
             }, null, _parent2, _scopeId));
             _push2(ssrRenderComponent(_component_el_table_column, {
-              label: "\u64CD\u4F5C\u7C7B\u578B",
+              label: "操作类型",
               "min-width": "100",
               align: "center",
               "header-align": "center"
@@ -902,7 +889,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
               _: 1
             }, _parent2, _scopeId));
             _push2(ssrRenderComponent(_component_el_table_column, {
-              label: "\u64CD\u4F5C\u5BF9\u8C61",
+              label: "操作对象",
               "min-width": "100",
               align: "center",
               "header-align": "center"
@@ -920,7 +907,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
             }, _parent2, _scopeId));
             _push2(ssrRenderComponent(_component_el_table_column, {
               prop: "entityId",
-              label: "\u5BF9\u8C61ID",
+              label: "对象ID",
               width: "85",
               "show-overflow-tooltip": "",
               "header-align": "center"
@@ -933,19 +920,19 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
               "header-align": "center"
             }, null, _parent2, _scopeId));
             _push2(ssrRenderComponent(_component_el_table_column, {
-              label: "\u7ED3\u679C",
+              label: "结果",
               width: "70",
               align: "center",
               "header-align": "center"
             }, {
               default: withCtx(({ row }, _push3, _parent3, _scopeId2) => {
                 if (_push3) {
-                  _push3(`<span style="${ssrRenderStyle(resultStyle[row.result] || "")}"${_scopeId2}>${ssrInterpolate(resultIcon[row.result] || "")} ${ssrInterpolate(row.result === "SUCCESS" ? "\u6210\u529F" : row.result === "FAIL" ? "\u5931\u8D25" : row.result)}</span>`);
+                  _push3(`<span style="${ssrRenderStyle(resultStyle[row.result] || "")}"${_scopeId2}>${ssrInterpolate(resultIcon[row.result] || "")} ${ssrInterpolate(row.result === "SUCCESS" ? "成功" : row.result === "FAIL" ? "失败" : row.result)}</span>`);
                 } else {
                   return [
                     createVNode("span", {
                       style: resultStyle[row.result] || ""
-                    }, toDisplayString(resultIcon[row.result] || "") + " " + toDisplayString(row.result === "SUCCESS" ? "\u6210\u529F" : row.result === "FAIL" ? "\u5931\u8D25" : row.result), 5)
+                    }, toDisplayString(resultIcon[row.result] || "") + " " + toDisplayString(row.result === "SUCCESS" ? "成功" : row.result === "FAIL" ? "失败" : row.result), 5)
                   ];
                 }
               }),
@@ -953,7 +940,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
             }, _parent2, _scopeId));
             _push2(ssrRenderComponent(_component_el_table_column, {
               prop: "createdAt",
-              label: "\u65F6\u95F4",
+              label: "时间",
               width: "170",
               align: "center",
               "header-align": "center"
@@ -970,7 +957,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
               _: 1
             }, _parent2, _scopeId));
             _push2(ssrRenderComponent(_component_el_table_column, {
-              label: "\u64CD\u4F5C",
+              label: "操作",
               width: "80",
               fixed: "right",
               align: "center"
@@ -985,10 +972,10 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                   }, {
                     default: withCtx((_2, _push4, _parent4, _scopeId3) => {
                       if (_push4) {
-                        _push4(`\u8BE6\u60C5`);
+                        _push4(`详情`);
                       } else {
                         return [
-                          createTextVNode("\u8BE6\u60C5")
+                          createTextVNode("详情")
                         ];
                       }
                     }),
@@ -1003,7 +990,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                       onClick: ($event) => showDetail(row)
                     }, {
                       default: withCtx(() => [
-                        createTextVNode("\u8BE6\u60C5")
+                        createTextVNode("详情")
                       ]),
                       _: 1
                     }, 8, ["onClick"])
@@ -1016,20 +1003,20 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
             return [
               createVNode(_component_el_table_column, {
                 type: "index",
-                label: "\u5E8F\u53F7",
+                label: "序号",
                 width: "55",
                 align: "center",
                 index: (i) => (currentPage.value - 1) * pageSize.value + i + 1
               }, null, 8, ["index"]),
               createVNode(_component_el_table_column, {
                 prop: "username",
-                label: "\u7528\u6237\u540D",
+                label: "用户名",
                 "min-width": "100",
                 align: "center",
                 "header-align": "center"
               }),
               createVNode(_component_el_table_column, {
-                label: "\u64CD\u4F5C\u7C7B\u578B",
+                label: "操作类型",
                 "min-width": "100",
                 align: "center",
                 "header-align": "center"
@@ -1049,7 +1036,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                 _: 1
               }),
               createVNode(_component_el_table_column, {
-                label: "\u64CD\u4F5C\u5BF9\u8C61",
+                label: "操作对象",
                 "min-width": "100",
                 align: "center",
                 "header-align": "center"
@@ -1061,7 +1048,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
               }),
               createVNode(_component_el_table_column, {
                 prop: "entityId",
-                label: "\u5BF9\u8C61ID",
+                label: "对象ID",
                 width: "85",
                 "show-overflow-tooltip": "",
                 "header-align": "center"
@@ -1074,7 +1061,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                 "header-align": "center"
               }),
               createVNode(_component_el_table_column, {
-                label: "\u7ED3\u679C",
+                label: "结果",
                 width: "70",
                 align: "center",
                 "header-align": "center"
@@ -1082,13 +1069,13 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                 default: withCtx(({ row }) => [
                   createVNode("span", {
                     style: resultStyle[row.result] || ""
-                  }, toDisplayString(resultIcon[row.result] || "") + " " + toDisplayString(row.result === "SUCCESS" ? "\u6210\u529F" : row.result === "FAIL" ? "\u5931\u8D25" : row.result), 5)
+                  }, toDisplayString(resultIcon[row.result] || "") + " " + toDisplayString(row.result === "SUCCESS" ? "成功" : row.result === "FAIL" ? "失败" : row.result), 5)
                 ]),
                 _: 1
               }),
               createVNode(_component_el_table_column, {
                 prop: "createdAt",
-                label: "\u65F6\u95F4",
+                label: "时间",
                 width: "170",
                 align: "center",
                 "header-align": "center"
@@ -1099,7 +1086,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                 _: 1
               }),
               createVNode(_component_el_table_column, {
-                label: "\u64CD\u4F5C",
+                label: "操作",
                 width: "80",
                 fixed: "right",
                 align: "center"
@@ -1112,7 +1099,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                     onClick: ($event) => showDetail(row)
                   }, {
                     default: withCtx(() => [
-                      createTextVNode("\u8BE6\u60C5")
+                      createTextVNode("详情")
                     ]),
                     _: 1
                   }, 8, ["onClick"])
@@ -1139,7 +1126,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
       _push(ssrRenderComponent(_component_el_dialog, {
         modelValue: detailDialogVisible.value,
         "onUpdate:modelValue": ($event) => detailDialogVisible.value = $event,
-        title: "\u65E5\u5FD7\u8BE6\u60C5",
+        title: "日志详情",
         width: "700",
         "destroy-on-close": ""
       }, {
@@ -1152,7 +1139,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
               }, {
                 default: withCtx((_2, _push3, _parent3, _scopeId2) => {
                   if (_push3) {
-                    _push3(ssrRenderComponent(_component_el_descriptions_item, { label: "\u7528\u6237\u540D" }, {
+                    _push3(ssrRenderComponent(_component_el_descriptions_item, { label: "用户名" }, {
                       default: withCtx((_3, _push4, _parent4, _scopeId3) => {
                         if (_push4) {
                           _push4(`${ssrInterpolate(detailRow.value.username)}`);
@@ -1164,7 +1151,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                       }),
                       _: 1
                     }, _parent3, _scopeId2));
-                    _push3(ssrRenderComponent(_component_el_descriptions_item, { label: "\u64CD\u4F5C\u7C7B\u578B" }, {
+                    _push3(ssrRenderComponent(_component_el_descriptions_item, { label: "操作类型" }, {
                       default: withCtx((_3, _push4, _parent4, _scopeId3) => {
                         if (_push4) {
                           _push4(`${ssrInterpolate(actionMap[detailRow.value.action] || detailRow.value.action)}`);
@@ -1176,7 +1163,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                       }),
                       _: 1
                     }, _parent3, _scopeId2));
-                    _push3(ssrRenderComponent(_component_el_descriptions_item, { label: "\u64CD\u4F5C\u5BF9\u8C61" }, {
+                    _push3(ssrRenderComponent(_component_el_descriptions_item, { label: "操作对象" }, {
                       default: withCtx((_3, _push4, _parent4, _scopeId3) => {
                         if (_push4) {
                           _push4(`${ssrInterpolate(entityMap[detailRow.value.entity] || detailRow.value.entity)}`);
@@ -1188,7 +1175,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                       }),
                       _: 1
                     }, _parent3, _scopeId2));
-                    _push3(ssrRenderComponent(_component_el_descriptions_item, { label: "\u64CD\u4F5C\u5B9E\u4F53ID" }, {
+                    _push3(ssrRenderComponent(_component_el_descriptions_item, { label: "操作实体ID" }, {
                       default: withCtx((_3, _push4, _parent4, _scopeId3) => {
                         if (_push4) {
                           _push4(`${ssrInterpolate(detailRow.value.entityId)}`);
@@ -1200,21 +1187,21 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                       }),
                       _: 1
                     }, _parent3, _scopeId2));
-                    _push3(ssrRenderComponent(_component_el_descriptions_item, { label: "\u7ED3\u679C" }, {
+                    _push3(ssrRenderComponent(_component_el_descriptions_item, { label: "结果" }, {
                       default: withCtx((_3, _push4, _parent4, _scopeId3) => {
                         if (_push4) {
-                          _push4(`<span style="${ssrRenderStyle(resultStyle[detailRow.value.result] || "")}"${_scopeId3}>${ssrInterpolate(detailRow.value.result === "SUCCESS" ? "\u6210\u529F" : detailRow.value.result === "FAIL" ? "\u5931\u8D25" : detailRow.value.result)}</span>`);
+                          _push4(`<span style="${ssrRenderStyle(resultStyle[detailRow.value.result] || "")}"${_scopeId3}>${ssrInterpolate(detailRow.value.result === "SUCCESS" ? "成功" : detailRow.value.result === "FAIL" ? "失败" : detailRow.value.result)}</span>`);
                         } else {
                           return [
                             createVNode("span", {
                               style: resultStyle[detailRow.value.result] || ""
-                            }, toDisplayString(detailRow.value.result === "SUCCESS" ? "\u6210\u529F" : detailRow.value.result === "FAIL" ? "\u5931\u8D25" : detailRow.value.result), 5)
+                            }, toDisplayString(detailRow.value.result === "SUCCESS" ? "成功" : detailRow.value.result === "FAIL" ? "失败" : detailRow.value.result), 5)
                           ];
                         }
                       }),
                       _: 1
                     }, _parent3, _scopeId2));
-                    _push3(ssrRenderComponent(_component_el_descriptions_item, { label: "IP\u5730\u5740" }, {
+                    _push3(ssrRenderComponent(_component_el_descriptions_item, { label: "IP地址" }, {
                       default: withCtx((_3, _push4, _parent4, _scopeId3) => {
                         if (_push4) {
                           _push4(`${ssrInterpolate(detailRow.value.clientIp)}`);
@@ -1227,7 +1214,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                       _: 1
                     }, _parent3, _scopeId2));
                     _push3(ssrRenderComponent(_component_el_descriptions_item, {
-                      label: "\u64CD\u4F5C\u63CF\u8FF0",
+                      label: "操作描述",
                       span: 2
                     }, {
                       default: withCtx((_3, _push4, _parent4, _scopeId3) => {
@@ -1237,11 +1224,10 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                             if (updateDiff.value) {
                               _push4(`<div style="${ssrRenderStyle({ "font-size": "13px", "line-height": "1.8", "white-space": "pre-wrap" })}"${_scopeId3}><!--[-->`);
                               ssrRenderList(updateDiff.value, (c) => {
-                                var _a, _b;
-                                _push4(`<div style="${ssrRenderStyle({ "margin-bottom": "4px" })}"${_scopeId3}><strong${_scopeId3}>${ssrInterpolate(getFieldLabel(c.key))}\uFF1A</strong>`);
+                                _push4(`<div style="${ssrRenderStyle({ "margin-bottom": "4px" })}"${_scopeId3}><strong${_scopeId3}>${ssrInterpolate(getFieldLabel(c.key))}：</strong>`);
                                 if (c.oldVal != null && c.newVal != null && (isDiffable(c.oldVal) || isDiffable(c.newVal)) && !unref(selectFields).has(c.key) && c.key !== "Logo URL") {
                                   _push4(`<!--[-->`);
-                                  ssrRenderList(computeCharDiff(String((_a = c.oldVal) != null ? _a : ""), String((_b = c.newVal) != null ? _b : "")), (seg) => {
+                                  ssrRenderList(computeCharDiff(String(c.oldVal ?? ""), String(c.newVal ?? "")), (seg) => {
                                     _push4(`<!--[-->`);
                                     if (seg.type === "same") {
                                       _push4(`<span${_scopeId3}>${ssrInterpolate(seg.text)}</span>`);
@@ -1254,13 +1240,13 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                                   });
                                   _push4(`<!--]-->`);
                                 } else {
-                                  _push4(`<!--[--><span style="${ssrRenderStyle({ "color": "#f56c6c", "text-decoration": "line-through" })}"${_scopeId3}>${ssrInterpolate(formatDiffVal(c.oldVal, c.key))}</span><span style="${ssrRenderStyle({ "margin": "0 6px", "color": "#909399" })}"${_scopeId3}>\u2192</span><span style="${ssrRenderStyle({ "color": "#67c23a", "font-weight": "bold" })}"${_scopeId3}>${ssrInterpolate(formatDiffVal(c.newVal, c.key))}</span><!--]-->`);
+                                  _push4(`<!--[--><span style="${ssrRenderStyle({ "color": "#f56c6c", "text-decoration": "line-through" })}"${_scopeId3}>${ssrInterpolate(formatDiffVal(c.oldVal, c.key))}</span><span style="${ssrRenderStyle({ "margin": "0 6px", "color": "#909399" })}"${_scopeId3}>→</span><span style="${ssrRenderStyle({ "color": "#67c23a", "font-weight": "bold" })}"${_scopeId3}>${ssrInterpolate(formatDiffVal(c.newVal, c.key))}</span><!--]-->`);
                                 }
                                 _push4(`</div>`);
                               });
                               _push4(`<!--]--></div>`);
                             } else {
-                              _push4(`<div style="${ssrRenderStyle({ "color": "#909399", "font-size": "13px" })}"${_scopeId3}>\u65E0\u5B57\u6BB5\u53D8\u66F4</div>`);
+                              _push4(`<div style="${ssrRenderStyle({ "color": "#909399", "font-size": "13px" })}"${_scopeId3}>无字段变更</div>`);
                             }
                             _push4(`<!--]-->`);
                           } else if (logDesc.value) {
@@ -1272,7 +1258,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                             }
                             _push4(`<span${_scopeId3}>${ssrInterpolate(logDesc.value.suffix)}</span><!--]-->`);
                           } else {
-                            _push4(`<pre style="${ssrRenderStyle({ "background": "#f5f7fa", "padding": "10px 12px", "border-radius": "4px", "font-size": "13px", "white-space": "pre-wrap", "word-break": "break-all", "max-height": "200px", "overflow": "auto", "margin": "0" })}"${_scopeId3}>${ssrInterpolate(detailRow.value.details || "\u65E0")}</pre>`);
+                            _push4(`<pre style="${ssrRenderStyle({ "background": "#f5f7fa", "padding": "10px 12px", "border-radius": "4px", "font-size": "13px", "white-space": "pre-wrap", "word-break": "break-all", "max-height": "200px", "overflow": "auto", "margin": "0" })}"${_scopeId3}>${ssrInterpolate(detailRow.value.details || "无")}</pre>`);
                           }
                         } else {
                           return [
@@ -1282,13 +1268,12 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                                 style: { "font-size": "13px", "line-height": "1.8", "white-space": "pre-wrap" }
                               }, [
                                 (openBlock(true), createBlock(Fragment, null, renderList(updateDiff.value, (c) => {
-                                  var _a, _b;
                                   return openBlock(), createBlock("div", {
                                     key: c.key,
                                     style: { "margin-bottom": "4px" }
                                   }, [
-                                    createVNode("strong", null, toDisplayString(getFieldLabel(c.key)) + "\uFF1A", 1),
-                                    c.oldVal != null && c.newVal != null && (isDiffable(c.oldVal) || isDiffable(c.newVal)) && !unref(selectFields).has(c.key) && c.key !== "Logo URL" ? (openBlock(true), createBlock(Fragment, { key: 0 }, renderList(computeCharDiff(String((_a = c.oldVal) != null ? _a : ""), String((_b = c.newVal) != null ? _b : "")), (seg) => {
+                                    createVNode("strong", null, toDisplayString(getFieldLabel(c.key)) + "：", 1),
+                                    c.oldVal != null && c.newVal != null && (isDiffable(c.oldVal) || isDiffable(c.newVal)) && !unref(selectFields).has(c.key) && c.key !== "Logo URL" ? (openBlock(true), createBlock(Fragment, { key: 0 }, renderList(computeCharDiff(String(c.oldVal ?? ""), String(c.newVal ?? "")), (seg) => {
                                       return openBlock(), createBlock(Fragment, {
                                         key: seg.type + seg.text
                                       }, [
@@ -1302,7 +1287,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                                       ], 64);
                                     }), 128)) : (openBlock(), createBlock(Fragment, { key: 1 }, [
                                       createVNode("span", { style: { "color": "#f56c6c", "text-decoration": "line-through" } }, toDisplayString(formatDiffVal(c.oldVal, c.key)), 1),
-                                      createVNode("span", { style: { "margin": "0 6px", "color": "#909399" } }, "\u2192"),
+                                      createVNode("span", { style: { "margin": "0 6px", "color": "#909399" } }, "→"),
                                       createVNode("span", { style: { "color": "#67c23a", "font-weight": "bold" } }, toDisplayString(formatDiffVal(c.newVal, c.key)), 1)
                                     ], 64))
                                   ]);
@@ -1310,7 +1295,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                               ])) : (openBlock(), createBlock("div", {
                                 key: 1,
                                 style: { "color": "#909399", "font-size": "13px" }
-                              }, "\u65E0\u5B57\u6BB5\u53D8\u66F4"))
+                              }, "无字段变更"))
                             ], 64)) : logDesc.value ? (openBlock(), createBlock(Fragment, { key: 1 }, [
                               createVNode("span", null, toDisplayString(logDesc.value.prefix), 1),
                               createVNode("span", {
@@ -1326,14 +1311,14 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                             ], 64)) : (openBlock(), createBlock("pre", {
                               key: 2,
                               style: { "background": "#f5f7fa", "padding": "10px 12px", "border-radius": "4px", "font-size": "13px", "white-space": "pre-wrap", "word-break": "break-all", "max-height": "200px", "overflow": "auto", "margin": "0" }
-                            }, toDisplayString(detailRow.value.details || "\u65E0"), 1))
+                            }, toDisplayString(detailRow.value.details || "无"), 1))
                           ];
                         }
                       }),
                       _: 1
                     }, _parent3, _scopeId2));
                     _push3(` `);
-                    _push3(ssrRenderComponent(_component_el_descriptions_item, { label: "\u65F6\u95F4" }, {
+                    _push3(ssrRenderComponent(_component_el_descriptions_item, { label: "时间" }, {
                       default: withCtx((_3, _push4, _parent4, _scopeId3) => {
                         if (_push4) {
                           _push4(`${ssrInterpolate((detailRow.value.createdAt || "").replace("T", " ").slice(0, 16))}`);
@@ -1346,7 +1331,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                       _: 1
                     }, _parent3, _scopeId2));
                     _push3(ssrRenderComponent(_component_el_descriptions_item, {
-                      label: "\u8BF7\u6C42\u8DEF\u5F84",
+                      label: "请求路径",
                       span: 2
                     }, {
                       default: withCtx((_3, _push4, _parent4, _scopeId3) => {
@@ -1362,46 +1347,46 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                     }, _parent3, _scopeId2));
                   } else {
                     return [
-                      createVNode(_component_el_descriptions_item, { label: "\u7528\u6237\u540D" }, {
+                      createVNode(_component_el_descriptions_item, { label: "用户名" }, {
                         default: withCtx(() => [
                           createTextVNode(toDisplayString(detailRow.value.username), 1)
                         ]),
                         _: 1
                       }),
-                      createVNode(_component_el_descriptions_item, { label: "\u64CD\u4F5C\u7C7B\u578B" }, {
+                      createVNode(_component_el_descriptions_item, { label: "操作类型" }, {
                         default: withCtx(() => [
                           createTextVNode(toDisplayString(actionMap[detailRow.value.action] || detailRow.value.action), 1)
                         ]),
                         _: 1
                       }),
-                      createVNode(_component_el_descriptions_item, { label: "\u64CD\u4F5C\u5BF9\u8C61" }, {
+                      createVNode(_component_el_descriptions_item, { label: "操作对象" }, {
                         default: withCtx(() => [
                           createTextVNode(toDisplayString(entityMap[detailRow.value.entity] || detailRow.value.entity), 1)
                         ]),
                         _: 1
                       }),
-                      createVNode(_component_el_descriptions_item, { label: "\u64CD\u4F5C\u5B9E\u4F53ID" }, {
+                      createVNode(_component_el_descriptions_item, { label: "操作实体ID" }, {
                         default: withCtx(() => [
                           createTextVNode(toDisplayString(detailRow.value.entityId), 1)
                         ]),
                         _: 1
                       }),
-                      createVNode(_component_el_descriptions_item, { label: "\u7ED3\u679C" }, {
+                      createVNode(_component_el_descriptions_item, { label: "结果" }, {
                         default: withCtx(() => [
                           createVNode("span", {
                             style: resultStyle[detailRow.value.result] || ""
-                          }, toDisplayString(detailRow.value.result === "SUCCESS" ? "\u6210\u529F" : detailRow.value.result === "FAIL" ? "\u5931\u8D25" : detailRow.value.result), 5)
+                          }, toDisplayString(detailRow.value.result === "SUCCESS" ? "成功" : detailRow.value.result === "FAIL" ? "失败" : detailRow.value.result), 5)
                         ]),
                         _: 1
                       }),
-                      createVNode(_component_el_descriptions_item, { label: "IP\u5730\u5740" }, {
+                      createVNode(_component_el_descriptions_item, { label: "IP地址" }, {
                         default: withCtx(() => [
                           createTextVNode(toDisplayString(detailRow.value.clientIp), 1)
                         ]),
                         _: 1
                       }),
                       createVNode(_component_el_descriptions_item, {
-                        label: "\u64CD\u4F5C\u63CF\u8FF0",
+                        label: "操作描述",
                         span: 2
                       }, {
                         default: withCtx(() => [
@@ -1411,13 +1396,12 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                               style: { "font-size": "13px", "line-height": "1.8", "white-space": "pre-wrap" }
                             }, [
                               (openBlock(true), createBlock(Fragment, null, renderList(updateDiff.value, (c) => {
-                                var _a, _b;
                                 return openBlock(), createBlock("div", {
                                   key: c.key,
                                   style: { "margin-bottom": "4px" }
                                 }, [
-                                  createVNode("strong", null, toDisplayString(getFieldLabel(c.key)) + "\uFF1A", 1),
-                                  c.oldVal != null && c.newVal != null && (isDiffable(c.oldVal) || isDiffable(c.newVal)) && !unref(selectFields).has(c.key) && c.key !== "Logo URL" ? (openBlock(true), createBlock(Fragment, { key: 0 }, renderList(computeCharDiff(String((_a = c.oldVal) != null ? _a : ""), String((_b = c.newVal) != null ? _b : "")), (seg) => {
+                                  createVNode("strong", null, toDisplayString(getFieldLabel(c.key)) + "：", 1),
+                                  c.oldVal != null && c.newVal != null && (isDiffable(c.oldVal) || isDiffable(c.newVal)) && !unref(selectFields).has(c.key) && c.key !== "Logo URL" ? (openBlock(true), createBlock(Fragment, { key: 0 }, renderList(computeCharDiff(String(c.oldVal ?? ""), String(c.newVal ?? "")), (seg) => {
                                     return openBlock(), createBlock(Fragment, {
                                       key: seg.type + seg.text
                                     }, [
@@ -1431,7 +1415,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                                     ], 64);
                                   }), 128)) : (openBlock(), createBlock(Fragment, { key: 1 }, [
                                     createVNode("span", { style: { "color": "#f56c6c", "text-decoration": "line-through" } }, toDisplayString(formatDiffVal(c.oldVal, c.key)), 1),
-                                    createVNode("span", { style: { "margin": "0 6px", "color": "#909399" } }, "\u2192"),
+                                    createVNode("span", { style: { "margin": "0 6px", "color": "#909399" } }, "→"),
                                     createVNode("span", { style: { "color": "#67c23a", "font-weight": "bold" } }, toDisplayString(formatDiffVal(c.newVal, c.key)), 1)
                                   ], 64))
                                 ]);
@@ -1439,7 +1423,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                             ])) : (openBlock(), createBlock("div", {
                               key: 1,
                               style: { "color": "#909399", "font-size": "13px" }
-                            }, "\u65E0\u5B57\u6BB5\u53D8\u66F4"))
+                            }, "无字段变更"))
                           ], 64)) : logDesc.value ? (openBlock(), createBlock(Fragment, { key: 1 }, [
                             createVNode("span", null, toDisplayString(logDesc.value.prefix), 1),
                             createVNode("span", {
@@ -1455,19 +1439,19 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                           ], 64)) : (openBlock(), createBlock("pre", {
                             key: 2,
                             style: { "background": "#f5f7fa", "padding": "10px 12px", "border-radius": "4px", "font-size": "13px", "white-space": "pre-wrap", "word-break": "break-all", "max-height": "200px", "overflow": "auto", "margin": "0" }
-                          }, toDisplayString(detailRow.value.details || "\u65E0"), 1))
+                          }, toDisplayString(detailRow.value.details || "无"), 1))
                         ]),
                         _: 1
                       }),
                       createTextVNode(),
-                      createVNode(_component_el_descriptions_item, { label: "\u65F6\u95F4" }, {
+                      createVNode(_component_el_descriptions_item, { label: "时间" }, {
                         default: withCtx(() => [
                           createTextVNode(toDisplayString((detailRow.value.createdAt || "").replace("T", " ").slice(0, 16)), 1)
                         ]),
                         _: 1
                       }),
                       createVNode(_component_el_descriptions_item, {
-                        label: "\u8BF7\u6C42\u8DEF\u5F84",
+                        label: "请求路径",
                         span: 2
                       }, {
                         default: withCtx(() => [
@@ -1491,46 +1475,46 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                 border: ""
               }, {
                 default: withCtx(() => [
-                  createVNode(_component_el_descriptions_item, { label: "\u7528\u6237\u540D" }, {
+                  createVNode(_component_el_descriptions_item, { label: "用户名" }, {
                     default: withCtx(() => [
                       createTextVNode(toDisplayString(detailRow.value.username), 1)
                     ]),
                     _: 1
                   }),
-                  createVNode(_component_el_descriptions_item, { label: "\u64CD\u4F5C\u7C7B\u578B" }, {
+                  createVNode(_component_el_descriptions_item, { label: "操作类型" }, {
                     default: withCtx(() => [
                       createTextVNode(toDisplayString(actionMap[detailRow.value.action] || detailRow.value.action), 1)
                     ]),
                     _: 1
                   }),
-                  createVNode(_component_el_descriptions_item, { label: "\u64CD\u4F5C\u5BF9\u8C61" }, {
+                  createVNode(_component_el_descriptions_item, { label: "操作对象" }, {
                     default: withCtx(() => [
                       createTextVNode(toDisplayString(entityMap[detailRow.value.entity] || detailRow.value.entity), 1)
                     ]),
                     _: 1
                   }),
-                  createVNode(_component_el_descriptions_item, { label: "\u64CD\u4F5C\u5B9E\u4F53ID" }, {
+                  createVNode(_component_el_descriptions_item, { label: "操作实体ID" }, {
                     default: withCtx(() => [
                       createTextVNode(toDisplayString(detailRow.value.entityId), 1)
                     ]),
                     _: 1
                   }),
-                  createVNode(_component_el_descriptions_item, { label: "\u7ED3\u679C" }, {
+                  createVNode(_component_el_descriptions_item, { label: "结果" }, {
                     default: withCtx(() => [
                       createVNode("span", {
                         style: resultStyle[detailRow.value.result] || ""
-                      }, toDisplayString(detailRow.value.result === "SUCCESS" ? "\u6210\u529F" : detailRow.value.result === "FAIL" ? "\u5931\u8D25" : detailRow.value.result), 5)
+                      }, toDisplayString(detailRow.value.result === "SUCCESS" ? "成功" : detailRow.value.result === "FAIL" ? "失败" : detailRow.value.result), 5)
                     ]),
                     _: 1
                   }),
-                  createVNode(_component_el_descriptions_item, { label: "IP\u5730\u5740" }, {
+                  createVNode(_component_el_descriptions_item, { label: "IP地址" }, {
                     default: withCtx(() => [
                       createTextVNode(toDisplayString(detailRow.value.clientIp), 1)
                     ]),
                     _: 1
                   }),
                   createVNode(_component_el_descriptions_item, {
-                    label: "\u64CD\u4F5C\u63CF\u8FF0",
+                    label: "操作描述",
                     span: 2
                   }, {
                     default: withCtx(() => [
@@ -1540,13 +1524,12 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                           style: { "font-size": "13px", "line-height": "1.8", "white-space": "pre-wrap" }
                         }, [
                           (openBlock(true), createBlock(Fragment, null, renderList(updateDiff.value, (c) => {
-                            var _a, _b;
                             return openBlock(), createBlock("div", {
                               key: c.key,
                               style: { "margin-bottom": "4px" }
                             }, [
-                              createVNode("strong", null, toDisplayString(getFieldLabel(c.key)) + "\uFF1A", 1),
-                              c.oldVal != null && c.newVal != null && (isDiffable(c.oldVal) || isDiffable(c.newVal)) && !unref(selectFields).has(c.key) && c.key !== "Logo URL" ? (openBlock(true), createBlock(Fragment, { key: 0 }, renderList(computeCharDiff(String((_a = c.oldVal) != null ? _a : ""), String((_b = c.newVal) != null ? _b : "")), (seg) => {
+                              createVNode("strong", null, toDisplayString(getFieldLabel(c.key)) + "：", 1),
+                              c.oldVal != null && c.newVal != null && (isDiffable(c.oldVal) || isDiffable(c.newVal)) && !unref(selectFields).has(c.key) && c.key !== "Logo URL" ? (openBlock(true), createBlock(Fragment, { key: 0 }, renderList(computeCharDiff(String(c.oldVal ?? ""), String(c.newVal ?? "")), (seg) => {
                                 return openBlock(), createBlock(Fragment, {
                                   key: seg.type + seg.text
                                 }, [
@@ -1560,7 +1543,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                                 ], 64);
                               }), 128)) : (openBlock(), createBlock(Fragment, { key: 1 }, [
                                 createVNode("span", { style: { "color": "#f56c6c", "text-decoration": "line-through" } }, toDisplayString(formatDiffVal(c.oldVal, c.key)), 1),
-                                createVNode("span", { style: { "margin": "0 6px", "color": "#909399" } }, "\u2192"),
+                                createVNode("span", { style: { "margin": "0 6px", "color": "#909399" } }, "→"),
                                 createVNode("span", { style: { "color": "#67c23a", "font-weight": "bold" } }, toDisplayString(formatDiffVal(c.newVal, c.key)), 1)
                               ], 64))
                             ]);
@@ -1568,7 +1551,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                         ])) : (openBlock(), createBlock("div", {
                           key: 1,
                           style: { "color": "#909399", "font-size": "13px" }
-                        }, "\u65E0\u5B57\u6BB5\u53D8\u66F4"))
+                        }, "无字段变更"))
                       ], 64)) : logDesc.value ? (openBlock(), createBlock(Fragment, { key: 1 }, [
                         createVNode("span", null, toDisplayString(logDesc.value.prefix), 1),
                         createVNode("span", {
@@ -1584,19 +1567,19 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                       ], 64)) : (openBlock(), createBlock("pre", {
                         key: 2,
                         style: { "background": "#f5f7fa", "padding": "10px 12px", "border-radius": "4px", "font-size": "13px", "white-space": "pre-wrap", "word-break": "break-all", "max-height": "200px", "overflow": "auto", "margin": "0" }
-                      }, toDisplayString(detailRow.value.details || "\u65E0"), 1))
+                      }, toDisplayString(detailRow.value.details || "无"), 1))
                     ]),
                     _: 1
                   }),
                   createTextVNode(),
-                  createVNode(_component_el_descriptions_item, { label: "\u65F6\u95F4" }, {
+                  createVNode(_component_el_descriptions_item, { label: "时间" }, {
                     default: withCtx(() => [
                       createTextVNode(toDisplayString((detailRow.value.createdAt || "").replace("T", " ").slice(0, 16)), 1)
                     ]),
                     _: 1
                   }),
                   createVNode(_component_el_descriptions_item, {
-                    label: "\u8BF7\u6C42\u8DEF\u5F84",
+                    label: "请求路径",
                     span: 2
                   }, {
                     default: withCtx(() => [

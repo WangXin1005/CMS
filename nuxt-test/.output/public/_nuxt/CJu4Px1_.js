@@ -1,0 +1,1 @@
+import{j as a}from"./CIyFALgo.js";const d=()=>({getList:async()=>(await a.get("/tags")).data,getBySlug:async t=>(await a.get(`/tags/${t}`)).data,create:async t=>(await a.post("/admin/tags",t)).data,update:async(t,e)=>(await a.put(`/admin/tags/${t}`,e)).data,remove:async t=>(await a.delete(`/admin/tags/${t}`)).data});export{d as u};

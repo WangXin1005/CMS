@@ -6,7 +6,7 @@
 <!-- 应用根组件 -->
 <template>
   <NuxtLayout>
-    <NuxtPage />
+    <NuxtPage keepalive />
   </NuxtLayout>
 </template>
 

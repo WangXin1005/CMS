@@ -99,8 +99,7 @@ var card_vue_vue_type_script_setup_true_lang_default = /* @__PURE__ */ defineCom
     const globalConfig = useGlobalConfig("card");
     const ns = useNamespace("card");
     return (_ctx, _cache) => {
-      var _a;
-      return openBlock(), createElementBlock("div", { class: normalizeClass([unref(ns).b(), unref(ns).is(`${__props.shadow || ((_a = unref(globalConfig)) == null ? void 0 : _a.shadow) || "always"}-shadow`)]) }, [
+      return openBlock(), createElementBlock("div", { class: normalizeClass([unref(ns).b(), unref(ns).is(`${__props.shadow || unref(globalConfig)?.shadow || "always"}-shadow`)]) }, [
         _ctx.$slots.header || __props.header ? (openBlock(), createElementBlock("div", {
           key: 0,
           class: normalizeClass([unref(ns).e("header"), __props.headerClass])
@@ -129,12 +128,11 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
     const isGuest = computed(() => role.value === "GUEST");
     const roleLevel = { SUPERADMIN: 3, ADMIN: 2, USER: 1, GUEST: 0 };
     function canEditPreview() {
-      var _a, _b, _c, _d;
       if (isGuest.value) return false;
       if (role.value === "SUPERADMIN") return true;
-      const authorName = (_b = (_a = dialogArticle.value) == null ? void 0 : _a.author) == null ? void 0 : _b.username;
+      const authorName = dialogArticle.value?.author?.username;
       if (authorName === currentUsername.value) return true;
-      const authorRole = ((_d = (_c = dialogArticle.value) == null ? void 0 : _c.author) == null ? void 0 : _d.role) || "";
+      const authorRole = dialogArticle.value?.author?.role || "";
       if (role.value === "ADMIN") return roleLevel[authorRole] <= 1;
       return false;
     }
@@ -179,9 +177,9 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
       const _component_el_divider = ElDivider;
       const _component_el_button = ElButton;
       const _directive_loading = vLoading;
-      _push(`<div${ssrRenderAttrs(mergeProps({ class: "home-page-wrapper" }, _attrs))} data-v-4fd74f5b><div data-v-4fd74f5b><div class="page-header" data-v-4fd74f5b><h2 data-v-4fd74f5b>\u4EEA\u8868\u76D8</h2></div><div${ssrRenderAttrs(mergeProps({ class: "stats-grid" }, ssrGetDirectiveProps(_ctx, _directive_loading, statsLoading.value)))} data-v-4fd74f5b>`);
+      _push(`<div${ssrRenderAttrs(mergeProps({ class: "home-page-wrapper" }, _attrs))} data-v-4fd74f5b><div data-v-4fd74f5b><div class="page-header" data-v-4fd74f5b><h2 data-v-4fd74f5b>仪表盘</h2></div><div${ssrRenderAttrs(mergeProps({ class: "stats-grid" }, ssrGetDirectiveProps(_ctx, _directive_loading, statsLoading.value)))} data-v-4fd74f5b>`);
       _push(ssrRenderComponent(_component_el_tooltip, {
-        content: "\u5305\u542B\u79C1\u5BC6\u6587\u7AE0",
+        content: "包含私密文章",
         placement: "top"
       }, {
         default: withCtx((_, _push2, _parent2, _scopeId) => {
@@ -192,14 +190,14 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
             }, {
               default: withCtx((_2, _push3, _parent3, _scopeId2) => {
                 if (_push3) {
-                  _push3(`<div class="stat-value" style="${ssrRenderStyle({ "color": "#409eff" })}" data-v-4fd74f5b${_scopeId2}>${ssrInterpolate(stats.value.totalArticles)}</div><div class="stat-label" data-v-4fd74f5b${_scopeId2}>\u6587\u7AE0\u603B\u6570</div>`);
+                  _push3(`<div class="stat-value" style="${ssrRenderStyle({ "color": "#409eff" })}" data-v-4fd74f5b${_scopeId2}>${ssrInterpolate(stats.value.totalArticles)}</div><div class="stat-label" data-v-4fd74f5b${_scopeId2}>文章总数</div>`);
                 } else {
                   return [
                     createVNode("div", {
                       class: "stat-value",
                       style: { "color": "#409eff" }
                     }, toDisplayString(stats.value.totalArticles), 1),
-                    createVNode("div", { class: "stat-label" }, "\u6587\u7AE0\u603B\u6570")
+                    createVNode("div", { class: "stat-label" }, "文章总数")
                   ];
                 }
               }),
@@ -216,7 +214,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                     class: "stat-value",
                     style: { "color": "#409eff" }
                   }, toDisplayString(stats.value.totalArticles), 1),
-                  createVNode("div", { class: "stat-label" }, "\u6587\u7AE0\u603B\u6570")
+                  createVNode("div", { class: "stat-label" }, "文章总数")
                 ]),
                 _: 1
               })
@@ -231,14 +229,14 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
       }, {
         default: withCtx((_, _push2, _parent2, _scopeId) => {
           if (_push2) {
-            _push2(`<div class="stat-value" style="${ssrRenderStyle({ "color": "#67c23a" })}" data-v-4fd74f5b${_scopeId}>${ssrInterpolate(stats.value.totalCategories)}</div><div class="stat-label" data-v-4fd74f5b${_scopeId}>\u5206\u7C7B\u603B\u6570</div>`);
+            _push2(`<div class="stat-value" style="${ssrRenderStyle({ "color": "#67c23a" })}" data-v-4fd74f5b${_scopeId}>${ssrInterpolate(stats.value.totalCategories)}</div><div class="stat-label" data-v-4fd74f5b${_scopeId}>分类总数</div>`);
           } else {
             return [
               createVNode("div", {
                 class: "stat-value",
                 style: { "color": "#67c23a" }
               }, toDisplayString(stats.value.totalCategories), 1),
-              createVNode("div", { class: "stat-label" }, "\u5206\u7C7B\u603B\u6570")
+              createVNode("div", { class: "stat-label" }, "分类总数")
             ];
           }
         }),
@@ -250,14 +248,14 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
       }, {
         default: withCtx((_, _push2, _parent2, _scopeId) => {
           if (_push2) {
-            _push2(`<div class="stat-value" style="${ssrRenderStyle({ "color": "#e6a23c" })}" data-v-4fd74f5b${_scopeId}>${ssrInterpolate(stats.value.totalTags)}</div><div class="stat-label" data-v-4fd74f5b${_scopeId}>\u6807\u7B7E\u603B\u6570</div>`);
+            _push2(`<div class="stat-value" style="${ssrRenderStyle({ "color": "#e6a23c" })}" data-v-4fd74f5b${_scopeId}>${ssrInterpolate(stats.value.totalTags)}</div><div class="stat-label" data-v-4fd74f5b${_scopeId}>标签总数</div>`);
           } else {
             return [
               createVNode("div", {
                 class: "stat-value",
                 style: { "color": "#e6a23c" }
               }, toDisplayString(stats.value.totalTags), 1),
-              createVNode("div", { class: "stat-label" }, "\u6807\u7B7E\u603B\u6570")
+              createVNode("div", { class: "stat-label" }, "标签总数")
             ];
           }
         }),
@@ -269,14 +267,14 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
       }, {
         default: withCtx((_, _push2, _parent2, _scopeId) => {
           if (_push2) {
-            _push2(`<div class="stat-value" style="${ssrRenderStyle({ "color": "#f56c6c" })}" data-v-4fd74f5b${_scopeId}>${ssrInterpolate(stats.value.totalComments)}</div><div class="stat-label" data-v-4fd74f5b${_scopeId}>\u8BC4\u8BBA\u603B\u6570</div>`);
+            _push2(`<div class="stat-value" style="${ssrRenderStyle({ "color": "#f56c6c" })}" data-v-4fd74f5b${_scopeId}>${ssrInterpolate(stats.value.totalComments)}</div><div class="stat-label" data-v-4fd74f5b${_scopeId}>评论总数</div>`);
           } else {
             return [
               createVNode("div", {
                 class: "stat-value",
                 style: { "color": "#f56c6c" }
               }, toDisplayString(stats.value.totalComments), 1),
-              createVNode("div", { class: "stat-label" }, "\u8BC4\u8BBA\u603B\u6570")
+              createVNode("div", { class: "stat-label" }, "评论总数")
             ];
           }
         }),
@@ -294,10 +292,10 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                   _push3(ssrRenderComponent(_component_el_card, { shadow: "never" }, {
                     header: withCtx((_3, _push4, _parent4, _scopeId3) => {
                       if (_push4) {
-                        _push4(`<span data-v-4fd74f5b${_scopeId3}>\u8FD1\u671F\u6587\u7AE0</span>`);
+                        _push4(`<span data-v-4fd74f5b${_scopeId3}>近期文章</span>`);
                       } else {
                         return [
-                          createVNode("span", null, "\u8FD1\u671F\u6587\u7AE0")
+                          createVNode("span", null, "近期文章")
                         ];
                       }
                     }),
@@ -305,7 +303,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                       if (_push4) {
                         _push4(`<div${ssrRenderAttrs(ssrGetDirectiveProps(_ctx, _directive_loading, articlesLoading.value))} data-v-4fd74f5b${_scopeId3}>`);
                         if (!articlesLoading.value && recentArticles.value.length === 0) {
-                          _push4(ssrRenderComponent(_component_el_empty, { description: "\u6682\u65E0\u6587\u7AE0" }, null, _parent4, _scopeId3));
+                          _push4(ssrRenderComponent(_component_el_empty, { description: "暂无文章" }, null, _parent4, _scopeId3));
                         } else {
                           _push4(`<!---->`);
                         }
@@ -319,10 +317,10 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                           }, {
                             default: withCtx((_4, _push5, _parent5, _scopeId4) => {
                               if (_push5) {
-                                _push5(`${ssrInterpolate(item.status === "PUBLISHED" ? "\u5DF2\u53D1\u5E03" : "\u8349\u7A3F")}`);
+                                _push5(`${ssrInterpolate(item.status === "PUBLISHED" ? "已发布" : "草稿")}`);
                               } else {
                                 return [
-                                  createTextVNode(toDisplayString(item.status === "PUBLISHED" ? "\u5DF2\u53D1\u5E03" : "\u8349\u7A3F"), 1)
+                                  createTextVNode(toDisplayString(item.status === "PUBLISHED" ? "已发布" : "草稿"), 1)
                                 ];
                               }
                             }),
@@ -336,7 +334,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                           withDirectives((openBlock(), createBlock("div", null, [
                             !articlesLoading.value && recentArticles.value.length === 0 ? (openBlock(), createBlock(_component_el_empty, {
                               key: 0,
-                              description: "\u6682\u65E0\u6587\u7AE0"
+                              description: "暂无文章"
                             })) : createCommentVNode("", true),
                             (openBlock(true), createBlock(Fragment, null, renderList(recentArticles.value, (item, i) => {
                               return openBlock(), createBlock("div", {
@@ -355,7 +353,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                                     effect: "dark"
                                   }, {
                                     default: withCtx(() => [
-                                      createTextVNode(toDisplayString(item.status === "PUBLISHED" ? "\u5DF2\u53D1\u5E03" : "\u8349\u7A3F"), 1)
+                                      createTextVNode(toDisplayString(item.status === "PUBLISHED" ? "已发布" : "草稿"), 1)
                                     ]),
                                     _: 2
                                   }, 1032, ["type"])
@@ -375,13 +373,13 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                   return [
                     createVNode(_component_el_card, { shadow: "never" }, {
                       header: withCtx(() => [
-                        createVNode("span", null, "\u8FD1\u671F\u6587\u7AE0")
+                        createVNode("span", null, "近期文章")
                       ]),
                       default: withCtx(() => [
                         withDirectives((openBlock(), createBlock("div", null, [
                           !articlesLoading.value && recentArticles.value.length === 0 ? (openBlock(), createBlock(_component_el_empty, {
                             key: 0,
-                            description: "\u6682\u65E0\u6587\u7AE0"
+                            description: "暂无文章"
                           })) : createCommentVNode("", true),
                           (openBlock(true), createBlock(Fragment, null, renderList(recentArticles.value, (item, i) => {
                             return openBlock(), createBlock("div", {
@@ -400,7 +398,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                                   effect: "dark"
                                 }, {
                                   default: withCtx(() => [
-                                    createTextVNode(toDisplayString(item.status === "PUBLISHED" ? "\u5DF2\u53D1\u5E03" : "\u8349\u7A3F"), 1)
+                                    createTextVNode(toDisplayString(item.status === "PUBLISHED" ? "已发布" : "草稿"), 1)
                                   ]),
                                   _: 2
                                 }, 1032, ["type"])
@@ -426,16 +424,16 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                     _push3(ssrRenderComponent(_component_el_card, { shadow: "never" }, {
                       header: withCtx((_3, _push4, _parent4, _scopeId3) => {
                         if (_push4) {
-                          _push4(`<span data-v-4fd74f5b${_scopeId3}>\u5FEB\u6377\u64CD\u4F5C</span>`);
+                          _push4(`<span data-v-4fd74f5b${_scopeId3}>快捷操作</span>`);
                         } else {
                           return [
-                            createVNode("span", null, "\u5FEB\u6377\u64CD\u4F5C")
+                            createVNode("span", null, "快捷操作")
                           ];
                         }
                       }),
                       default: withCtx((_3, _push4, _parent4, _scopeId3) => {
                         if (_push4) {
-                          _push4(`<div class="quick-actions" data-v-4fd74f5b${_scopeId3}><div class="quick-action-item" data-v-4fd74f5b${_scopeId3}><div class="qa-icon" data-v-4fd74f5b${_scopeId3}>\u270D\uFE0F</div><div class="qa-label" data-v-4fd74f5b${_scopeId3}>\u5199\u6587\u7AE0</div></div><div class="quick-action-item" data-v-4fd74f5b${_scopeId3}><div class="qa-icon" data-v-4fd74f5b${_scopeId3}>\u{1F4CB}</div><div class="qa-label" data-v-4fd74f5b${_scopeId3}>\u6587\u7AE0\u7BA1\u7406</div></div><div class="quick-action-item" data-v-4fd74f5b${_scopeId3}><div class="qa-icon" data-v-4fd74f5b${_scopeId3}>\u{1F4AC}</div><div class="qa-label" data-v-4fd74f5b${_scopeId3}>\u8BC4\u8BBA\u7BA1\u7406</div></div></div>`);
+                          _push4(`<div class="quick-actions" data-v-4fd74f5b${_scopeId3}><div class="quick-action-item" data-v-4fd74f5b${_scopeId3}><div class="qa-icon" data-v-4fd74f5b${_scopeId3}>✍️</div><div class="qa-label" data-v-4fd74f5b${_scopeId3}>写文章</div></div><div class="quick-action-item" data-v-4fd74f5b${_scopeId3}><div class="qa-icon" data-v-4fd74f5b${_scopeId3}>📋</div><div class="qa-label" data-v-4fd74f5b${_scopeId3}>文章管理</div></div><div class="quick-action-item" data-v-4fd74f5b${_scopeId3}><div class="qa-icon" data-v-4fd74f5b${_scopeId3}>💬</div><div class="qa-label" data-v-4fd74f5b${_scopeId3}>评论管理</div></div></div>`);
                         } else {
                           return [
                             createVNode("div", { class: "quick-actions" }, [
@@ -443,22 +441,22 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                                 class: "quick-action-item",
                                 onClick: goCreate
                               }, [
-                                createVNode("div", { class: "qa-icon" }, "\u270D\uFE0F"),
-                                createVNode("div", { class: "qa-label" }, "\u5199\u6587\u7AE0")
+                                createVNode("div", { class: "qa-icon" }, "✍️"),
+                                createVNode("div", { class: "qa-label" }, "写文章")
                               ]),
                               createVNode("div", {
                                 class: "quick-action-item",
                                 onClick: goArticleList
                               }, [
-                                createVNode("div", { class: "qa-icon" }, "\u{1F4CB}"),
-                                createVNode("div", { class: "qa-label" }, "\u6587\u7AE0\u7BA1\u7406")
+                                createVNode("div", { class: "qa-icon" }, "📋"),
+                                createVNode("div", { class: "qa-label" }, "文章管理")
                               ]),
                               createVNode("div", {
                                 class: "quick-action-item",
                                 onClick: goComments
                               }, [
-                                createVNode("div", { class: "qa-icon" }, "\u{1F4AC}"),
-                                createVNode("div", { class: "qa-label" }, "\u8BC4\u8BBA\u7BA1\u7406")
+                                createVNode("div", { class: "qa-icon" }, "💬"),
+                                createVNode("div", { class: "qa-label" }, "评论管理")
                               ])
                             ])
                           ];
@@ -470,7 +468,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                     return [
                       createVNode(_component_el_card, { shadow: "never" }, {
                         header: withCtx(() => [
-                          createVNode("span", null, "\u5FEB\u6377\u64CD\u4F5C")
+                          createVNode("span", null, "快捷操作")
                         ]),
                         default: withCtx(() => [
                           createVNode("div", { class: "quick-actions" }, [
@@ -478,22 +476,22 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                               class: "quick-action-item",
                               onClick: goCreate
                             }, [
-                              createVNode("div", { class: "qa-icon" }, "\u270D\uFE0F"),
-                              createVNode("div", { class: "qa-label" }, "\u5199\u6587\u7AE0")
+                              createVNode("div", { class: "qa-icon" }, "✍️"),
+                              createVNode("div", { class: "qa-label" }, "写文章")
                             ]),
                             createVNode("div", {
                               class: "quick-action-item",
                               onClick: goArticleList
                             }, [
-                              createVNode("div", { class: "qa-icon" }, "\u{1F4CB}"),
-                              createVNode("div", { class: "qa-label" }, "\u6587\u7AE0\u7BA1\u7406")
+                              createVNode("div", { class: "qa-icon" }, "📋"),
+                              createVNode("div", { class: "qa-label" }, "文章管理")
                             ]),
                             createVNode("div", {
                               class: "quick-action-item",
                               onClick: goComments
                             }, [
-                              createVNode("div", { class: "qa-icon" }, "\u{1F4AC}"),
-                              createVNode("div", { class: "qa-label" }, "\u8BC4\u8BBA\u7BA1\u7406")
+                              createVNode("div", { class: "qa-icon" }, "💬"),
+                              createVNode("div", { class: "qa-label" }, "评论管理")
                             ])
                           ])
                         ]),
@@ -515,13 +513,13 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                 default: withCtx(() => [
                   createVNode(_component_el_card, { shadow: "never" }, {
                     header: withCtx(() => [
-                      createVNode("span", null, "\u8FD1\u671F\u6587\u7AE0")
+                      createVNode("span", null, "近期文章")
                     ]),
                     default: withCtx(() => [
                       withDirectives((openBlock(), createBlock("div", null, [
                         !articlesLoading.value && recentArticles.value.length === 0 ? (openBlock(), createBlock(_component_el_empty, {
                           key: 0,
-                          description: "\u6682\u65E0\u6587\u7AE0"
+                          description: "暂无文章"
                         })) : createCommentVNode("", true),
                         (openBlock(true), createBlock(Fragment, null, renderList(recentArticles.value, (item, i) => {
                           return openBlock(), createBlock("div", {
@@ -540,7 +538,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                                 effect: "dark"
                               }, {
                                 default: withCtx(() => [
-                                  createTextVNode(toDisplayString(item.status === "PUBLISHED" ? "\u5DF2\u53D1\u5E03" : "\u8349\u7A3F"), 1)
+                                  createTextVNode(toDisplayString(item.status === "PUBLISHED" ? "已发布" : "草稿"), 1)
                                 ]),
                                 _: 2
                               }, 1032, ["type"])
@@ -564,7 +562,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                 default: withCtx(() => [
                   createVNode(_component_el_card, { shadow: "never" }, {
                     header: withCtx(() => [
-                      createVNode("span", null, "\u5FEB\u6377\u64CD\u4F5C")
+                      createVNode("span", null, "快捷操作")
                     ]),
                     default: withCtx(() => [
                       createVNode("div", { class: "quick-actions" }, [
@@ -572,22 +570,22 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                           class: "quick-action-item",
                           onClick: goCreate
                         }, [
-                          createVNode("div", { class: "qa-icon" }, "\u270D\uFE0F"),
-                          createVNode("div", { class: "qa-label" }, "\u5199\u6587\u7AE0")
+                          createVNode("div", { class: "qa-icon" }, "✍️"),
+                          createVNode("div", { class: "qa-label" }, "写文章")
                         ]),
                         createVNode("div", {
                           class: "quick-action-item",
                           onClick: goArticleList
                         }, [
-                          createVNode("div", { class: "qa-icon" }, "\u{1F4CB}"),
-                          createVNode("div", { class: "qa-label" }, "\u6587\u7AE0\u7BA1\u7406")
+                          createVNode("div", { class: "qa-icon" }, "📋"),
+                          createVNode("div", { class: "qa-label" }, "文章管理")
                         ]),
                         createVNode("div", {
                           class: "quick-action-item",
                           onClick: goComments
                         }, [
-                          createVNode("div", { class: "qa-icon" }, "\u{1F4AC}"),
-                          createVNode("div", { class: "qa-label" }, "\u8BC4\u8BBA\u7BA1\u7406")
+                          createVNode("div", { class: "qa-icon" }, "💬"),
+                          createVNode("div", { class: "qa-label" }, "评论管理")
                         ])
                       ])
                     ]),
@@ -605,7 +603,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
       _push(ssrRenderComponent(_component_el_dialog, {
         modelValue: dialogVisible.value,
         "onUpdate:modelValue": ($event) => dialogVisible.value = $event,
-        title: "\u6587\u7AE0\u9884\u89C8",
+        title: "文章预览",
         width: "700px",
         top: "5vh",
         "destroy-on-close": ""
@@ -617,10 +615,10 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
             }, {
               default: withCtx((_2, _push3, _parent3, _scopeId2) => {
                 if (_push3) {
-                  _push3(`\u5173\u95ED`);
+                  _push3(`关闭`);
                 } else {
                   return [
-                    createTextVNode("\u5173\u95ED")
+                    createTextVNode("关闭")
                   ];
                 }
               }),
@@ -633,10 +631,10 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
               }, {
                 default: withCtx((_2, _push3, _parent3, _scopeId2) => {
                   if (_push3) {
-                    _push3(`\u7F16\u8F91`);
+                    _push3(`编辑`);
                   } else {
                     return [
-                      createTextVNode("\u7F16\u8F91")
+                      createTextVNode("编辑")
                     ];
                   }
                 }),
@@ -651,7 +649,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                 onClick: ($event) => dialogVisible.value = false
               }, {
                 default: withCtx(() => [
-                  createTextVNode("\u5173\u95ED")
+                  createTextVNode("关闭")
                 ]),
                 _: 1
               }, 8, ["onClick"]),
@@ -661,7 +659,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                 onClick: handlePreviewEdit
               }, {
                 default: withCtx(() => [
-                  createTextVNode("\u7F16\u8F91")
+                  createTextVNode("编辑")
                 ]),
                 _: 1
               })) : createCommentVNode("", true)
@@ -669,10 +667,9 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
           }
         }),
         default: withCtx((_, _push2, _parent2, _scopeId) => {
-          var _a, _b, _c, _d, _e, _f;
           if (_push2) {
             if (dialogArticle.value) {
-              _push2(`<!--[--><h2 style="${ssrRenderStyle({ "font-size": "20px", "margin": "0 0 12px", "color": "#1a1a1a" })}" data-v-4fd74f5b${_scopeId}>${ssrInterpolate(dialogArticle.value.title)}</h2><div style="${ssrRenderStyle({ "font-size": "13px", "color": "#999", "margin-bottom": "16px" })}" data-v-4fd74f5b${_scopeId}><span data-v-4fd74f5b${_scopeId}>\u270D ${ssrInterpolate((_a = dialogArticle.value.author) == null ? void 0 : _a.username)}</span><span style="${ssrRenderStyle({ "margin-left": "16px" })}" data-v-4fd74f5b${_scopeId}>${ssrInterpolate((dialogArticle.value.createdAt || "").replace("T", " ").slice(0, 16))}</span>`);
+              _push2(`<!--[--><h2 style="${ssrRenderStyle({ "font-size": "20px", "margin": "0 0 12px", "color": "#1a1a1a" })}" data-v-4fd74f5b${_scopeId}>${ssrInterpolate(dialogArticle.value.title)}</h2><div style="${ssrRenderStyle({ "font-size": "13px", "color": "#999", "margin-bottom": "16px" })}" data-v-4fd74f5b${_scopeId}><span data-v-4fd74f5b${_scopeId}>✍ ${ssrInterpolate(dialogArticle.value.author?.username)}</span><span style="${ssrRenderStyle({ "margin-left": "16px" })}" data-v-4fd74f5b${_scopeId}>${ssrInterpolate((dialogArticle.value.createdAt || "").replace("T", " ").slice(0, 16))}</span>`);
               if (dialogArticle.value.category) {
                 _push2(ssrRenderComponent(_component_el_tag, {
                   size: "small",
@@ -693,7 +690,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                 _push2(`<!---->`);
               }
               _push2(`</div>`);
-              if ((_b = dialogArticle.value.tags) == null ? void 0 : _b.length) {
+              if (dialogArticle.value.tags?.length) {
                 _push2(`<div style="${ssrRenderStyle({ "margin-bottom": "12px" })}" data-v-4fd74f5b${_scopeId}><!--[-->`);
                 ssrRenderList(dialogArticle.value.tags, (tag) => {
                   _push2(ssrRenderComponent(_component_el_tag, {
@@ -718,7 +715,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                 _push2(`<!---->`);
               }
               _push2(ssrRenderComponent(_component_el_divider, { style: { "margin": "12px 0" } }, null, _parent2, _scopeId));
-              _push2(`<div class="article-content-render" style="${ssrRenderStyle({ "max-height": "400px", "overflow-y": "auto" })}" data-v-4fd74f5b${_scopeId}>${(_c = unref(sanitizeHtml)(dialogArticle.value.content)) != null ? _c : ""}</div><!--]-->`);
+              _push2(`<div class="article-content-render" style="${ssrRenderStyle({ "max-height": "400px", "overflow-y": "auto" })}" data-v-4fd74f5b${_scopeId}>${unref(sanitizeHtml)(dialogArticle.value.content) ?? ""}</div><!--]-->`);
             } else {
               _push2(`<!---->`);
             }
@@ -727,7 +724,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
               dialogArticle.value ? (openBlock(), createBlock(Fragment, { key: 0 }, [
                 createVNode("h2", { style: { "font-size": "20px", "margin": "0 0 12px", "color": "#1a1a1a" } }, toDisplayString(dialogArticle.value.title), 1),
                 createVNode("div", { style: { "font-size": "13px", "color": "#999", "margin-bottom": "16px" } }, [
-                  createVNode("span", null, "\u270D " + toDisplayString((_d = dialogArticle.value.author) == null ? void 0 : _d.username), 1),
+                  createVNode("span", null, "✍ " + toDisplayString(dialogArticle.value.author?.username), 1),
                   createVNode("span", { style: { "margin-left": "16px" } }, toDisplayString((dialogArticle.value.createdAt || "").replace("T", " ").slice(0, 16)), 1),
                   dialogArticle.value.category ? (openBlock(), createBlock(_component_el_tag, {
                     key: 0,
@@ -740,7 +737,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                     _: 1
                   })) : createCommentVNode("", true)
                 ]),
-                ((_e = dialogArticle.value.tags) == null ? void 0 : _e.length) ? (openBlock(), createBlock("div", {
+                dialogArticle.value.tags?.length ? (openBlock(), createBlock("div", {
                   key: 0,
                   style: { "margin-bottom": "12px" }
                 }, [
@@ -759,7 +756,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                 ])) : createCommentVNode("", true),
                 createVNode(_component_el_divider, { style: { "margin": "12px 0" } }),
                 (openBlock(), createBlock("div", {
-                  key: _ctx.previewKey + "-" + (((_f = dialogArticle.value) == null ? void 0 : _f.id) || 0),
+                  key: _ctx.previewKey + "-" + (dialogArticle.value?.id || 0),
                   class: "article-content-render",
                   style: { "max-height": "400px", "overflow-y": "auto" },
                   innerHTML: unref(sanitizeHtml)(dialogArticle.value.content)

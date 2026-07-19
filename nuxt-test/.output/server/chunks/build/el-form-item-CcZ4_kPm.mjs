@@ -244,27 +244,25 @@ var form_vue_vue_type_script_setup_true_lang_default = /* @__PURE__ */ defineCom
       return Promise.reject(validationErrors);
     };
     const validateField = async (modelProps = [], callback) => {
-      var _a;
       let result = false;
       const shouldThrow = !isFunction(callback);
       try {
         result = await doValidateField(modelProps);
-        if (result === true) await (callback == null ? void 0 : callback(result));
+        if (result === true) await callback?.(result);
         return result;
       } catch (e) {
         if (e instanceof Error) throw e;
         const invalidFields = e;
         if (props.scrollToError) {
-          if (formRef.value) (_a = formRef.value.querySelector(`.${ns.b()}-item.is-error`)) == null ? void 0 : _a.scrollIntoView(props.scrollIntoViewOptions);
+          if (formRef.value) formRef.value.querySelector(`.${ns.b()}-item.is-error`)?.scrollIntoView(props.scrollIntoViewOptions);
         }
-        !result && await (callback == null ? void 0 : callback(false, invalidFields));
+        !result && await callback?.(false, invalidFields);
         return shouldThrow && Promise.reject(invalidFields);
       }
     };
     const scrollToField = (prop) => {
-      var _a;
       const field = getField(prop);
-      if (field) (_a = field.$el) == null ? void 0 : _a.scrollIntoView(props.scrollIntoViewOptions);
+      if (field) field.$el?.scrollIntoView(props.scrollIntoViewOptions);
     };
     watch(() => props.rules, () => {
       if (props.validateOnRuleChange) validate().catch(NOOP);
@@ -423,8 +421,7 @@ var form_label_wrap_default = /* @__PURE__ */ defineComponent({
     const el = ref();
     const computedWidth = ref(0);
     const getLabelWidth = () => {
-      var _a;
-      if ((_a = el.value) == null ? void 0 : _a.firstElementChild) {
+      if (el.value?.firstElementChild) {
         const width = (void 0).getComputedStyle(el.value.firstElementChild).width;
         return Math.ceil(Number.parseFloat(width));
       } else return 0;
@@ -433,25 +430,21 @@ var form_label_wrap_default = /* @__PURE__ */ defineComponent({
       nextTick(() => {
         if (slots.default && props.isAutoWidth) {
           if (action === "update") computedWidth.value = getLabelWidth();
-          else if (action === "remove") formContext == null ? void 0 : formContext.deregisterLabelWidth(computedWidth.value);
+          else if (action === "remove") formContext?.deregisterLabelWidth(computedWidth.value);
         }
       });
     };
     const updateLabelWidthFn = () => updateLabelWidth("update");
     watch(computedWidth, (val, oldVal) => {
-      if (props.updateAll) formContext == null ? void 0 : formContext.registerLabelWidth(val, oldVal);
+      if (props.updateAll) formContext?.registerLabelWidth(val, oldVal);
     });
-    useResizeObserver(computed(() => {
-      var _a, _b;
-      return (_b = (_a = el.value) == null ? void 0 : _a.firstElementChild) != null ? _b : null;
-    }), updateLabelWidthFn);
+    useResizeObserver(computed(() => el.value?.firstElementChild ?? null), updateLabelWidthFn);
     return () => {
-      var _a, _b;
       if (!slots) return null;
       const { isAutoWidth } = props;
       if (isAutoWidth) {
-        const autoLabelWidth = formContext == null ? void 0 : formContext.autoLabelWidth;
-        const hasLabel = formItemContext == null ? void 0 : formItemContext.hasLabel;
+        const autoLabelWidth = formContext?.autoLabelWidth;
+        const hasLabel = formItemContext?.hasLabel;
         const style = {};
         if (hasLabel && autoLabelWidth && autoLabelWidth !== "auto") {
           const marginWidth = Math.max(0, Number.parseInt(autoLabelWidth, 10) - computedWidth.value);
@@ -462,8 +455,8 @@ var form_label_wrap_default = /* @__PURE__ */ defineComponent({
           "ref": el,
           "class": [ns.be("item", "label-wrap")],
           "style": style
-        }, [(_a = slots.default) == null ? void 0 : _a.call(slots)]);
-      } else return createVNode(Fragment, { "ref": el }, [(_b = slots.default) == null ? void 0 : _b.call(slots)]);
+        }, [slots.default?.()]);
+      } else return createVNode(Fragment, { "ref": el }, [slots.default?.()]);
     };
   }
 });
@@ -487,17 +480,15 @@ var form_item_vue_vue_type_script_setup_true_lang_default = /* @__PURE__ */ defi
     const formItemRef = ref();
     let initialValue = void 0;
     let isResettingField = false;
-    const labelPosition = computed(() => props.labelPosition || (formContext == null ? void 0 : formContext.labelPosition));
+    const labelPosition = computed(() => props.labelPosition || formContext?.labelPosition);
     const labelStyle = computed(() => {
-      var _a;
       if (labelPosition.value === "top") return {};
-      return { width: addUnit((_a = props.labelWidth) != null ? _a : formContext == null ? void 0 : formContext.labelWidth) };
+      return { width: addUnit(props.labelWidth ?? formContext?.labelWidth) };
     });
     const contentStyle = computed(() => {
-      var _a;
-      if (labelPosition.value === "top" || (formContext == null ? void 0 : formContext.inline)) return {};
+      if (labelPosition.value === "top" || formContext?.inline) return {};
       if (!props.label && !props.labelWidth && isNested) return {};
-      const labelWidth = addUnit((_a = props.labelWidth) != null ? _a : formContext == null ? void 0 : formContext.labelWidth);
+      const labelWidth = addUnit(props.labelWidth ?? formContext?.labelWidth);
       if (!props.label && !slots.label) return { marginLeft: labelWidth };
       return {};
     });
@@ -508,14 +499,14 @@ var form_item_vue_vue_type_script_setup_true_lang_default = /* @__PURE__ */ defi
       ns.is("validating", validateState.value === "validating"),
       ns.is("success", validateState.value === "success"),
       ns.is("required", isRequired.value || props.required),
-      ns.is("no-asterisk", formContext == null ? void 0 : formContext.hideRequiredAsterisk),
-      (formContext == null ? void 0 : formContext.requireAsteriskPosition) === "right" ? "asterisk-right" : "asterisk-left",
+      ns.is("no-asterisk", formContext?.hideRequiredAsterisk),
+      formContext?.requireAsteriskPosition === "right" ? "asterisk-right" : "asterisk-left",
       {
-        [ns.m("feedback")]: formContext == null ? void 0 : formContext.statusIcon,
+        [ns.m("feedback")]: formContext?.statusIcon,
         [ns.m(`label-${labelPosition.value}`)]: labelPosition.value
       }
     ]);
-    const _inlineMessage = computed(() => isBoolean(props.inlineMessage) ? props.inlineMessage : (formContext == null ? void 0 : formContext.inlineMessage) || false);
+    const _inlineMessage = computed(() => isBoolean(props.inlineMessage) ? props.inlineMessage : formContext?.inlineMessage || false);
     const validateClasses = computed(() => [ns.e("error"), { [ns.em("error", "inline")]: _inlineMessage.value }]);
     const propString = computed(() => {
       if (!props.prop) return "";
@@ -525,15 +516,14 @@ var form_item_vue_vue_type_script_setup_true_lang_default = /* @__PURE__ */ defi
       return !!(props.label || slots.label);
     });
     const labelFor = computed(() => {
-      var _a;
-      return (_a = props.for) != null ? _a : inputIds.value.length === 1 ? inputIds.value[0] : void 0;
+      return props.for ?? (inputIds.value.length === 1 ? inputIds.value[0] : void 0);
     });
     const isGroup = computed(() => {
       return !labelFor.value && hasLabel.value;
     });
     const isNested = !!parentFormItemContext;
     const fieldValue = computed(() => {
-      const model = formContext == null ? void 0 : formContext.model;
+      const model = formContext?.model;
       if (!model || !props.prop) return;
       return getProp(model, props.prop).value;
     });
@@ -541,7 +531,7 @@ var form_item_vue_vue_type_script_setup_true_lang_default = /* @__PURE__ */ defi
       const { required } = props;
       const rules = [];
       if (props.rules) rules.push(...castArray(props.rules));
-      const formRules = formContext == null ? void 0 : formContext.rules;
+      const formRules = formContext?.rules;
       if (formRules && props.prop) {
         const _rules = getProp(formRules, props.prop).value;
         if (_rules) rules.push(...castArray(_rules));
@@ -568,25 +558,21 @@ var form_item_vue_vue_type_script_setup_true_lang_default = /* @__PURE__ */ defi
       }).map(({ trigger: trigger2, ...rule }) => rule);
     };
     const isRequired = computed(() => normalizedRules.value.some((rule) => rule.required));
-    const shouldShowError = computed(() => {
-      var _a;
-      return validateStateDebounced.value === "error" && props.showMessage && ((_a = formContext == null ? void 0 : formContext.showMessage) != null ? _a : true);
-    });
-    const currentLabel = computed(() => `${props.label || ""}${(formContext == null ? void 0 : formContext.labelSuffix) || ""}`);
+    const shouldShowError = computed(() => validateStateDebounced.value === "error" && props.showMessage && (formContext?.showMessage ?? true));
+    const currentLabel = computed(() => `${props.label || ""}${formContext?.labelSuffix || ""}`);
     const setValidationState = (state) => {
       validateState.value = state;
     };
     const onValidationFailed = (error) => {
-      var _a, _b;
       const { errors, fields } = error;
       if (!errors || !fields) console.error(error);
       setValidationState("error");
-      validateMessage.value = errors ? (_b = (_a = errors == null ? void 0 : errors[0]) == null ? void 0 : _a.message) != null ? _b : `${props.prop} is required` : "";
-      formContext == null ? void 0 : formContext.emit("validate", props.prop, false, validateMessage.value);
+      validateMessage.value = errors ? errors?.[0]?.message ?? `${props.prop} is required` : "";
+      formContext?.emit("validate", props.prop, false, validateMessage.value);
     };
     const onValidationSucceeded = () => {
       setValidationState("success");
-      formContext == null ? void 0 : formContext.emit("validate", props.prop, true, "");
+      formContext?.emit("validate", props.prop, true, "");
     };
     const doValidate = async (rules) => {
       const modelName = propString.value;
@@ -602,21 +588,21 @@ var form_item_vue_vue_type_script_setup_true_lang_default = /* @__PURE__ */ defi
       if (isResettingField || !props.prop) return false;
       const hasCallback = isFunction(callback);
       if (!validateEnabled.value) {
-        callback == null ? void 0 : callback(false);
+        callback?.(false);
         return false;
       }
       const rules = getFilteredRule(trigger);
       if (rules.length === 0) {
-        callback == null ? void 0 : callback(true);
+        callback?.(true);
         return true;
       }
       setValidationState("validating");
       return doValidate(rules).then(() => {
-        callback == null ? void 0 : callback(true);
+        callback?.(true);
         return true;
       }).catch((err) => {
         const { fields } = err;
-        callback == null ? void 0 : callback(false, fields);
+        callback?.(false, fields);
         return hasCallback ? false : Promise.reject(fields);
       });
     };
@@ -626,7 +612,7 @@ var form_item_vue_vue_type_script_setup_true_lang_default = /* @__PURE__ */ defi
       isResettingField = false;
     };
     const resetField = async () => {
-      const model = formContext == null ? void 0 : formContext.model;
+      const model = formContext?.model;
       if (!model || !props.prop) return;
       const computedValue = getProp(model, props.prop);
       isResettingField = true;
@@ -710,7 +696,6 @@ var form_item_vue_vue_type_script_setup_true_lang_default = /* @__PURE__ */ defi
       setInitialValue
     });
     return (_ctx, _cache) => {
-      var _a;
       return openBlock(), createElementBlock("div", {
         ref_key: "formItemRef",
         ref: formItemRef,
@@ -719,7 +704,7 @@ var form_item_vue_vue_type_script_setup_true_lang_default = /* @__PURE__ */ defi
         "aria-labelledby": isGroup.value ? unref(labelId) : void 0
       }, [createVNode(unref(form_label_wrap_default), {
         "is-auto-width": labelStyle.value.width === "auto",
-        "update-all": ((_a = unref(formContext)) == null ? void 0 : _a.labelWidth) === "auto"
+        "update-all": unref(formContext)?.labelWidth === "auto"
       }, {
         default: withCtx(() => [!!(__props.label || _ctx.$slots.label) ? (openBlock(), createBlock(resolveDynamicComponent(labelFor.value ? "label" : "div"), {
           key: 0,

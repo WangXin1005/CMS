@@ -3,9 +3,9 @@ import { f as request } from './request-D_zzMMA3.mjs';
 const useArticle = () => {
   const getPublished = async (page = 1, size = 10, filters) => {
     const params = { page, size };
-    if (filters == null ? void 0 : filters.categoryId) params.categoryId = filters.categoryId;
-    if (filters == null ? void 0 : filters.tagId) params.tagId = filters.tagId;
-    if (filters == null ? void 0 : filters.keyword) params.keyword = filters.keyword;
+    if (filters?.categoryId) params.categoryId = filters.categoryId;
+    if (filters?.tagId) params.tagId = filters.tagId;
+    if (filters?.keyword) params.keyword = filters.keyword;
     const res = await request.get("/articles", { params });
     return res.data;
   };

@@ -5,6 +5,7 @@
  *  - 浏览器硬刷新（F5）时会恢复之前的滚动位置
  *  - 从文章预览页 router.back() 返回时，异步数据加载后页面变长导致偏离顶部
  *  - 通过禁用 scrollRestoration + 路由切换后延迟滚动解决
+ *  - 返回首页时从 sessionStorage 恢复滚动位置
  */
 export default defineNuxtPlugin((nuxtApp) => {
   // 禁用浏览器自带的滚动位置恢复
@@ -17,10 +18,22 @@ export default defineNuxtPlugin((nuxtApp) => {
     window.scrollTo(0, 0)
   })
 
-  // 每次路由切换完成后延迟滚动到顶部（等待异步数据渲染）
+  // 每次路由切换完成后处理滚动
   const router = nuxtApp.$router
-  router.afterEach(() => {
-    // 先立即滚一次，再延迟等待异步数据加载后的 DOM 高度变化
+  router.afterEach((to: any) => {
+    // 返回首页时恢复滚动位置
+    if (to.path === '/') {
+      const saved = sessionStorage.getItem('indexScrollY')
+      if (saved) {
+        const y = parseInt(saved, 10)
+        sessionStorage.removeItem('indexScrollY')
+        setTimeout(() => { document.documentElement.scrollTop = y; window.scrollTo(0, y) }, 50)
+        setTimeout(() => { document.documentElement.scrollTop = y; window.scrollTo(0, y) }, 150)
+        setTimeout(() => { document.documentElement.scrollTop = y; window.scrollTo(0, y) }, 350)
+        return
+      }
+    }
+    // 其他页面：滚到顶部
     window.scrollTo(0, 0)
     setTimeout(() => window.scrollTo(0, 0), 100)
     setTimeout(() => window.scrollTo(0, 0), 300)

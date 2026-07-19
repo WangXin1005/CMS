@@ -16,10 +16,13 @@ export default defineNuxtConfig({
     '/api/**': { proxy: process.env.NUXT_API_PROXY_TARGET || 'http://localhost:8080' },
   },
 
-  // 路由滚动行为：切换路由时回到页面顶部
+  // 路由滚动行为：返回首页时恢复位置，其他情况滚到顶部
   router: {
     options: {
-      scrollBehavior() {
+      scrollBehavior(_to: any, _from: any, savedPosition: any) {
+        if (savedPosition) return savedPosition
+        // 导航到首页时不强制滚动（由页面自行控制）
+        if (_to.path === '/') return false
         return { top: 0, behavior: 'instant' as const }
       },
     },
@@ -38,8 +41,10 @@ export default defineNuxtConfig({
   vite: {
     optimizeDeps: {
       include: [
+        'axios',
         'dayjs',
         'dayjs/plugin/*.js',
+        'isomorphic-dompurify',
         'lodash-unified',
         'sortablejs',
       ],

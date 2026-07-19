@@ -14,7 +14,7 @@
  *   onMounted → loadArticles() + loadSidebar() 并行加载
  *   用户交互 → 更新筛选条件 → currentPage=1 → loadArticles()
  */
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted, nextTick } from 'vue'
 import { Search } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 
@@ -28,16 +28,21 @@ const { getList: getTags } = useTag()
 const articles = ref<Record<string, unknown>[]>([])
 const loading = ref(true)
 const total = ref(0)
-const currentPage = ref(1)
-const pageSize = ref(10)
+const currentPage = useState('index:currentPage', () => 1)
+const pageSize = ref(12)
 
-const searchKeyword = ref('')
-const activeCategoryId = ref<number | null>(null)
-const activeTagId = ref<number | null>(null)
+const searchKeyword = useState('index:searchKeyword', () => '')
+const activeCategoryId = useState<number | null>('index:activeCategoryId', () => null)
+const activeTagId = useState<number | null>('index:activeTagId', () => null)
 
 const categories = ref<Record<string, unknown>[]>([])
 const tags = ref<Record<string, unknown>[]>([])
-
+const categoryExpanded = ref(false)
+const tagExpanded = ref(false)
+const categoryOverflow = ref(false)
+const tagOverflow = ref(false)
+const categoryItemsRef = ref(null)
+const tagItemsRef = ref(null)
 async function loadArticles() {
   loading.value = true
   try {
@@ -66,42 +71,82 @@ async function loadSidebar() {
     categories.value = []
     tags.value = []
   }
+  await nextTick()
+  checkOverflow()
 }
 
 function handleSearch() {
   currentPage.value = 1
   loadArticles()
+  window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
 function selectCategory(catId: number) {
   activeCategoryId.value = activeCategoryId.value === catId ? null : catId
-  activeTagId.value = null
   currentPage.value = 1
   loadArticles()
+  window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
 function selectTag(tagId: number) {
   activeTagId.value = activeTagId.value === tagId ? null : tagId
-  activeCategoryId.value = null
   currentPage.value = 1
   loadArticles()
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+}
+
+function handlePageChange(page: number) {
+  currentPage.value = page
+  loadArticles()
+  window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
 function navigateToArticle(slug: string) {
+  sessionStorage.setItem('indexScrollY', String(window.scrollY || document.documentElement.scrollTop))
   navigateTo('/article/' + slug)
+}
+
+
+function checkOverflow() {
+  if (categoryItemsRef.value) categoryOverflow.value = categoryItemsRef.value.scrollHeight > 27
+  if (tagItemsRef.value) tagOverflow.value = tagItemsRef.value.scrollHeight > 28
 }
 
 onMounted(async () => {
   await Promise.all([loadArticles(), loadSidebar()])
+  await nextTick()
+  checkOverflow()
 })
+
+
 </script>
 
 <template>
   <div class="blog-layout">
-    <div class="search-bar-wrapper">
+    <div class="sticky-top">
       <div class="search-bar">
         <el-input v-model="searchKeyword" placeholder="搜索文章..." clearable :prefix-icon="Search" size="large"
           @clear="handleSearch" @keyup.enter="handleSearch" />
+      </div>
+      <div class="filter-bar">
+        <div class="filter-section">
+          <span class="filter-label">📂 分类</span>
+          <div class="filter-items" :class="{ collapsed: !categoryExpanded }" ref="categoryItemsRef">
+            <span v-for="cat in categories" :key="cat.id" :class="{ active: activeCategoryId === cat.id }"
+              class="filter-chip" @click="selectCategory(cat.id)">{{ cat.name }}</span>
+            <span v-if="categories.length === 0" class="filter-empty">暂无分类</span>
+          </div>
+          <div v-if="categoryOverflow" class="expand-row" @click="categoryExpanded = !categoryExpanded">{{ categoryExpanded ? '▲ 收起' : '▼ 展开' }}</div>
+        </div>
+        <div class="filter-section">
+          <span class="filter-label">🏷️ 标签</span>
+          <div class="filter-items" :class="{ collapsed: !tagExpanded }" ref="tagItemsRef">
+            <span v-for="tag in tags" :key="tag.id" :class="{ active: activeTagId === tag.id }"
+              class="filter-chip tag-chip" @click="selectTag(tag.id)">{{ tag.name }}</span>
+            <span v-if="tags.length === 0" class="filter-empty">暂无标签</span>
+          </div>
+          <div v-if="tagOverflow" class="expand-row" @click="tagExpanded = !tagExpanded">{{ tagExpanded ? '▲ 收起' : '▼ 展开' }}</div>
+        </div>
       </div>
     </div>
     <div class="blog-content-row">
@@ -145,38 +190,16 @@ onMounted(async () => {
         <div v-if="total > pageSize" class="pagination-wrapper">
           <el-pagination v-model:current-page="currentPage" :page-size="pageSize" :total="total"
             layout="prev, pager, next, jumper, total" :hide-on-single-page="false" background
-            @current-change="loadArticles" />
+            @current-change="handlePageChange" />
         </div>
       </div>
-
-      <aside class="sidebar">
-        <div class="widget">
-          <h3 class="widget-title">📂 分类</h3>
-          <ul v-if="categories.length" class="category-list">
-            <li v-for="cat in categories" :key="cat.id" :class="{ active: activeCategoryId === cat.id }"
-              @click="selectCategory(cat.id)">
-              {{ cat.name }}
-            </li>
-          </ul>
-          <p v-else class="empty-hint">暂无分类</p>
-        </div>
-        <div class="widget">
-          <h3 class="widget-title">🏷️ 标签</h3>
-          <div v-if="tags.length" class="tag-cloud">
-            <el-tag v-for="tag in tags" :key="tag.id" :type="activeTagId === tag.id ? 'primary' : undefined"
-              :effect="activeTagId === tag.id ? 'dark' : undefined" class="tag-item" @click="selectTag(tag.id)">
-              {{ tag.name }}
-            </el-tag>
-          </div>
-          <p v-else class="empty-hint">暂无标签</p>
-        </div>
-      </aside>
     </div>
   </div>
 </template>
 
 <style lang="less" scoped>
 .blog-layout {
+  width: 100%;
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 16px;
@@ -204,24 +227,136 @@ onMounted(async () => {
 .main-content {
   flex: 1;
   min-width: 0;
-  margin-top: 15px;
+  margin-top: 0;
 }
 
-.search-bar-wrapper {
-  position: sticky;
-  top: 60px;
-  z-index: 50;
-  background: #f0f2f5;
-  padding: 16px 0 8px;
-}
 
 .blog-content-row {
   display: flex;
   gap: 24px;
 }
 
+.sticky-top {
+  position: sticky;
+  top: 60px;
+  z-index: 50;
+  background: #f0f2f5;
+  padding-top: 16px;
+  width: 100%;
+}
+
+.filter-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+.filter-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 15px 16px 10px 16px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  width: 100%;
+}
+
+.filter-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #999;
+  white-space: nowrap;
+  line-height: 20px;
+  min-width: 52px;
+  margin-top: -5px;
+}
+
+.filter-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.filter-items.collapsed {
+  max-height: 27px;
+  overflow: hidden;
+  padding-top: 2px;
+}
+
+.expand-row {
+  text-align: center;
+  font-size: 12px;
+  color: #999;
+  cursor: pointer;
+  padding: 6px 0 0 0;
+  transition: color 0.2s;
+  line-height: 7px;
+}
+
+.expand-row:hover {
+  color: #667eea;
+}
+
+.filter-chip {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 16px;
+  font-size: 13px;
+  color: #555;
+  background: #f8f9ff;
+  border: 1.5px solid #d4d9f0;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  white-space: nowrap;
+  font-weight: 500;
+}
+
+.filter-chip:hover {
+  color: #667eea;
+  background: #eef0ff;
+  border-color: #667eea;
+  box-shadow: 0 2px 6px rgba(102, 126, 234, 0.15);
+  transform: translateY(-1px);
+}
+
+.filter-chip.active {
+  color: #fff;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  border-color: transparent;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+  font-weight: 600;
+}
+
+.tag-chip {
+  border-radius: 4px;
+  background: #f5fdf5;
+  border-color: #c8e6c9;
+  color: #4a7c4f;
+}
+
+.tag-chip:hover {
+  color: #52c41a;
+  background: #eef9ee;
+  border-color: #52c41a;
+  box-shadow: 0 2px 6px rgba(82, 196, 26, 0.15);
+}
+
+.tag-chip.active {
+  color: #fff;
+  background: linear-gradient(135deg, #52c41a, #389e0d);
+  box-shadow: 0 2px 8px rgba(82, 196, 26, 0.3);
+}
+
+.filter-empty {
+  font-size: 13px;
+  color: #ccc;
+  line-height: 28px;
+}
+
 .search-bar {
-  margin-bottom: 0;
+  margin-bottom: 10px;
 }
 
 .search-bar :deep(.el-input__wrapper) {
@@ -232,7 +367,7 @@ onMounted(async () => {
 .article-grid,
 .skeleton-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 24px;
 }
 
@@ -242,98 +377,15 @@ onMounted(async () => {
   margin-top: 40px;
 }
 
-/* ===== 侧边栏 ===== */
-.sidebar {
-  margin-top: 15px;
-  width: 280px;
-  flex-shrink: 0;
-}
-
-.widget {
-  background: #fff;
-  border-radius: 10px;
-  padding: 20px;
-  margin-bottom: 20px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
-}
-
-.widget-title {
-  font-size: 15px;
-  font-weight: 600;
-  margin: 0 0 14px;
-  padding-bottom: 10px;
-  border-bottom: 2px solid #667eea;
-  color: #333;
-}
-
-.category-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.category-list li {
-  padding: 9px 0;
-  cursor: pointer;
-  transition: all 0.2s;
-  color: #555;
-  font-size: 14px;
-  border-bottom: 1px solid #f5f5f5;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-
-  &:last-child {
-    border-bottom: none;
-  }
-
-  &:hover {
-    color: #667eea;
-    padding-left: 4px;
-  }
-
-  &.active {
-    color: #667eea;
-    font-weight: 600;
-  }
-}
-
-.tag-cloud {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.tag-item {
-  cursor: pointer;
-  transition: all 0.25s ease;
-}
-
-.tag-item:hover {
-  color: #409eff !important;
-  border-color: #409eff !important;
-}
-
-.empty-hint {
-  color: #999;
-  font-size: 14px;
-  text-align: center;
-  padding: 16px 0;
-  margin: 0;
-}
-
 @media (max-width: 768px) {
-  .blog-layout {
+  .filter-bar {
     flex-direction: column;
+    gap: 8px;
   }
 
   .article-grid,
   .skeleton-grid {
     grid-template-columns: 1fr;
-  }
-
-  .sidebar {
-    width: 100%;
   }
 }
 </style>

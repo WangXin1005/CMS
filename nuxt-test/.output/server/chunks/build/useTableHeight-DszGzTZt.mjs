@@ -22,8 +22,7 @@ const mousewheel = function(element, callback) {
   }
 };
 const removeWheelHandler = (element) => {
-  var _a;
-  if ((_a = element["_Mousewheel"]) == null ? void 0 : _a.wheelHandler) {
+  if (element["_Mousewheel"]?.wheelHandler) {
     element.removeEventListener("wheel", element[SCOPE].wheelHandler);
     element[SCOPE] = null;
   }
@@ -270,8 +269,7 @@ let columnIdSeed = 1;
 const createTableId = (namespace) => `${namespace}-table_${tableIdSeed++}`;
 const createTableColumnId = (parentId) => `${parentId}_column_${columnIdSeed++}`;
 const getCell = function(event) {
-  var _a;
-  return (_a = event.target) == null ? void 0 : _a.closest("td");
+  return event.target?.closest("td");
 };
 const orderBy = function(array, sortKey, reverse, sortMethod, sortBy) {
   if (!sortKey && !sortMethod && (!sortBy || isArray(sortBy) && !sortBy.length)) return array;
@@ -288,11 +286,10 @@ const orderBy = function(array, sortKey, reverse, sortMethod, sortBy) {
     return [isObject(value) ? sortKey ? get(value, sortKey) : null : value];
   };
   const compare = function(a, b) {
-    var _a, _b, _c, _d, _e, _f;
     if (sortMethod) return sortMethod(a.value, b.value);
-    for (let i = 0, len = (_b = (_a = a.key) == null ? void 0 : _a.length) != null ? _b : 0; i < len; i++) {
-      if (((_c = a.key) == null ? void 0 : _c[i]) < ((_d = b.key) == null ? void 0 : _d[i])) return -1;
-      if (((_e = a.key) == null ? void 0 : _e[i]) > ((_f = b.key) == null ? void 0 : _f[i])) return 1;
+    for (let i = 0, len = a.key?.length ?? 0; i < len; i++) {
+      if (a.key?.[i] < b.key?.[i]) return -1;
+      if (a.key?.[i] > b.key?.[i]) return 1;
     }
     return 0;
   };
@@ -381,7 +378,7 @@ function parseHeight(height) {
   return null;
 }
 function toggleRowStatus(statusArr, row, newVal, tableTreeProps, selectable, rowIndex, rowKey) {
-  let _rowIndex = rowIndex != null ? rowIndex : 0;
+  let _rowIndex = rowIndex ?? 0;
   let changed = false;
   const getIndex = () => {
     if (!rowKey) return statusArr.indexOf(row);
@@ -390,7 +387,7 @@ function toggleRowStatus(statusArr, row, newVal, tableTreeProps, selectable, row
   };
   const index = getIndex();
   const included = index !== -1;
-  const isRowSelectable = selectable == null ? void 0 : selectable.call(null, row, _rowIndex);
+  const isRowSelectable = selectable?.call(null, row, _rowIndex);
   const toggleStatus = (type) => {
     if (type === "add") statusArr.push(row);
     else statusArr.splice(index, 1);
@@ -398,7 +395,7 @@ function toggleRowStatus(statusArr, row, newVal, tableTreeProps, selectable, row
   };
   const getChildrenCount = (row2) => {
     let count = 0;
-    const children = (tableTreeProps == null ? void 0 : tableTreeProps.children) && row2[tableTreeProps.children];
+    const children = tableTreeProps?.children && row2[tableTreeProps.children];
     if (children && isArray(children)) {
       count += children.length;
       children.forEach((item) => {
@@ -411,8 +408,8 @@ function toggleRowStatus(statusArr, row, newVal, tableTreeProps, selectable, row
     if (newVal && !included) toggleStatus("add");
     else if (!newVal && included) toggleStatus("remove");
   } else included ? toggleStatus("remove") : toggleStatus("add");
-  if (!(tableTreeProps == null ? void 0 : tableTreeProps.checkStrictly) && (tableTreeProps == null ? void 0 : tableTreeProps.children) && isArray(row[tableTreeProps.children])) row[tableTreeProps.children].forEach((item) => {
-    const childChanged = toggleRowStatus(statusArr, item, newVal != null ? newVal : !included, tableTreeProps, selectable, _rowIndex + 1, rowKey);
+  if (!tableTreeProps?.checkStrictly && tableTreeProps?.children && isArray(row[tableTreeProps.children])) row[tableTreeProps.children].forEach((item) => {
+    const childChanged = toggleRowStatus(statusArr, item, newVal ?? !included, tableTreeProps, selectable, _rowIndex + 1, rowKey);
     _rowIndex += getChildrenCount(item) + 1;
     if (childChanged) changed = childChanged;
   });
@@ -441,7 +438,7 @@ function walkTreeNode(root, cb, childrenKey = "children", lazyKey = "hasChildren
   });
 }
 const getTableOverflowTooltipProps = (props, innerText, row, column) => {
-  const tooltipFormatterContent = isFunction(column == null ? void 0 : column.tooltipFormatter) ? column.tooltipFormatter({
+  const tooltipFormatterContent = isFunction(column?.tooltipFormatter) ? column.tooltipFormatter({
     row,
     column,
     cellValue: getProp(row, column.property).value
@@ -454,28 +451,27 @@ const getTableOverflowTooltipProps = (props, innerText, row, column) => {
   };
   return {
     slotContent: null,
-    content: tooltipFormatterContent != null ? tooltipFormatterContent : innerText,
+    content: tooltipFormatterContent ?? innerText,
     strategy: "fixed",
     ...props
   };
 };
 let removePopper = null;
 function createTablePopper(props, popperContent, row, column, trigger, table) {
-  var _a;
   const tableOverflowTooltipProps = getTableOverflowTooltipProps(props, popperContent, row, column);
   const mergedProps = {
     ...tableOverflowTooltipProps,
     slotContent: void 0
   };
-  if ((removePopper == null ? void 0 : removePopper.trigger) === trigger) {
-    const comp = (_a = removePopper.vm) == null ? void 0 : _a.component;
-    merge(comp == null ? void 0 : comp.props, mergedProps);
+  if (removePopper?.trigger === trigger) {
+    const comp = removePopper.vm?.component;
+    merge(comp?.props, mergedProps);
     if (comp && tableOverflowTooltipProps.slotContent) comp.slots.content = () => [tableOverflowTooltipProps.slotContent];
     return;
   }
-  removePopper == null ? void 0 : removePopper();
-  const parentNode = table == null ? void 0 : table.refs.tableWrapper;
-  const ns = parentNode == null ? void 0 : parentNode.dataset.prefix;
+  removePopper?.();
+  const parentNode = table?.refs.tableWrapper;
+  const ns = parentNode?.dataset.prefix;
   const vm = createVNode(ElTooltip, {
     virtualTriggering: true,
     virtualRef: trigger,
@@ -493,20 +489,19 @@ function createTablePopper(props, popperContent, row, column, trigger, table) {
   const container = (void 0).createElement("div");
   render(vm, container);
   vm.component.exposed.onOpen();
-  const scrollContainer = parentNode == null ? void 0 : parentNode.querySelector(`.${ns}-scrollbar__wrap`);
+  const scrollContainer = parentNode?.querySelector(`.${ns}-scrollbar__wrap`);
   removePopper = () => {
-    var _a2, _b;
-    if ((_b = (_a2 = vm.component) == null ? void 0 : _a2.exposed) == null ? void 0 : _b.onClose) vm.component.exposed.onClose();
+    if (vm.component?.exposed?.onClose) vm.component.exposed.onClose();
     render(null, container);
     const currentRemovePopper = removePopper;
-    scrollContainer == null ? void 0 : scrollContainer.removeEventListener("scroll", currentRemovePopper);
+    scrollContainer?.removeEventListener("scroll", currentRemovePopper);
     currentRemovePopper.trigger = void 0;
     currentRemovePopper.vm = void 0;
     removePopper = null;
   };
-  removePopper.trigger = trigger != null ? trigger : void 0;
+  removePopper.trigger = trigger ?? void 0;
   removePopper.vm = vm;
-  scrollContainer == null ? void 0 : scrollContainer.addEventListener("scroll", removePopper);
+  scrollContainer?.addEventListener("scroll", removePopper);
 }
 function getCurrentColumns(column) {
   if (column.children) return flatMap(column.children, getCurrentColumns);
@@ -583,9 +578,8 @@ function useExpand(watcherData) {
   const defaultExpandAll = ref(false);
   const expandRows = ref([]);
   const canRowExpand = (row, index) => {
-    var _a;
     const expandableFn = instance.store.states.rowExpandable.value;
-    return (_a = expandableFn == null ? void 0 : expandableFn(row, index)) != null ? _a : true;
+    return expandableFn?.(row, index) ?? true;
   };
   const updateExpandRows = () => {
     const data = watcherData.data.value || [];
@@ -643,12 +637,11 @@ function useCurrent(watcherData) {
     _currentRowKey.value = null;
   };
   const setCurrentRowByKey = (key) => {
-    var _a;
     const { data, rowKey } = watcherData;
     const oldCurrentRow = currentRow.value;
     let _currentRow = null;
-    if (rowKey.value) _currentRow = (_a = (unref(data) || []).find((item) => getRowIdentity(item, rowKey.value) === key)) != null ? _a : null;
-    currentRow.value = _currentRow != null ? _currentRow : null;
+    if (rowKey.value) _currentRow = (unref(data) || []).find((item) => getRowIdentity(item, rowKey.value) === key) ?? null;
+    currentRow.value = _currentRow ?? null;
     instance.emit("current-change", currentRow.value, oldCurrentRow);
   };
   const updateCurrentRow = (_currentRow) => {
@@ -739,8 +732,7 @@ function useTree(watcherData) {
     return res;
   };
   const updateTreeData = (ifChangeExpandRowKeys = false, ifExpandAll) => {
-    var _a, _b;
-    ifExpandAll || (ifExpandAll = (_a = instance.store) == null ? void 0 : _a.states.defaultExpandAll.value);
+    ifExpandAll ||= instance.store?.states.defaultExpandAll.value;
     const nested = normalizedData.value;
     const normalizedLazyNode_ = normalizedLazyNode.value;
     const keys = Object.keys(nested);
@@ -750,10 +742,10 @@ function useTree(watcherData) {
       const rootLazyRowKeys = [];
       const getExpanded = (oldValue, key) => {
         if (ifChangeExpandRowKeys) if (expandRowKeys.value) return ifExpandAll || expandRowKeys.value.includes(key);
-        else return !!(ifExpandAll || (oldValue == null ? void 0 : oldValue.expanded));
+        else return !!(ifExpandAll || oldValue?.expanded);
         else {
           const included = ifExpandAll || expandRowKeys.value && expandRowKeys.value.includes(key);
-          return !!((oldValue == null ? void 0 : oldValue.expanded) || included);
+          return !!(oldValue?.expanded || included);
         }
       };
       keys.forEach((key) => {
@@ -770,11 +762,10 @@ function useTree(watcherData) {
       });
       const lazyKeys = Object.keys(normalizedLazyNode_);
       if (lazy.value && lazyKeys.length && rootLazyRowKeys.length) lazyKeys.forEach((key) => {
-        var _a2;
         const oldValue = oldTreeData[key];
         const lazyNodeChildren = normalizedLazyNode_[key].children;
         if (rootLazyRowKeys.includes(key)) {
-          if (((_a2 = newTreeData[key].children) == null ? void 0 : _a2.length) !== 0) throw new Error("[ElTable]children must be an empty array.");
+          if (newTreeData[key].children?.length !== 0) throw new Error("[ElTable]children must be an empty array.");
           newTreeData[key].children = lazyNodeChildren;
         } else {
           const { loaded = false, loading = false } = oldValue || {};
@@ -790,7 +781,7 @@ function useTree(watcherData) {
       });
     }
     treeData.value = newTreeData;
-    (_b = instance.store) == null ? void 0 : _b.updateTableScrollY();
+    instance.store?.updateTableScrollY();
   };
   watch(() => expandRowKeys.value, () => {
     updateTreeData(true);
@@ -890,9 +881,8 @@ const doFlattenColumns = (columns) => {
   return result;
 };
 function useWatcher$1() {
-  var _a;
   const instance = getCurrentInstance();
-  const { size: tableSize } = toRefs((_a = instance.proxy) == null ? void 0 : _a.$props);
+  const { size: tableSize } = toRefs(instance.proxy?.$props);
   const rowKey = ref(null);
   const data = ref([]);
   const _data = ref([]);
@@ -926,26 +916,23 @@ function useWatcher$1() {
     return rowKey.value ? getKeysMap(selection.value, rowKey.value) : void 0;
   });
   const getRowChildren = (row) => {
-    var _a2, _b, _c;
     const { childrenColumnName, lazyTreeNodeMap } = instance.store.states;
-    const inlineChildren = (_a2 = row[childrenColumnName.value]) != null ? _a2 : [];
+    const inlineChildren = row[childrenColumnName.value] ?? [];
     if (!rowKey.value) return inlineChildren;
     const id = getRowIdentity(row, rowKey.value);
-    return [...(_c = (_b = lazyTreeNodeMap.value) == null ? void 0 : _b[id]) != null ? _c : [], ...inlineChildren];
+    return [...lazyTreeNodeMap.value?.[id] ?? [], ...inlineChildren];
   };
   watch(data, () => {
-    var _a2;
     if (instance.state) {
       scheduleLayout(false);
-      if (instance.props.tableLayout === "auto") (_a2 = instance.refs.tableHeaderRef) == null ? void 0 : _a2.updateFixedColumnStyle();
+      if (instance.props.tableLayout === "auto") instance.refs.tableHeaderRef?.updateFixedColumnStyle();
     }
   }, { deep: true });
   const assertRowKey = () => {
     if (!rowKey.value) throw new Error("[ElTable] prop row-key is required");
   };
   const updateChildFixed = (column) => {
-    var _a2;
-    (_a2 = column.children) == null ? void 0 : _a2.forEach((childColumn) => {
+    column.children?.forEach((childColumn) => {
       childColumn.fixed = column.fixed;
       updateChildFixed(childColumn);
     });
@@ -1002,14 +989,13 @@ function useWatcher$1() {
     return map;
   });
   const updateSelectionByChildren = (options = {}) => {
-    var _a2;
     const { emitChange = true } = options;
     if (treeStates.checkStrictly.value || !rowKey.value) {
       selectionIndeterminate.value = {};
       return;
     }
     const rowKeyValue = rowKey.value;
-    const rowIndexMapValue = (_a2 = options.rowIndexMap) != null ? _a2 : rowIndexMap.value;
+    const rowIndexMapValue = options.rowIndexMap ?? rowIndexMap.value;
     const selectableFn = selectable.value;
     const rowIdCache = /* @__PURE__ */ new WeakMap();
     const getCachedRowId = (row) => {
@@ -1042,7 +1028,6 @@ function useWatcher$1() {
         selectableCount
       };
       rows.forEach((row) => {
-        var _a3;
         const id = getCachedRowId(row);
         const children = getRowChildren(row);
         let childSelectedCount = 0;
@@ -1052,7 +1037,7 @@ function useWatcher$1() {
           childSelectedCount = childResult.selectedCount;
           childSelectableCount = childResult.selectableCount;
         }
-        const rowSelectable = selectableFn ? selectableFn.call(null, row, (_a3 = rowIndexMapValue.get(id)) != null ? _a3 : 0) : true;
+        const rowSelectable = selectableFn ? selectableFn.call(null, row, rowIndexMapValue.get(id) ?? 0) : true;
         if (rowSelectable) {
           if (childSelectableCount > 0) {
             const allSelected = childSelectedCount === childSelectableCount;
@@ -1092,11 +1077,10 @@ function useWatcher$1() {
     if (oldSelection.length) instance.emit("selection-change", []);
   };
   const cleanSelection = () => {
-    var _a2, _b;
     let deleted;
     if (rowKey.value) {
       deleted = [];
-      const childrenKey = (_b = (_a2 = instance == null ? void 0 : instance.store) == null ? void 0 : _a2.states) == null ? void 0 : _b.childrenColumnName.value;
+      const childrenKey = instance?.store?.states?.childrenColumnName.value;
       const dataMap = getKeysMap(data.value, rowKey.value, true, childrenKey);
       const { lazyTreeNodeMap } = instance.store.states;
       if (lazyTreeNodeMap.value) Object.entries(lazyTreeNodeMap.value).forEach(([parentId, lazyRows]) => {
@@ -1121,32 +1105,30 @@ function useWatcher$1() {
     return (selection.value || []).slice();
   };
   const cascadeToLazyChildren = (row, selected, rowIndexMap2) => {
-    var _a2, _b, _c, _d;
     if (!rowKey.value || treeStates.checkStrictly.value || !treeStates.lazy.value) return;
     const { lazyTreeNodeMap, childrenColumnName } = instance.store.states;
     const id = getRowIdentity(row, rowKey.value);
-    const lazyChildren = (_b = (_a2 = lazyTreeNodeMap.value) == null ? void 0 : _a2[id]) != null ? _b : [];
-    const inlineChildren = (_c = row[childrenColumnName.value]) != null ? _c : [];
+    const lazyChildren = lazyTreeNodeMap.value?.[id] ?? [];
+    const inlineChildren = row[childrenColumnName.value] ?? [];
     const treeProps = {
       children: childrenColumnName.value,
       checkStrictly: false
     };
     for (const child of lazyChildren) {
-      const childIndex = (_d = rowIndexMap2.get(getRowIdentity(child, rowKey.value))) != null ? _d : 0;
+      const childIndex = rowIndexMap2.get(getRowIdentity(child, rowKey.value)) ?? 0;
       toggleRowStatus(selection.value, child, selected, treeProps, selectable.value, childIndex, rowKey.value);
       cascadeToLazyChildren(child, selected, rowIndexMap2);
     }
     for (const child of inlineChildren) cascadeToLazyChildren(child, selected, rowIndexMap2);
   };
   const toggleRowSelection = (row, selected, emitChange = true, ignoreSelectable = false) => {
-    var _a2, _b, _c, _d;
     const treeProps = {
-      children: (_b = (_a2 = instance == null ? void 0 : instance.store) == null ? void 0 : _a2.states) == null ? void 0 : _b.childrenColumnName.value,
-      checkStrictly: (_d = (_c = instance == null ? void 0 : instance.store) == null ? void 0 : _c.states) == null ? void 0 : _d.checkStrictly.value
+      children: instance?.store?.states?.childrenColumnName.value,
+      checkStrictly: instance?.store?.states?.checkStrictly.value
     };
     if (toggleRowStatus(selection.value, row, selected, treeProps, ignoreSelectable ? void 0 : selectable.value, data.value.indexOf(row), rowKey.value)) {
       if (treeStates.lazy.value && !treeStates.checkStrictly.value) {
-        cascadeToLazyChildren(row, selected != null ? selected : isSelected(row), rowIndexMap.value);
+        cascadeToLazyChildren(row, selected ?? isSelected(row), rowIndexMap.value);
         updateSelectionByChildren({
           emitChange: false,
           rowIndexMap: rowIndexMap.value
@@ -1158,12 +1140,11 @@ function useWatcher$1() {
     }
   };
   const _toggleAllSelection = () => {
-    var _a2, _b, _c;
     const value = selectOnIndeterminate.value ? !isAllSelected.value : !(isAllSelected.value || selection.value.length);
     isAllSelected.value = value;
     let selectionChanged = false;
     let childrenCount = 0;
-    const rowKey2 = (_b = (_a2 = instance == null ? void 0 : instance.store) == null ? void 0 : _a2.states) == null ? void 0 : _b.rowKey.value;
+    const rowKey2 = instance?.store?.states?.rowKey.value;
     const { childrenColumnName } = instance.store.states;
     const treeProps = {
       children: childrenColumnName.value,
@@ -1176,7 +1157,7 @@ function useWatcher$1() {
     });
     const rowIndexMapVal = rowIndexMap.value;
     if (treeStates.lazy.value && !treeStates.checkStrictly.value && rowKey2) for (const lazyRows of Object.values(treeStates.lazyTreeNodeMap.value)) for (const child of lazyRows) {
-      const childIndex = (_c = rowIndexMapVal.get(getRowIdentity(child, rowKey2))) != null ? _c : 0;
+      const childIndex = rowIndexMapVal.get(getRowIdentity(child, rowKey2)) ?? 0;
       if (toggleRowStatus(selection.value, child, value, treeProps, selectable.value, childIndex, rowKey2)) selectionChanged = true;
       cascadeToLazyChildren(child, value, rowIndexMapVal);
     }
@@ -1188,8 +1169,7 @@ function useWatcher$1() {
     instance.emit("select-all", (selection.value || []).slice());
   };
   const updateAllSelected = () => {
-    var _a2;
-    if (((_a2 = data.value) == null ? void 0 : _a2.length) === 0) {
+    if (data.value?.length === 0) {
       isAllSelected.value = false;
       return;
     }
@@ -1216,11 +1196,10 @@ function useWatcher$1() {
     return !!selectionIndeterminate.value[id];
   };
   const getChildrenCount = (rowKey2) => {
-    var _a2;
     if (!instance || !instance.store) return 0;
     const { treeData } = instance.store.states;
     let count = 0;
-    const children = (_a2 = treeData.value[rowKey2]) == null ? void 0 : _a2.children;
+    const children = treeData.value[rowKey2]?.children;
     if (children) {
       count += children.length;
       children.forEach((childKey) => {
@@ -1256,15 +1235,14 @@ function useWatcher$1() {
     filteredData.value = sourceData;
   };
   const execSort = () => {
-    var _a2;
-    data.value = sortData((_a2 = filteredData.value) != null ? _a2 : [], {
+    data.value = sortData(filteredData.value ?? [], {
       sortingColumn: sortingColumn.value,
       sortProp: sortProp.value,
       sortOrder: sortOrder.value
     });
   };
   const execQuery = (ignore = void 0) => {
-    if (!(ignore == null ? void 0 : ignore.filter)) execFilter();
+    if (!ignore?.filter) execFilter();
     execSort();
   };
   const clearFilter = (columnKeys) => {
@@ -1330,12 +1308,11 @@ function useWatcher$1() {
     updateAllSelected();
   });
   watch(() => treeStates.lazyTreeNodeMap.value, () => {
-    var _a2;
     if (!treeStates.lazy.value || treeStates.checkStrictly.value || !rowKey.value) return;
     const rowIndexMapVal = rowIndexMap.value;
     const prevLen = selection.value.length;
     for (const parentId of Object.keys(treeStates.lazyTreeNodeMap.value)) {
-      if (!((_a2 = selectedMap.value) == null ? void 0 : _a2[parentId])) continue;
+      if (!selectedMap.value?.[parentId]) continue;
       cascadeToLazyChildren(selectedMap.value[parentId].row, true, rowIndexMapVal);
     }
     const cascadeChanged = selection.value.length !== prevLen;
@@ -1417,17 +1394,15 @@ function useWatcher$1() {
 }
 function replaceColumn(array, column) {
   return array.map((item) => {
-    var _a;
     if (item.id === column.id) return column;
-    else if ((_a = item.children) == null ? void 0 : _a.length) item.children = replaceColumn(item.children, column);
+    else if (item.children?.length) item.children = replaceColumn(item.children, column);
     return item;
   });
 }
 function sortColumn(array) {
   array.forEach((item) => {
-    var _a, _b;
-    item.no = (_a = item.getColumnIndex) == null ? void 0 : _a.call(item);
-    if ((_b = item.children) == null ? void 0 : _b.length) sortColumn(item.children);
+    item.no = item.getColumnIndex?.();
+    if (item.children?.length) sortColumn(item.children);
   });
   array.sort((cur, pre) => cur.no - pre.no);
 }
@@ -1453,7 +1428,6 @@ function useStore() {
       if (instance.$ready) instance.store.scheduleLayout();
     },
     insertColumn(states, column, parent, updateColumnOrder) {
-      var _a;
       const array = unref(states._columns);
       let newColumns = [];
       if (!parent) {
@@ -1461,7 +1435,7 @@ function useStore() {
         newColumns = array;
       } else {
         if (parent && !parent.children) parent.children = [];
-        (_a = parent.children) == null ? void 0 : _a.push(column);
+        parent.children?.push(column);
         newColumns = replaceColumn(array, parent);
       }
       sortColumn(newColumns);
@@ -1477,19 +1451,16 @@ function useStore() {
       }
     },
     updateColumnOrder(states, column) {
-      var _a;
-      if (((_a = column.getColumnIndex) == null ? void 0 : _a.call(column)) === column.no) return;
+      if (column.getColumnIndex?.() === column.no) return;
       sortColumn(states._columns.value);
       if (instance.$ready) instance.store.updateColumns();
     },
     removeColumn(states, column, parent, updateColumnOrder) {
-      var _a;
       const array = unref(states._columns) || [];
       if (parent) {
-        (_a = parent.children) == null ? void 0 : _a.splice(parent.children.findIndex((item) => item.id === column.id), 1);
+        parent.children?.splice(parent.children.findIndex((item) => item.id === column.id), 1);
         nextTick(() => {
-          var _a2;
-          if (((_a2 = parent.children) == null ? void 0 : _a2.length) === 0) delete parent.children;
+          if (parent.children?.length === 0) delete parent.children;
         });
         states._columns.value = replaceColumn(array, parent);
       } else {
@@ -1540,8 +1511,7 @@ function useStore() {
       instance.store.updateTableScrollY();
     },
     toggleAllSelection() {
-      var _a, _b;
-      (_b = (_a = instance.store).toggleAllSelection) == null ? void 0 : _b.call(_a);
+      instance.store.toggleAllSelection?.();
     },
     rowSelectedChanged(_states, row) {
       instance.store.toggleRowSelection(row);
@@ -1652,7 +1622,7 @@ var TableLayout = class {
     const height = this.height.value;
     if (isNull(height)) return false;
     const scrollBarRef = this.table.refs.scrollBarRef;
-    if (this.table.vnode.el && (scrollBarRef == null ? void 0 : scrollBarRef.wrapRef)) {
+    if (this.table.vnode.el && scrollBarRef?.wrapRef) {
       let scrollY = true;
       const prevScrollY = this.scrollY.value;
       scrollY = scrollBarRef.wrapRef.scrollHeight > scrollBarRef.wrapRef.clientHeight;
@@ -1706,10 +1676,9 @@ var TableLayout = class {
     return false;
   }
   updateColumnsWidth() {
-    var _a;
     if (!isClient) return;
     const fit = this.fit;
-    const bodyWidth = (_a = this.table.vnode.el) == null ? void 0 : _a.clientWidth;
+    const bodyWidth = this.table.vnode.el?.clientWidth;
     let bodyMinWidth = 0;
     const flattenColumns = this.getFlattenColumns();
     const flexColumns = flattenColumns.filter((column) => !isNumber(column.width));
@@ -1779,13 +1748,12 @@ var TableLayout = class {
   }
   notifyObservers(event) {
     this.observers.forEach((observer) => {
-      var _a, _b;
       switch (event) {
         case "columns":
-          (_a = observer.state) == null ? void 0 : _a.onColumnsChange(this);
+          observer.state?.onColumnsChange(this);
           break;
         case "scrollable":
-          (_b = observer.state) == null ? void 0 : _b.onScrollableChange(this);
+          observer.state?.onScrollableChange(this);
           break;
         default:
           throw new Error(`Table Layout don't have event ${event}.`);
@@ -1848,7 +1816,7 @@ function useUtils$1(props) {
   });
   const toggleAllSelection = (event) => {
     event.stopPropagation();
-    parent == null ? void 0 : parent.store.commit("toggleAllSelection");
+    parent?.store.commit("toggleAllSelection");
   };
   return {
     isGroup,
@@ -1881,7 +1849,7 @@ var filter_panel_vue_vue_type_script_lang_default = defineComponent({
     const instance = getCurrentInstance();
     const { t } = useLocale();
     const ns = useNamespace("table-filter");
-    const parent = instance == null ? void 0 : instance.parent;
+    const parent = instance?.parent;
     if (props.column && !parent.filterPanels.value[props.column.id]) parent.filterPanels.value[props.column.id] = instance;
     const tooltipRef = ref(null);
     const rootRef = ref(null);
@@ -1894,10 +1862,7 @@ var filter_panel_vue_vue_type_script_lang_default = defineComponent({
       return ns.b();
     });
     const filterValue = computed({
-      get: () => {
-        var _a;
-        return (((_a = props.column) == null ? void 0 : _a.filteredValue) || [])[0];
-      },
+      get: () => (props.column?.filteredValue || [])[0],
       set: (value) => {
         if (filteredValue.value) if (!isPropAbsent(value)) filteredValue.value.splice(0, 1, value);
         else filteredValue.value.splice(0, 1);
@@ -1909,8 +1874,7 @@ var filter_panel_vue_vue_type_script_lang_default = defineComponent({
         return [];
       },
       set(value) {
-        var _a;
-        if (props.column) (_a = props.upDataColumn) == null ? void 0 : _a.call(props, "filteredValue", value);
+        if (props.column) props.upDataColumn?.("filteredValue", value);
       }
     });
     const multiple = computed(() => {
@@ -1921,8 +1885,7 @@ var filter_panel_vue_vue_type_script_lang_default = defineComponent({
       return filter.value === filterValue.value;
     };
     const hidden = () => {
-      var _a;
-      (_a = tooltipRef.value) == null ? void 0 : _a.onClose();
+      tooltipRef.value?.onClose();
     };
     const handleConfirm = () => {
       confirmFilter(filteredValue.value);
@@ -1941,22 +1904,19 @@ var filter_panel_vue_vue_type_script_lang_default = defineComponent({
       hidden();
     };
     const confirmFilter = (filteredValue2) => {
-      var _a, _b;
-      (_a = props.store) == null ? void 0 : _a.commit("filterChange", {
+      props.store?.commit("filterChange", {
         column: props.column,
         values: filteredValue2
       });
-      (_b = props.store) == null ? void 0 : _b.updateAllSelected();
+      props.store?.updateAllSelected();
     };
     const handleShowTooltip = () => {
-      var _a, _b;
-      (_a = rootRef.value) == null ? void 0 : _a.focus();
+      rootRef.value?.focus();
       !multiple.value && initCheckedIndex();
-      if (props.column) (_b = props.upDataColumn) == null ? void 0 : _b.call(props, "filterOpened", true);
+      if (props.column) props.upDataColumn?.("filterOpened", true);
     };
     const handleHideTooltip = () => {
-      var _a;
-      if (props.column) (_a = props.upDataColumn) == null ? void 0 : _a.call(props, "filterOpened", false);
+      if (props.column) props.upDataColumn?.("filterOpened", false);
     };
     const initCheckedIndex = () => {
       if (isPropAbsent(filterValue)) {
@@ -1969,7 +1929,6 @@ var filter_panel_vue_vue_type_script_lang_default = defineComponent({
       checkedIndex.value = idx >= 0 ? idx + 1 : 0;
     };
     const handleKeydown = (event) => {
-      var _a, _b;
       const code = getEventCode(event);
       const len = (filters.value ? filters.value.length : 0) + 1;
       let index = checkedIndex.value;
@@ -2001,7 +1960,7 @@ var filter_panel_vue_vue_type_script_lang_default = defineComponent({
       }
       isPreventDefault && event.preventDefault();
       checkedIndex.value = index;
-      (_b = (_a = rootRef.value) == null ? void 0 : _a.querySelector(`.${ns.e("list-item")}:nth-child(${index + 1})`)) == null ? void 0 : _b.focus();
+      rootRef.value?.querySelector(`.${ns.e("list-item")}:nth-child(${index + 1})`)?.focus();
     };
     return {
       multiple,
@@ -2112,20 +2071,14 @@ function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
         onClick: ($event) => _ctx.handleSelect(filter.value, idx + 1)
       }, toDisplayString(filter.text), 11, _hoisted_3);
     }), 128))], 34))]),
-    default: withCtx(() => {
-      var _a;
-      return [createElementVNode("button", {
-        type: "button",
-        class: normalizeClass(`${_ctx.ns.namespace.value}-table__column-filter-trigger`),
-        "aria-label": _ctx.t("el.table.filterLabel", { column: ((_a = _ctx.column) == null ? void 0 : _a.label) || "" })
-      }, [createVNode(_component_el_icon, null, {
-        default: withCtx(() => [renderSlot(_ctx.$slots, "filter-icon", {}, () => {
-          var _a2;
-          return [((_a2 = _ctx.column) == null ? void 0 : _a2.filterOpened) ? (openBlock(), createBlock(_component_arrow_up, { key: 0 })) : (openBlock(), createBlock(_component_arrow_down, { key: 1 }))];
-        })]),
-        _: 3
-      })], 10, _hoisted_4)];
-    }),
+    default: withCtx(() => [createElementVNode("button", {
+      type: "button",
+      class: normalizeClass(`${_ctx.ns.namespace.value}-table__column-filter-trigger`),
+      "aria-label": _ctx.t("el.table.filterLabel", { column: _ctx.column?.label || "" })
+    }, [createVNode(_component_el_icon, null, {
+      default: withCtx(() => [renderSlot(_ctx.$slots, "filter-icon", {}, () => [_ctx.column?.filterOpened ? (openBlock(), createBlock(_component_arrow_up, { key: 0 })) : (openBlock(), createBlock(_component_arrow_down, { key: 1 }))])]),
+      _: 3
+    })], 10, _hoisted_4)]),
     _: 3
   }, 8, [
     "placement",
@@ -2144,8 +2097,7 @@ function useLayoutObserver(root) {
     return layout;
   });
   const onColumnsChange = (layout) => {
-    var _a;
-    const cols = ((_a = root.vnode.el) == null ? void 0 : _a.querySelectorAll("colgroup > col")) || [];
+    const cols = root.vnode.el?.querySelectorAll("colgroup > col") || [];
     if (!cols.length) return;
     const flattenColumns = layout.getFlattenColumns();
     const columnsMap = {};
@@ -2159,10 +2111,9 @@ function useLayoutObserver(root) {
     }
   };
   const onScrollableChange = (layout) => {
-    var _a, _b;
-    const cols = ((_a = root.vnode.el) == null ? void 0 : _a.querySelectorAll("colgroup > col[name=gutter]")) || [];
+    const cols = root.vnode.el?.querySelectorAll("colgroup > col[name=gutter]") || [];
     for (let i = 0, j = cols.length; i < j; i++) cols[i].setAttribute("width", layout.scrollY.value ? layout.gutterWidth : "0");
-    const ths = ((_b = root.vnode.el) == null ? void 0 : _b.querySelectorAll("th.gutter")) || [];
+    const ths = root.vnode.el?.querySelectorAll("th.gutter") || [];
     for (let i = 0, j = ths.length; i < j; i++) {
       const th = ths[i];
       th.style.width = layout.scrollY.value ? `${layout.gutterWidth}px` : "0";
@@ -2184,24 +2135,23 @@ function useEvent(props, emit) {
   const handleHeaderClick = (event, column) => {
     if (!column.filters && column.sortable) handleSortClick(event, column, false);
     else if (column.filterable && !column.sortable) handleFilterClick(event);
-    parent == null ? void 0 : parent.emit("header-click", column, event);
+    parent?.emit("header-click", column, event);
   };
   const handleHeaderContextMenu = (event, column) => {
-    parent == null ? void 0 : parent.emit("header-contextmenu", column, event);
+    parent?.emit("header-contextmenu", column, event);
   };
   const draggingColumn = ref(null);
   const dragging = ref(false);
   const dragState = ref();
   const handleMouseDown = (event, column) => {
-    var _a, _b, _c;
     if (!isClient) return;
     if (column.children && column.children.length > 0) return;
     if (draggingColumn.value && props.border && draggingColumn.value.id === column.id) {
       dragging.value = true;
       const table = parent;
       emit("set-drag-visible", true);
-      const tableLeft = (_a = table == null ? void 0 : table.vnode.el) == null ? void 0 : _a.getBoundingClientRect().left;
-      const columnEl = (_c = (_b = instance == null ? void 0 : instance.vnode) == null ? void 0 : _b.el) == null ? void 0 : _c.querySelector(`th.${column.id}`);
+      const tableLeft = table?.vnode.el?.getBoundingClientRect().left;
+      const columnEl = instance?.vnode?.el?.querySelector(`th.${column.id}`);
       const columnRect = columnEl.getBoundingClientRect();
       const minLeft = columnRect.left - tableLeft + 30;
       addClass(columnEl, "noclick");
@@ -2211,7 +2161,7 @@ function useEvent(props, emit) {
         startColumnLeft: columnRect.left - tableLeft,
         tableLeft
       };
-      const resizeProxy = table == null ? void 0 : table.refs.resizeProxy;
+      const resizeProxy = table?.refs.resizeProxy;
       resizeProxy.style.left = `${dragState.value.startLeft}px`;
       (void 0).onselectstart = function() {
         return false;
@@ -2228,7 +2178,7 @@ function useEvent(props, emit) {
         if (dragging.value) {
           const { startColumnLeft, startLeft } = dragState.value;
           column.width = column.realWidth = Number.parseInt(resizeProxy.style.left, 10) - startColumnLeft;
-          table == null ? void 0 : table.emit("header-dragend", column.width, startLeft - startColumnLeft, column, event);
+          table?.emit("header-dragend", column.width, startLeft - startColumnLeft, column, event);
           requestAnimationFrame(() => {
             props.store.scheduleLayout(false, true);
           });
@@ -2251,7 +2201,6 @@ function useEvent(props, emit) {
     }
   };
   const handleMouseMove = (event, column) => {
-    var _a;
     if (!props.border || column.children && column.children.length > 0) return;
     const el = event.target;
     const target = isElement(el) ? el.closest("th") : null;
@@ -2268,7 +2217,7 @@ function useEvent(props, emit) {
       return;
     }
     const rect = target.getBoundingClientRect();
-    const isLastTh = ((_a = target.parentNode) == null ? void 0 : _a.lastElementChild) === target;
+    const isLastTh = target.parentNode?.lastElementChild === target;
     const allowDrag = props.allowDragLastColumn || !isLastTh;
     const isResizeHandleActive = rect.width > 12 && rect.right - event.clientX < 8 && allowDrag;
     const cursor = isResizeHandleActive ? "col-resize" : "";
@@ -2286,10 +2235,9 @@ function useEvent(props, emit) {
     return sortOrders[index > sortOrders.length - 2 ? 0 : index + 1];
   };
   const handleSortClick = (event, column, givenOrder) => {
-    var _a, _b;
     event.stopPropagation();
     const order = column.order === givenOrder ? null : givenOrder || toggleOrder(column);
-    const target = (_a = event.target) == null ? void 0 : _a.closest("th");
+    const target = event.target?.closest("th");
     if (target) {
       if (hasClass(target, "noclick")) {
         removeClass(target, "noclick");
@@ -2306,13 +2254,13 @@ function useEvent(props, emit) {
     if (sortingColumn !== column || sortingColumn === column && isNull(sortingColumn.order)) {
       if (sortingColumn) sortingColumn.order = null;
       states.sortingColumn.value = column;
-      sortProp = (_b = column.property) != null ? _b : null;
+      sortProp = column.property ?? null;
     }
     if (!order) sortOrder = column.order = null;
     else sortOrder = column.order = order;
     states.sortProp.value = sortProp;
     states.sortOrder.value = sortOrder;
-    parent == null ? void 0 : parent.store.commit("changeSortCondition");
+    parent?.store.commit("changeSortCondition");
   };
   return {
     handleHeaderClick,
@@ -2328,20 +2276,19 @@ function useStyle$2(props) {
   const parent = inject(TABLE_INJECTION_KEY);
   const ns = useNamespace("table");
   const getHeaderRowStyle = (rowIndex) => {
-    const headerRowStyle = parent == null ? void 0 : parent.props.headerRowStyle;
+    const headerRowStyle = parent?.props.headerRowStyle;
     if (isFunction(headerRowStyle)) return headerRowStyle.call(null, { rowIndex });
     return headerRowStyle;
   };
   const getHeaderRowClass = (rowIndex) => {
     const classes = [];
-    const headerRowClassName = parent == null ? void 0 : parent.props.headerRowClassName;
+    const headerRowClassName = parent?.props.headerRowClassName;
     if (isString(headerRowClassName)) classes.push(headerRowClassName);
     else if (isFunction(headerRowClassName)) classes.push(headerRowClassName.call(null, { rowIndex }));
     return classes.join(" ");
   };
   const getHeaderCellStyle = (rowIndex, columnIndex, row, column) => {
-    var _a;
-    let headerCellStyles = (_a = parent == null ? void 0 : parent.props.headerCellStyle) != null ? _a : {};
+    let headerCellStyles = parent?.props.headerCellStyle ?? {};
     if (isFunction(headerCellStyles)) headerCellStyles = headerCellStyles.call(null, {
       rowIndex,
       columnIndex,
@@ -2365,7 +2312,7 @@ function useStyle$2(props) {
     ];
     if (!column.children) classes.push("is-leaf");
     if (column.sortable) classes.push("is-sortable");
-    const headerCellClassName = parent == null ? void 0 : parent.props.headerCellClassName;
+    const headerCellClassName = parent?.props.headerCellClassName;
     if (isString(headerCellClassName)) classes.push(headerCellClassName);
     else if (isFunction(headerCellClassName)) classes.push(headerCellClassName.call(null, {
       rowIndex,
@@ -2414,7 +2361,7 @@ var table_header_default = defineComponent({
     const ns = useNamespace("table");
     const filterPanels = ref({});
     const { onColumnsChange, onScrollableChange } = useLayoutObserver(parent);
-    const isTableLayoutAuto = (parent == null ? void 0 : parent.props.tableLayout) === "auto";
+    const isTableLayoutAuto = parent?.props.tableLayout === "auto";
     const saveIndexSelection = reactive(/* @__PURE__ */ new Map());
     const theadRef = ref();
     const updateFixedColumnStyle = () => {
@@ -2487,8 +2434,7 @@ var table_header_default = defineComponent({
         ariaSort: column.sortable ? column.order : void 0,
         style: getHeaderCellStyle(rowIndex, cellIndex, subColumns, column),
         onClick: ($event) => {
-          var _a;
-          if ((_a = $event.currentTarget) == null ? void 0 : _a.classList.contains("noclick")) return;
+          if ($event.currentTarget?.classList.contains("noclick")) return;
           handleHeaderClick($event, column);
         },
         onContextmenu: ($event) => handleHeaderContextMenu($event, column),
@@ -2517,7 +2463,7 @@ var table_header_default = defineComponent({
         column.filterable && h(filter_panel_default, {
           store,
           placement: column.filterPlacement || "bottom-start",
-          appendTo: $parent == null ? void 0 : $parent.appendFilterPanelTo,
+          appendTo: $parent?.appendFilterPanelTo,
           column,
           upDataColumn: (key, value) => {
             column[key] = value;
@@ -2532,35 +2478,31 @@ function useEvents(props) {
   const tooltipContent = ref("");
   const tooltipTrigger = ref(h("div"));
   const handleEvent = (event, row, name) => {
-    var _a, _b, _c;
     const table = parent;
     const cell = getCell(event);
     let column = null;
-    const namespace = (_a = table == null ? void 0 : table.vnode.el) == null ? void 0 : _a.dataset.prefix;
+    const namespace = table?.vnode.el?.dataset.prefix;
     if (cell) {
-      column = getColumnByCell({ columns: (_c = (_b = props.store) == null ? void 0 : _b.states.columns.value) != null ? _c : [] }, cell, namespace);
-      if (column) table == null ? void 0 : table.emit(`cell-${name}`, row, column, cell, event);
+      column = getColumnByCell({ columns: props.store?.states.columns.value ?? [] }, cell, namespace);
+      if (column) table?.emit(`cell-${name}`, row, column, cell, event);
     }
-    table == null ? void 0 : table.emit(`row-${name}`, row, column, event);
+    table?.emit(`row-${name}`, row, column, event);
   };
   const handleDoubleClick = (event, row) => {
     handleEvent(event, row, "dblclick");
   };
   const handleClick = (event, row) => {
-    var _a;
-    (_a = props.store) == null ? void 0 : _a.commit("setCurrentRow", row);
+    props.store?.commit("setCurrentRow", row);
     handleEvent(event, row, "click");
   };
   const handleContextMenu = (event, row) => {
     handleEvent(event, row, "contextmenu");
   };
   const handleMouseEnter = debounce((index) => {
-    var _a;
-    (_a = props.store) == null ? void 0 : _a.commit("setHoverRow", index);
+    props.store?.commit("setHoverRow", index);
   }, 30);
   const handleMouseLeave = debounce(() => {
-    var _a;
-    (_a = props.store) == null ? void 0 : _a.commit("setHoverRow", null);
+    props.store?.commit("setHoverRow", null);
   }, 30);
   const getPadding = (el) => {
     const style = (void 0).getComputedStyle(el, null);
@@ -2572,24 +2514,22 @@ function useEvents(props) {
     };
   };
   const toggleRowClassByCell = (rowSpan, event, toggle) => {
-    var _a;
-    let node = (_a = event == null ? void 0 : event.target) == null ? void 0 : _a.parentNode;
+    let node = event?.target?.parentNode;
     while (rowSpan > 1) {
-      node = node == null ? void 0 : node.nextSibling;
+      node = node?.nextSibling;
       if (!node || node.nodeName !== "TR") break;
       toggle(node, "hover-row hover-fixed-row");
       rowSpan--;
     }
   };
   const handleCellMouseEnter = (event, row, tooltipOptions) => {
-    var _a, _b, _c, _d, _e;
     if (!parent) return;
     const table = parent;
     const cell = getCell(event);
-    const namespace = (_a = table == null ? void 0 : table.vnode.el) == null ? void 0 : _a.dataset.prefix;
+    const namespace = table?.vnode.el?.dataset.prefix;
     let column = null;
     if (cell) {
-      column = getColumnByCell({ columns: (_c = (_b = props.store) == null ? void 0 : _b.states.columns.value) != null ? _c : [] }, cell, namespace);
+      column = getColumnByCell({ columns: props.store?.states.columns.value ?? [] }, cell, namespace);
       if (!column) return;
       if (cell.rowSpan > 1) toggleRowClassByCell(cell.rowSpan, event, addClass);
       const hoverState = table.hoverState = {
@@ -2597,14 +2537,14 @@ function useEvents(props) {
         column,
         row
       };
-      table == null ? void 0 : table.emit("cell-mouse-enter", hoverState.row, hoverState.column, hoverState.cell, event);
+      table?.emit("cell-mouse-enter", hoverState.row, hoverState.column, hoverState.cell, event);
     }
     if (!tooltipOptions) {
-      if ((removePopper == null ? void 0 : removePopper.trigger) === cell) removePopper == null ? void 0 : removePopper();
+      if (removePopper?.trigger === cell) removePopper?.();
       return;
     }
     const cellChild = event.target.querySelector(".cell");
-    if (!(hasClass(cellChild, `${namespace}-tooltip`) && cellChild.childNodes.length && ((_d = cellChild.textContent) == null ? void 0 : _d.trim()))) return;
+    if (!(hasClass(cellChild, `${namespace}-tooltip`) && cellChild.childNodes.length && cellChild.textContent?.trim())) return;
     const range = (void 0).createRange();
     range.setStart(cellChild, 0);
     range.setEnd(cellChild, cellChild.childNodes.length);
@@ -2613,15 +2553,15 @@ function useEvents(props) {
     const { top, left, right, bottom } = getPadding(cellChild);
     const horizontalPadding = left + right;
     const verticalPadding = top + bottom;
-    if (isGreaterThan(rangeWidth + horizontalPadding, cellChildWidth) || isGreaterThan(rangeHeight + verticalPadding, cellChildHeight) || isGreaterThan(cellChild.scrollWidth, cellChildWidth)) createTablePopper(tooltipOptions, (_e = (cell == null ? void 0 : cell.innerText) || (cell == null ? void 0 : cell.textContent)) != null ? _e : "", row, column, cell, table);
-    else if ((removePopper == null ? void 0 : removePopper.trigger) === cell) removePopper == null ? void 0 : removePopper();
+    if (isGreaterThan(rangeWidth + horizontalPadding, cellChildWidth) || isGreaterThan(rangeHeight + verticalPadding, cellChildHeight) || isGreaterThan(cellChild.scrollWidth, cellChildWidth)) createTablePopper(tooltipOptions, (cell?.innerText || cell?.textContent) ?? "", row, column, cell, table);
+    else if (removePopper?.trigger === cell) removePopper?.();
   };
   const handleCellMouseLeave = (event) => {
     const cell = getCell(event);
     if (!cell) return;
     if (cell.rowSpan > 1) toggleRowClassByCell(cell.rowSpan, event, removeClass);
-    const oldHoverState = parent == null ? void 0 : parent.hoverState;
-    parent == null ? void 0 : parent.emit("cell-mouse-leave", oldHoverState == null ? void 0 : oldHoverState.row, oldHoverState == null ? void 0 : oldHoverState.column, oldHoverState == null ? void 0 : oldHoverState.cell, event);
+    const oldHoverState = parent?.hoverState;
+    parent?.emit("cell-mouse-leave", oldHoverState?.row, oldHoverState?.column, oldHoverState?.cell, event);
   };
   return {
     handleDoubleClick,
@@ -2639,7 +2579,7 @@ function useStyles(props) {
   const parent = inject(TABLE_INJECTION_KEY);
   const ns = useNamespace("table");
   const getRowStyle = (row, rowIndex) => {
-    const rowStyle = parent == null ? void 0 : parent.props.rowStyle;
+    const rowStyle = parent?.props.rowStyle;
     if (isFunction(rowStyle)) return rowStyle.call(null, {
       row,
       rowIndex
@@ -2647,11 +2587,10 @@ function useStyles(props) {
     return rowStyle || null;
   };
   const getRowClass = (row, rowIndex, displayIndex) => {
-    var _a;
     const classes = [ns.e("row")];
-    if ((parent == null ? void 0 : parent.props.highlightCurrentRow) && row === ((_a = props.store) == null ? void 0 : _a.states.currentRow.value)) classes.push("current-row");
+    if (parent?.props.highlightCurrentRow && row === props.store?.states.currentRow.value) classes.push("current-row");
     if (props.stripe && displayIndex % 2 === 1) classes.push(ns.em("row", "striped"));
-    const rowClassName = parent == null ? void 0 : parent.props.rowClassName;
+    const rowClassName = parent?.props.rowClassName;
     if (isString(rowClassName)) classes.push(rowClassName);
     else if (isFunction(rowClassName)) classes.push(rowClassName.call(null, {
       row,
@@ -2660,28 +2599,28 @@ function useStyles(props) {
     return classes;
   };
   const getCellStyle = (rowIndex, columnIndex, row, column) => {
-    const cellStyle = parent == null ? void 0 : parent.props.cellStyle;
-    let cellStyles = cellStyle != null ? cellStyle : {};
+    const cellStyle = parent?.props.cellStyle;
+    let cellStyles = cellStyle ?? {};
     if (isFunction(cellStyle)) cellStyles = cellStyle.call(null, {
       rowIndex,
       columnIndex,
       row,
       column
     });
-    const fixedStyle = getFixedColumnOffset(columnIndex, props == null ? void 0 : props.fixed, props.store);
+    const fixedStyle = getFixedColumnOffset(columnIndex, props?.fixed, props.store);
     ensurePosition(fixedStyle, "left");
     ensurePosition(fixedStyle, "right");
     return Object.assign({}, cellStyles, fixedStyle);
   };
   const getCellClass = (rowIndex, columnIndex, row, column, offset) => {
-    const fixedClasses = getFixedColumnsClass(ns.b(), columnIndex, props == null ? void 0 : props.fixed, props.store, void 0, offset);
+    const fixedClasses = getFixedColumnsClass(ns.b(), columnIndex, props?.fixed, props.store, void 0, offset);
     const classes = [
       column.id,
       column.align,
       column.className,
       ...fixedClasses
     ];
-    const cellClassName = parent == null ? void 0 : parent.props.cellClassName;
+    const cellClassName = parent?.props.cellClassName;
     if (isString(cellClassName)) classes.push(cellClassName);
     else if (isFunction(cellClassName)) classes.push(cellClassName.call(null, {
       rowIndex,
@@ -2695,7 +2634,7 @@ function useStyles(props) {
   const getSpan = (row, column, rowIndex, columnIndex) => {
     let rowspan = 1;
     let colspan = 1;
-    const fn = parent == null ? void 0 : parent.props.spanMethod;
+    const fn = parent?.props.spanMethod;
     if (isFunction(fn)) {
       const result = fn({
         row,
@@ -2761,12 +2700,10 @@ function useRender$1(props) {
   const { getRowStyle, getRowClass, getCellStyle, getCellClass, getSpan, getColspanRealWidth } = useStyles(props);
   let displayIndex = -1;
   const firstDefaultColumnIndex = computed(() => {
-    var _a;
-    return (_a = props.store) == null ? void 0 : _a.states.columns.value.findIndex(({ type }) => type === "default");
+    return props.store?.states.columns.value.findIndex(({ type }) => type === "default");
   });
   const getKeyOfRow = (row, index) => {
-    var _a;
-    const rowKey = (_a = parent == null ? void 0 : parent.props) == null ? void 0 : _a.rowKey;
+    const rowKey = parent?.props?.rowKey;
     if (rowKey) return getRowIdentity(row, rowKey);
     return index;
   };
@@ -2841,7 +2778,7 @@ function useRender$1(props) {
     if (columns.some(({ type }) => type === "expand")) {
       const expanded = isRowExpanded(row);
       const tr = rowRender(row, $index, void 0, expanded);
-      const renderExpanded = parent == null ? void 0 : parent.renderExpanded;
+      const renderExpanded = parent?.renderExpanded;
       if (!renderExpanded) {
         console.error("[Element Error]renderExpanded is required.");
         return tr;
@@ -2878,7 +2815,7 @@ function useRender$1(props) {
           treeRowData.loading = cur.loading;
         }
       }
-      const tmp = [rowRender(row, $index, treeRowData != null ? treeRowData : void 0)];
+      const tmp = [rowRender(row, $index, treeRowData ?? void 0)];
       if (cur) {
         let i = 0;
         const traverse = (children, parent2) => {
@@ -2944,32 +2881,28 @@ var table_body_default = defineComponent({
   name: "ElTableBody",
   props: defaultProps,
   setup(props) {
-    var _a;
     const instance = getCurrentInstance();
     const parent = inject(TABLE_INJECTION_KEY);
     const ns = useNamespace("table");
     const { wrappedRowRender, tooltipContent, tooltipTrigger } = useRender$1(props);
     const { onColumnsChange, onScrollableChange } = useLayoutObserver(parent);
     const hoveredCellList = [];
-    watch((_a = props.store) == null ? void 0 : _a.states.hoverRow, (newVal, oldVal) => {
-      var _a2, _b;
-      const el = instance == null ? void 0 : instance.vnode.el;
-      const rows = Array.from((el == null ? void 0 : el.children) || []).filter((e) => e == null ? void 0 : e.classList.contains(`${ns.e("row")}`));
+    watch(props.store?.states.hoverRow, (newVal, oldVal) => {
+      const el = instance?.vnode.el;
+      const rows = Array.from(el?.children || []).filter((e) => e?.classList.contains(`${ns.e("row")}`));
       let rowNum = newVal;
-      const childNodes = (_a2 = rows[rowNum]) == null ? void 0 : _a2.childNodes;
-      if (childNodes == null ? void 0 : childNodes.length) {
+      const childNodes = rows[rowNum]?.childNodes;
+      if (childNodes?.length) {
         let control = 0;
         Array.from(childNodes).reduce((acc, item, index) => {
-          var _a3, _b2;
-          if (((_a3 = childNodes[index]) == null ? void 0 : _a3.colSpan) > 1) control = (_b2 = childNodes[index]) == null ? void 0 : _b2.colSpan;
+          if (childNodes[index]?.colSpan > 1) control = childNodes[index]?.colSpan;
           if (item.nodeName !== "TD" && control === 0) acc.push(index);
           control > 0 && control--;
           return acc;
         }, []).forEach((rowIndex) => {
-          var _a3;
           rowNum = newVal;
           while (rowNum > 0) {
-            const preChildNodes = (_a3 = rows[rowNum - 1]) == null ? void 0 : _a3.childNodes;
+            const preChildNodes = rows[rowNum - 1]?.childNodes;
             if (preChildNodes[rowIndex] && preChildNodes[rowIndex].nodeName === "TD" && preChildNodes[rowIndex].rowSpan > 1) {
               addClass(preChildNodes[rowIndex], "hover-cell");
               hoveredCellList.push(preChildNodes[rowIndex]);
@@ -2982,7 +2915,7 @@ var table_body_default = defineComponent({
         hoveredCellList.forEach((item) => removeClass(item, "hover-cell"));
         hoveredCellList.length = 0;
       }
-      if (!((_b = props.store) == null ? void 0 : _b.states.isComplex.value) || !isClient) return;
+      if (!props.store?.states.isComplex.value || !isClient) return;
       rAF(() => {
         const oldRow = rows[oldVal];
         const newRow = rows[newVal];
@@ -3001,39 +2934,30 @@ var table_body_default = defineComponent({
   },
   render() {
     const { wrappedRowRender, store } = this;
-    return h("tbody", { tabIndex: -1 }, [((store == null ? void 0 : store.states.data.value) || []).reduce((acc, row) => {
+    return h("tbody", { tabIndex: -1 }, [(store?.states.data.value || []).reduce((acc, row) => {
       return acc.concat(wrappedRowRender(row, acc.length));
     }, [])]);
   }
 });
 function useMapState() {
-  var _a;
-  const store = (_a = inject(TABLE_INJECTION_KEY)) == null ? void 0 : _a.store;
+  const store = inject(TABLE_INJECTION_KEY)?.store;
   return {
     leftFixedLeafCount: computed(() => {
-      var _a2;
-      return (_a2 = store == null ? void 0 : store.states.fixedLeafColumnsLength.value) != null ? _a2 : 0;
+      return store?.states.fixedLeafColumnsLength.value ?? 0;
     }),
     rightFixedLeafCount: computed(() => {
-      var _a2;
-      return (_a2 = store == null ? void 0 : store.states.rightFixedColumns.value.length) != null ? _a2 : 0;
+      return store?.states.rightFixedColumns.value.length ?? 0;
     }),
     columnsCount: computed(() => {
-      var _a2;
-      return (_a2 = store == null ? void 0 : store.states.columns.value.length) != null ? _a2 : 0;
+      return store?.states.columns.value.length ?? 0;
     }),
     leftFixedCount: computed(() => {
-      var _a2;
-      return (_a2 = store == null ? void 0 : store.states.fixedColumns.value.length) != null ? _a2 : 0;
+      return store?.states.fixedColumns.value.length ?? 0;
     }),
     rightFixedCount: computed(() => {
-      var _a2;
-      return (_a2 = store == null ? void 0 : store.states.rightFixedColumns.value.length) != null ? _a2 : 0;
+      return store?.states.rightFixedColumns.value.length ?? 0;
     }),
-    columns: computed(() => {
-      var _a2;
-      return (_a2 = store == null ? void 0 : store.states.columns.value) != null ? _a2 : [];
-    })
+    columns: computed(() => store?.states.columns.value ?? [])
   };
 }
 function useStyle$1(props) {
@@ -3214,10 +3138,10 @@ function useStyle(props, layout, store, table) {
   const footerScrollHeight = ref(0);
   ref(0);
   watch(() => props.height, (value) => {
-    layout.setHeight(value != null ? value : null);
+    layout.setHeight(value ?? null);
   }, { immediate: true });
   watch(() => props.maxHeight, (value) => {
-    layout.setMaxHeight(value != null ? value : null);
+    layout.setMaxHeight(value ?? null);
   }, { immediate: true });
   watch(() => [props.currentRowKey, store.states.rowKey], ([currentRowKey, rowKey]) => {
     if (!unref(rowKey) || !unref(currentRowKey)) return;
@@ -3391,22 +3315,12 @@ var table_vue_vue_type_script_setup_true_lang_default = /* @__PURE__ */ defineCo
       doLayout,
       debouncedUpdateLayout
     };
-    const computedSumText = computed(() => {
-      var _a;
-      return (_a = props.sumText) != null ? _a : t("el.table.sumText");
-    });
+    const computedSumText = computed(() => props.sumText ?? t("el.table.sumText"));
     const computedEmptyText = computed(() => {
-      var _a;
-      return (_a = props.emptyText) != null ? _a : t("el.table.emptyText");
+      return props.emptyText ?? t("el.table.emptyText");
     });
-    const computedTooltipEffect = computed(() => {
-      var _a, _b;
-      return (_b = props.tooltipEffect) != null ? _b : (_a = globalConfig.value) == null ? void 0 : _a.tooltipEffect;
-    });
-    const computedTooltipOptions = computed(() => {
-      var _a, _b;
-      return (_b = props.tooltipOptions) != null ? _b : (_a = globalConfig.value) == null ? void 0 : _a.tooltipOptions;
-    });
+    const computedTooltipEffect = computed(() => props.tooltipEffect ?? globalConfig.value?.tooltipEffect);
+    const computedTooltipOptions = computed(() => props.tooltipOptions ?? globalConfig.value?.tooltipOptions);
     const columns = computed(() => {
       return convertToRows(store.states.originColumns.value)[0];
     });
@@ -3874,7 +3788,6 @@ const getDefaultClassName = (type) => {
 const cellForced = {
   selection: {
     renderHeader({ store }) {
-      var _a;
       function isDisabled() {
         return store.states.data.value && store.states.data.value.length === 0;
       }
@@ -3882,7 +3795,7 @@ const cellForced = {
         disabled: isDisabled(),
         size: store.states.tableSize.value,
         indeterminate: store.states.selection.value.length > 0 && !store.states.isAllSelected.value,
-        "onUpdate:modelValue": (_a = store.toggleAllSelection) != null ? _a : void 0,
+        "onUpdate:modelValue": store.toggleAllSelection ?? void 0,
         modelValue: store.states.isAllSelected.value,
         ariaLabel: store.t("el.table.selectAllLabel")
       });
@@ -3921,7 +3834,6 @@ const cellForced = {
       return column.label || "";
     },
     renderCell({ column, row, store, expanded, $index }) {
-      var _a, _b, _c;
       const { ns } = store;
       const classes = [ns.e("expand-icon")];
       if (!column.renderExpand && expanded) classes.push(ns.em("expand-icon", "expanded"));
@@ -3929,7 +3841,7 @@ const cellForced = {
         e.stopPropagation();
         store.toggleRowExpansion(row);
       };
-      const isRowExpandable = (_c = (_b = (_a = store.states.rowExpandable).value) == null ? void 0 : _b.call(_a, row, $index)) != null ? _c : true;
+      const isRowExpandable = store.states.rowExpandable.value?.(row, $index) ?? true;
       if (!isRowExpandable) classes.push(ns.is("disabled"));
       return h("button", {
         type: "button",
@@ -3953,11 +3865,10 @@ const cellForced = {
   }
 };
 function defaultRenderCell({ row, column, $index }) {
-  var _a;
   const property = column.property;
   const value = property && getProp(row, property).value;
   if (column && column.formatter) return column.formatter(row, column, value, $index);
-  return ((_a = value == null ? void 0 : value.toString) == null ? void 0 : _a.call(value)) || "";
+  return value?.toString?.() || "";
 }
 function treeCellPrefix({ row, treeNode, store }, createPlaceholder = false) {
   const { ns } = store;
@@ -4057,10 +3968,7 @@ function useWatcher(owner, props_) {
       });
     });
     const globalConfig = useGlobalConfig("table");
-    if (globalConfig.value && hasOwn(globalConfig.value, "showOverflowTooltip")) watch(() => {
-      var _a;
-      return (_a = globalConfig.value) == null ? void 0 : _a.showOverflowTooltip;
-    }, (newVal) => {
+    if (globalConfig.value && hasOwn(globalConfig.value, "showOverflowTooltip")) watch(() => globalConfig.value?.showOverflowTooltip, (newVal) => {
       if (instance.columnConfig.value.type === "selection") return;
       if (!isUndefined(props_.showOverflowTooltip) || !isUndefined(owner.value.props.showOverflowTooltip)) return;
       instance.columnConfig.value.showOverflowTooltip = newVal;
@@ -4126,8 +4034,7 @@ function useRender(props, slots, owner) {
     if (isArray(children)) children.forEach((child) => check(child));
     else check(children);
     function check(item) {
-      var _a;
-      if (((_a = item == null ? void 0 : item.type) == null ? void 0 : _a.name) === "ElTableColumn") item.vParent = instance;
+      if (item?.type?.name === "ElTableColumn") item.vParent = instance;
     }
   };
   const setColumnRenders = (column) => {
@@ -4227,18 +4134,17 @@ var index_vue_vue_type_script_setup_true_lang_default = /* @__PURE__ */ defineCo
     instance.columnId = columnId.value;
     instance.columnConfig = columnConfig;
     const TableColumnRenderer = () => {
-      var _a, _b;
       try {
-        const renderDefault = (_a = slots.default) == null ? void 0 : _a.call(slots, {
+        const renderDefault = slots.default?.({
           row: {},
           column: {},
           $index: -1
         });
         const children = [];
         if (isArray(renderDefault)) {
-          for (const childNode of renderDefault) if (((_b = childNode.type) == null ? void 0 : _b.name) === "ElTableColumn" || childNode.shapeFlag & 2) children.push(childNode);
+          for (const childNode of renderDefault) if (childNode.type?.name === "ElTableColumn" || childNode.shapeFlag & 2) children.push(childNode);
           else if (childNode.type === Fragment && isArray(childNode.children)) childNode.children.forEach((vnode) => {
-            if ((vnode == null ? void 0 : vnode.patchFlag) !== 1024 && !isString(vnode == null ? void 0 : vnode.children)) children.push(vnode);
+            if (vnode?.patchFlag !== 1024 && !isString(vnode?.children)) children.push(vnode);
           });
         }
         return h("div", children);

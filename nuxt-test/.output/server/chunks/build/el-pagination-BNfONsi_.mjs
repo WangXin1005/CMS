@@ -141,10 +141,9 @@ var sizes_vue_vue_type_script_setup_true_lang_default = /* @__PURE__ */ defineCo
     });
     const innerPageSizes = computed(() => props.pageSizes);
     function handleChange(val) {
-      var _a;
       if (val !== innerPageSize.value) {
         innerPageSize.value = val;
-        (_a = pagination.handleSizeChange) == null ? void 0 : _a.call(pagination, Number(val));
+        pagination.handleSizeChange?.(Number(val));
       }
     }
     return (_ctx, _cache) => {
@@ -194,16 +193,13 @@ var jumper_vue_vue_type_script_setup_true_lang_default = /* @__PURE__ */ defineC
     const ns = useNamespace("pagination");
     const { pageCount, disabled, currentPage, changeEvent } = usePagination();
     const userInput = ref();
-    const innerValue = computed(() => {
-      var _a;
-      return (_a = userInput.value) != null ? _a : currentPage == null ? void 0 : currentPage.value;
-    });
+    const innerValue = computed(() => userInput.value ?? currentPage?.value);
     function handleInput(val) {
       userInput.value = val ? +val : "";
     }
     function handleChange(val) {
       val = Math.trunc(+val);
-      changeEvent == null ? void 0 : changeEvent(val);
+      changeEvent?.(val);
       userInput.value = void 0;
     }
     return (_ctx, _cache) => {
@@ -356,8 +352,8 @@ var pager_vue_vue_type_script_setup_true_lang_default = /* @__PURE__ */ defineCo
         showPrev = currentPage > pagerCount - halfPagerCount;
         showNext = currentPage < pageCount - halfPagerCount;
       }
-      quickPrevHover.value && (quickPrevHover.value = showPrev);
-      quickNextHover.value && (quickNextHover.value = showNext);
+      quickPrevHover.value &&= showPrev;
+      quickNextHover.value &&= showNext;
       showPrevMore.value = showPrev;
       showNextMore.value = showNext;
     }, { immediate: true });
@@ -602,10 +598,7 @@ var pagination_default = defineComponent({
     const ns = useNamespace("pagination");
     const vnodeProps = getCurrentInstance().vnode.props || {};
     const _globalSize = useGlobalSize();
-    const _size = computed(() => {
-      var _a;
-      return props.small ? "small" : (_a = props.size) != null ? _a : _globalSize.value;
-    });
+    const _size = computed(() => props.small ? "small" : props.size ?? _globalSize.value);
     useDeprecated({
       from: "small",
       replacement: "size",
@@ -702,7 +695,6 @@ var pagination_default = defineComponent({
       handleSizeChange
     });
     return () => {
-      var _a, _b;
       if (!assertValidUsage.value) {
         debugWarn(componentName, t("el.pagination.deprecationWarning"));
         return null;
@@ -746,7 +738,7 @@ var pagination_default = defineComponent({
           size: _size.value,
           appendSizeTo: props.appendSizeTo
         }),
-        slot: (_b = (_a = slots == null ? void 0 : slots.default) == null ? void 0 : _a.call(slots)) != null ? _b : null,
+        slot: slots?.default?.() ?? null,
         total: h(total_default, { total: isAbsent(props.total) ? 0 : props.total })
       };
       const components = props.layout.split(",").map((item) => item.trim());

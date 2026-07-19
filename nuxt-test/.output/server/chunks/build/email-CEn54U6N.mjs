@@ -1,33 +1,33 @@
 function validatePassword(password) {
   if (!password) {
-    return "\u8BF7\u8F93\u5165\u5BC6\u7801";
+    return "请输入密码";
   }
   if (password.length < 12 || password.length > 16) {
-    return "\u5BC6\u7801\u957F\u5EA6\u9700\u4E3A 12~16 \u4F4D";
+    return "密码长度需为 12~16 位";
   }
   if (!/[A-Z]/.test(password) || !/[a-z]/.test(password) || !/[0-9]/.test(password) || !/[\]!@#$%^&*()_+\-=[{}|;:,.<>?/~`]/.test(password)) {
-    return "\u5BC6\u7801\u9700\u5305\u542B\u5927\u5C0F\u5199\u5B57\u6BCD\u3001\u6570\u5B57\u548C\u7279\u6B8A\u5B57\u7B26";
+    return "密码需包含大小写字母、数字和特殊字符";
   }
   return null;
 }
 function validateUsername(username) {
   if (!username) {
-    return "\u8BF7\u8F93\u5165\u7528\u6237\u540D";
+    return "请输入用户名";
   }
   if (username.length < 4 || username.length > 15) {
-    return "\u7528\u6237\u540D\u957F\u5EA6\u9700\u4E3A 4~15 \u4F4D";
+    return "用户名长度需为 4~15 位";
   }
   if (!/^[a-zA-Z0-9]+$/.test(username)) {
-    return "\u7528\u6237\u540D\u53EA\u80FD\u5305\u542B\u5927\u5C0F\u5199\u5B57\u6BCD\u548C\u6570\u5B57";
+    return "用户名只能包含大小写字母和数字";
   }
   return null;
 }
 function validateEmail(email) {
   if (!email) {
-    return "\u8BF7\u8F93\u5165\u90AE\u7BB1\u5730\u5740";
+    return "请输入邮箱地址";
   }
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    return "\u90AE\u7BB1\u683C\u5F0F\u4E0D\u6B63\u786E";
+    return "邮箱格式不正确";
   }
   return null;
 }

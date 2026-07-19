@@ -254,7 +254,6 @@ var image_viewer_vue_vue_type_script_setup_true_lang_default = /* @__PURE__ */ d
   props: imageViewerProps,
   emits: imageViewerEmits,
   setup(__props, { expose: __expose, emit: __emit }) {
-    var _a;
     const modes = {
       CONTAIN: {
         name: "contain",
@@ -289,7 +288,7 @@ var image_viewer_vue_vue_type_script_setup_true_lang_default = /* @__PURE__ */ d
       offsetY: 0,
       enableTransition: false
     });
-    const zIndex = ref((_a = props.zIndex) != null ? _a : nextZIndex());
+    const zIndex = ref(props.zIndex ?? nextZIndex());
     useLockscreen(visible, { ns });
     const isSingle = computed(() => {
       const { urlList } = props;
@@ -440,8 +439,7 @@ var image_viewer_vue_vue_type_script_setup_true_lang_default = /* @__PURE__ */ d
       transform.value.enableTransition = enableTransition;
     }
     function onFocusoutPrevented(event) {
-      var _a2;
-      if (((_a2 = event.detail) == null ? void 0 : _a2.focusReason) === "pointer") event.preventDefault();
+      if (event.detail?.focusReason === "pointer") event.preventDefault();
     }
     function onCloseRequested() {
       if (props.closeOnPressEscape) hide();
@@ -451,8 +449,7 @@ var image_viewer_vue_vue_type_script_setup_true_lang_default = /* @__PURE__ */ d
     });
     watch(currentImg, () => {
       nextTick(() => {
-        var _a2;
-        if (!((_a2 = imgRef.value) == null ? void 0 : _a2.complete)) loading.value = true;
+        if (!imgRef.value?.complete) loading.value = true;
       });
     });
     watch(activeIndex, (val) => {
@@ -665,12 +662,11 @@ var image_vue_vue_type_script_setup_true_lang_default = /* @__PURE__ */ defineCo
     }
     const lazyLoadHandler = useThrottleFn(handleLazyLoad, 200, true);
     async function addLazyLoadListener() {
-      var _a;
       if (!isClient) return;
       await nextTick();
       const { scrollContainer } = props;
       if (isElement(scrollContainer)) _scrollContainer.value = scrollContainer;
-      else if (isString(scrollContainer) && scrollContainer !== "") _scrollContainer.value = (_a = (void 0).querySelector(scrollContainer)) != null ? _a : void 0;
+      else if (isString(scrollContainer) && scrollContainer !== "") _scrollContainer.value = (void 0).querySelector(scrollContainer) ?? void 0;
       else if (container.value) {
         const scrollContainer2 = getScrollContainer(container.value);
         _scrollContainer.value = isWindow(scrollContainer2) ? void 0 : scrollContainer2;
@@ -682,7 +678,7 @@ var image_vue_vue_type_script_setup_true_lang_default = /* @__PURE__ */ defineCo
     }
     function removeLazyLoadListener() {
       if (!isClient || !lazyLoadHandler) return;
-      stopScrollListener == null ? void 0 : stopScrollListener();
+      stopScrollListener?.();
       _scrollContainer.value = void 0;
       stopScrollListener = void 0;
     }
@@ -973,14 +969,13 @@ var progress_vue_vue_type_script_setup_true_lang_default = /* @__PURE__ */ defin
       }).sort((a, b) => a.percentage - b.percentage);
     }
     const getCurrentColor = (percentage) => {
-      var _a;
       const { color } = props;
       if (isFunction(color)) return color(percentage);
       else if (isString(color)) return color;
       else {
         const colors = getColors(color);
         for (const color2 of colors) if (color2.percentage > percentage) return color2.color;
-        return (_a = colors[colors.length - 1]) == null ? void 0 : _a.color;
+        return colors[colors.length - 1]?.color;
       }
     };
     return (_ctx, _cache) => {
@@ -1554,16 +1549,12 @@ var upload_dragger_vue_vue_type_script_setup_true_lang_default = /* @__PURE__ */
       const files = Array.from(e.dataTransfer.files);
       const items = e.dataTransfer.items || [];
       if (props.directory) {
-        const entries = Array.from(items).map((item) => {
-          var _a;
-          return (_a = item == null ? void 0 : item.webkitGetAsEntry) == null ? void 0 : _a.call(item);
-        }).filter((entry) => entry);
+        const entries = Array.from(items).map((item) => item?.webkitGetAsEntry?.()).filter((entry) => entry);
         emit("file", flatten(await Promise.all(entries.map(getAllFiles))));
         return;
       }
       files.forEach((file, index) => {
-        var _a, _b;
-        const entry = (_b = (_a = items[index]) == null ? void 0 : _a.webkitGetAsEntry) == null ? void 0 : _b.call(_a);
+        const entry = items[index]?.webkitGetAsEntry?.();
         if (entry) file.isDirectory = entry.isDirectory;
       });
       emit("file", files);
@@ -1653,7 +1644,7 @@ var upload_content_vue_vue_type_script_setup_true_lang_default = /* @__PURE__ */
     const doUpload = async (rawFile, beforeData) => {
       const { headers, data, method, withCredentials, name: filename, action, onProgress, onSuccess, onError, httpRequest } = props;
       try {
-        beforeData = await resolveData(beforeData != null ? beforeData : data, rawFile);
+        beforeData = await resolveData(beforeData ?? data, rawFile);
       } catch {
         props.onRemove(rawFile);
         return;
@@ -1748,15 +1739,13 @@ var upload_content_vue_vue_type_script_setup_true_lang_default = /* @__PURE__ */
 var upload_content_default = upload_content_vue_vue_type_script_setup_true_lang_default;
 const SCOPE = "ElUpload";
 const revokeFileObjectURL = (file) => {
-  var _a;
-  if ((_a = file.url) == null ? void 0 : _a.startsWith("blob:")) URL.revokeObjectURL(file.url);
+  if (file.url?.startsWith("blob:")) URL.revokeObjectURL(file.url);
 };
 const useHandlers = (props, uploadRef) => {
   const uploadFiles = useVModel(props, "fileList", void 0, { passive: true });
   const getFile = (rawFile) => uploadFiles.value.find((file) => file.uid === rawFile.uid);
   function abort(file) {
-    var _a;
-    (_a = uploadRef.value) == null ? void 0 : _a.abort(file);
+    uploadRef.value?.abort(file);
   }
   function clearFiles(states = [
     "ready",
@@ -1829,10 +1818,7 @@ const useHandlers = (props, uploadRef) => {
     } else doRemove(uploadFile);
   };
   function submit() {
-    uploadFiles.value.filter(({ status }) => status === "ready").forEach(({ raw }) => {
-      var _a;
-      return raw && ((_a = uploadRef.value) == null ? void 0 : _a.upload(raw));
-    });
+    uploadFiles.value.filter(({ status }) => status === "ready").forEach(({ raw }) => raw && uploadRef.value?.upload(raw));
   }
   watch(() => props.listType, (val) => {
     if (val !== "picture-card" && val !== "picture") return;
@@ -1848,8 +1834,8 @@ const useHandlers = (props, uploadRef) => {
   });
   watch(uploadFiles, (files) => {
     for (const file of files) {
-      file.uid || (file.uid = genFileId());
-      file.status || (file.status = "success");
+      file.uid ||= genFileId();
+      file.status ||= "success";
     }
   }, {
     immediate: true,
@@ -2001,7 +1987,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
       loading.value = true;
       try {
         const res = await getList();
-        mediaList.value = res != null ? res : [];
+        mediaList.value = res ?? [];
       } catch {
         mediaList.value = [];
       } finally {
@@ -2012,7 +1998,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
       uploadLoading.value = true;
       try {
         await upload(file);
-        ElMessage.success("\u4E0A\u4F20\u6210\u529F");
+        ElMessage.success("上传成功");
         await loadData();
       } catch {
       } finally {
@@ -2022,11 +2008,11 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
     function beforeUpload(file) {
       const allowed = ["image/jpeg", "image/png", "image/gif", "image/webp", "image/svg+xml"];
       if (!allowed.includes(file.type)) {
-        ElMessage.error("\u53EA\u652F\u6301 jpg/png/gif/webp/svg \u683C\u5F0F");
+        ElMessage.error("只支持 jpg/png/gif/webp/svg 格式");
         return false;
       }
       if (file.size > 10 * 1024 * 1024) {
-        ElMessage.error("\u6587\u4EF6\u5927\u5C0F\u4E0D\u80FD\u8D85\u8FC7 10MB");
+        ElMessage.error("文件大小不能超过 10MB");
         return false;
       }
       handleUpload(file);
@@ -2034,9 +2020,9 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
     }
     async function handleDelete(id) {
       try {
-        await ElMessageBox.confirm("\u786E\u5B9A\u5220\u9664\u6B64\u6587\u4EF6\uFF1F", "\u786E\u8BA4", { confirmButtonText: "\u786E\u5B9A", cancelButtonText: "\u53D6\u6D88", type: "warning" });
+        await ElMessageBox.confirm("确定删除此文件？", "确认", { confirmButtonText: "确定", cancelButtonText: "取消", type: "warning" });
         await remove(id);
-        ElMessage.success("\u5220\u9664\u6210\u529F");
+        ElMessage.success("删除成功");
         await loadData();
       } catch {
       }
@@ -2049,7 +2035,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
       const _component_el_image = ElImage;
       const _component_el_pagination = ElPagination;
       const _directive_loading = vLoading;
-      _push(`<div${ssrRenderAttrs(mergeProps({ style: { "flex": "1", "min-height": "0", "display": "flex", "flex-direction": "column" } }, _attrs))}><div class="page-header"><h2>\u5A92\u4F53\u7BA1\u7406</h2>`);
+      _push(`<div${ssrRenderAttrs(mergeProps({ style: { "flex": "1", "min-height": "0", "display": "flex", "flex-direction": "column" } }, _attrs))}><div class="page-header"><h2>媒体管理</h2>`);
       _push(ssrRenderComponent(_component_el_upload, {
         "show-file-list": false,
         "before-upload": beforeUpload,
@@ -2064,10 +2050,10 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
             }, {
               default: withCtx((_2, _push3, _parent3, _scopeId2) => {
                 if (_push3) {
-                  _push3(`\u4E0A\u4F20\u6587\u4EF6`);
+                  _push3(`上传文件`);
                 } else {
                   return [
-                    createTextVNode("\u4E0A\u4F20\u6587\u4EF6")
+                    createTextVNode("上传文件")
                   ];
                 }
               }),
@@ -2081,7 +2067,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                 loading: uploadLoading.value
               }, {
                 default: withCtx(() => [
-                  createTextVNode("\u4E0A\u4F20\u6587\u4EF6")
+                  createTextVNode("上传文件")
                 ]),
                 _: 1
               }, 8, ["icon", "loading"])
@@ -2099,10 +2085,10 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
       }, ssrGetDirectiveProps(_ctx, _directive_loading, loading.value)), {
         empty: withCtx((_, _push2, _parent2, _scopeId) => {
           if (_push2) {
-            _push2(`<div style="${ssrRenderStyle({ "padding": "40px 0", "color": "#909399" })}"${_scopeId}>\u6682\u65E0\u6570\u636E</div>`);
+            _push2(`<div style="${ssrRenderStyle({ "padding": "40px 0", "color": "#909399" })}"${_scopeId}>暂无数据</div>`);
           } else {
             return [
-              createVNode("div", { style: { "padding": "40px 0", "color": "#909399" } }, "\u6682\u65E0\u6570\u636E")
+              createVNode("div", { style: { "padding": "40px 0", "color": "#909399" } }, "暂无数据")
             ];
           }
         }),
@@ -2110,13 +2096,13 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
           if (_push2) {
             _push2(ssrRenderComponent(_component_el_table_column, {
               type: "index",
-              label: "\u5E8F\u53F7",
+              label: "序号",
               width: "55",
               align: "center",
               index: (i) => (currentPage.value - 1) * pageSize.value + i + 1
             }, null, _parent2, _scopeId));
             _push2(ssrRenderComponent(_component_el_table_column, {
-              label: "\u9884\u89C8",
+              label: "预览",
               width: "70"
             }, {
               default: withCtx(({ row }, _push3, _parent3, _scopeId2) => {
@@ -2144,17 +2130,17 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
             }, _parent2, _scopeId));
             _push2(ssrRenderComponent(_component_el_table_column, {
               prop: "originalName",
-              label: "\u6587\u4EF6\u540D",
+              label: "文件名",
               "min-width": "200",
               "show-overflow-tooltip": ""
             }, null, _parent2, _scopeId));
             _push2(ssrRenderComponent(_component_el_table_column, {
               prop: "mimeType",
-              label: "\u7C7B\u578B",
+              label: "类型",
               width: "100"
             }, null, _parent2, _scopeId));
             _push2(ssrRenderComponent(_component_el_table_column, {
-              label: "\u5927\u5C0F",
+              label: "大小",
               width: "90"
             }, {
               default: withCtx(({ row }, _push3, _parent3, _scopeId2) => {
@@ -2170,12 +2156,12 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
             }, _parent2, _scopeId));
             _push2(ssrRenderComponent(_component_el_table_column, {
               prop: "uploadedBy.username",
-              label: "\u4E0A\u4F20\u8005",
+              label: "上传者",
               width: "100"
             }, null, _parent2, _scopeId));
             _push2(ssrRenderComponent(_component_el_table_column, {
               prop: "createdAt",
-              label: "\u65F6\u95F4",
+              label: "时间",
               width: "170"
             }, {
               default: withCtx(({ row }, _push3, _parent3, _scopeId2) => {
@@ -2191,7 +2177,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
             }, _parent2, _scopeId));
             if (isAdmin.value) {
               _push2(ssrRenderComponent(_component_el_table_column, {
-                label: "\u64CD\u4F5C",
+                label: "操作",
                 width: "100",
                 fixed: "right"
               }, {
@@ -2205,10 +2191,10 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                     }, {
                       default: withCtx((_2, _push4, _parent4, _scopeId3) => {
                         if (_push4) {
-                          _push4(`\u5220\u9664`);
+                          _push4(`删除`);
                         } else {
                           return [
-                            createTextVNode("\u5220\u9664")
+                            createTextVNode("删除")
                           ];
                         }
                       }),
@@ -2223,7 +2209,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                         onClick: ($event) => handleDelete(row.id)
                       }, {
                         default: withCtx(() => [
-                          createTextVNode("\u5220\u9664")
+                          createTextVNode("删除")
                         ]),
                         _: 1
                       }, 8, ["onClick"])
@@ -2239,13 +2225,13 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
             return [
               createVNode(_component_el_table_column, {
                 type: "index",
-                label: "\u5E8F\u53F7",
+                label: "序号",
                 width: "55",
                 align: "center",
                 index: (i) => (currentPage.value - 1) * pageSize.value + i + 1
               }, null, 8, ["index"]),
               createVNode(_component_el_table_column, {
-                label: "\u9884\u89C8",
+                label: "预览",
                 width: "70"
               }, {
                 default: withCtx(({ row }) => [
@@ -2261,17 +2247,17 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
               }),
               createVNode(_component_el_table_column, {
                 prop: "originalName",
-                label: "\u6587\u4EF6\u540D",
+                label: "文件名",
                 "min-width": "200",
                 "show-overflow-tooltip": ""
               }),
               createVNode(_component_el_table_column, {
                 prop: "mimeType",
-                label: "\u7C7B\u578B",
+                label: "类型",
                 width: "100"
               }),
               createVNode(_component_el_table_column, {
-                label: "\u5927\u5C0F",
+                label: "大小",
                 width: "90"
               }, {
                 default: withCtx(({ row }) => [
@@ -2281,12 +2267,12 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
               }),
               createVNode(_component_el_table_column, {
                 prop: "uploadedBy.username",
-                label: "\u4E0A\u4F20\u8005",
+                label: "上传者",
                 width: "100"
               }),
               createVNode(_component_el_table_column, {
                 prop: "createdAt",
-                label: "\u65F6\u95F4",
+                label: "时间",
                 width: "170"
               }, {
                 default: withCtx(({ row }) => [
@@ -2296,7 +2282,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
               }),
               isAdmin.value ? (openBlock(), createBlock(_component_el_table_column, {
                 key: 0,
-                label: "\u64CD\u4F5C",
+                label: "操作",
                 width: "100",
                 fixed: "right"
               }, {
@@ -2308,7 +2294,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                     onClick: ($event) => handleDelete(row.id)
                   }, {
                     default: withCtx(() => [
-                      createTextVNode("\u5220\u9664")
+                      createTextVNode("删除")
                     ]),
                     _: 1
                   }, 8, ["onClick"])

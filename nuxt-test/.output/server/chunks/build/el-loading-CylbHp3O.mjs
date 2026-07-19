@@ -31,17 +31,15 @@ function createLoadingComponent(options, appContext) {
     loadingInstance.unmount();
   }
   function removeElLoadingChild() {
-    var _a, _b;
-    (_b = (_a = vm.$el) == null ? void 0 : _a.parentNode) == null ? void 0 : _b.removeChild(vm.$el);
+    vm.$el?.parentNode?.removeChild(vm.$el);
   }
   function close() {
-    var _a;
     if (options.beforeClose && !options.beforeClose()) return;
     afterLeaveFlag.value = true;
     clearTimeout(afterLeaveTimer);
     afterLeaveTimer = setTimeout(handleAfterLeave, 400);
     data.visible = false;
-    (_a = options.closed) == null ? void 0 : _a.call(options);
+    options.closed?.();
   }
   function handleAfterLeave() {
     if (!afterLeaveFlag.value) return;
@@ -86,7 +84,7 @@ function createLoadingComponent(options, appContext) {
       };
     }
   }));
-  Object.assign(loadingInstance._context, appContext != null ? appContext : {});
+  Object.assign(loadingInstance._context, appContext ?? {});
   const vm = loadingInstance.mount((void 0).createElement("div"));
   return {
     ...toRefs(data),
@@ -108,11 +106,10 @@ const Loading = function(options = {}, context) {
   const instance = createLoadingComponent({
     ...resolved,
     closed: () => {
-      var _a;
-      (_a = resolved.closed) == null ? void 0 : _a.call(resolved);
+      resolved.closed?.();
       if (resolved.fullscreen) fullscreenInstance = void 0;
     }
-  }, context != null ? context : Loading._context);
+  }, context ?? Loading._context);
   addStyle(resolved, resolved.parent, instance);
   addClassList(resolved, resolved.parent, instance);
   resolved.parent.vLoadingAddClassList = () => addClassList(resolved, resolved.parent, instance);
@@ -126,9 +123,8 @@ const Loading = function(options = {}, context) {
   return instance;
 };
 const resolveOptions = (options) => {
-  var _a, _b, _c, _d;
   let target;
-  if (isString(options.target)) target = (_a = (void 0).querySelector(options.target)) != null ? _a : (void 0).body;
+  if (isString(options.target)) target = (void 0).querySelector(options.target) ?? (void 0).body;
   else target = options.target || (void 0).body;
   return {
     parent: target === (void 0).body || options.body ? (void 0).body : target,
@@ -137,10 +133,10 @@ const resolveOptions = (options) => {
     svgViewBox: options.svgViewBox || "",
     spinner: options.spinner || false,
     text: options.text || "",
-    fullscreen: target === (void 0).body && ((_b = options.fullscreen) != null ? _b : true),
-    lock: (_c = options.lock) != null ? _c : false,
+    fullscreen: target === (void 0).body && (options.fullscreen ?? true),
+    lock: options.lock ?? false,
     customClass: options.customClass || "",
-    visible: (_d = options.visible) != null ? _d : true,
+    visible: options.visible ?? true,
     beforeClose: options.beforeClose,
     closed: options.closed,
     target
@@ -181,14 +177,13 @@ const getAttributeName = (name) => {
   return `element-loading-${hyphenate(name)}`;
 };
 const createInstance = (el, binding) => {
-  var _a, _b, _c, _d;
   const vm = binding.instance;
   const getBindingProp = (key) => isObject(binding.value) ? binding.value[key] : void 0;
   const resolveExpression = (key) => {
-    return ref(isString(key) && (vm == null ? void 0 : vm[key]) || key);
+    return ref(isString(key) && vm?.[key] || key);
   };
   const getProp = (name) => resolveExpression(getBindingProp(name) || el.getAttribute(getAttributeName(name)));
-  const fullscreen = (_a = getBindingProp("fullscreen")) != null ? _a : binding.modifiers.fullscreen;
+  const fullscreen = getBindingProp("fullscreen") ?? binding.modifiers.fullscreen;
   const options = {
     text: getProp("text"),
     svg: getProp("svg"),
@@ -197,9 +192,9 @@ const createInstance = (el, binding) => {
     background: getProp("background"),
     customClass: getProp("customClass"),
     fullscreen,
-    target: (_b = getBindingProp("target")) != null ? _b : fullscreen ? void 0 : el,
-    body: (_c = getBindingProp("body")) != null ? _c : binding.modifiers.body,
-    lock: (_d = getBindingProp("lock")) != null ? _d : binding.modifiers.lock
+    target: getBindingProp("target") ?? (fullscreen ? void 0 : el),
+    body: getBindingProp("body") ?? binding.modifiers.body,
+    lock: getBindingProp("lock") ?? binding.modifiers.lock
   };
   const instance = Loading(options);
   instance._context = vLoading._context;
@@ -218,7 +213,7 @@ const vLoading = {
   updated(el, binding) {
     const instance = el[INSTANCE_KEY];
     if (!binding.value) {
-      instance == null ? void 0 : instance.instance.close();
+      instance?.instance.close();
       el[INSTANCE_KEY] = null;
       return;
     }
@@ -233,8 +228,7 @@ const vLoading = {
     });
   },
   unmounted(el) {
-    var _a;
-    (_a = el[INSTANCE_KEY]) == null ? void 0 : _a.instance.close();
+    el[INSTANCE_KEY]?.instance.close();
     el[INSTANCE_KEY] = null;
   }
 };

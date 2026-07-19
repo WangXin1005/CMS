@@ -70,7 +70,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
       initUsernameError.value = err || "";
       if (!err && registerForm.value.username) {
         const taken = await checkUsername(registerForm.value.username);
-        if (taken) initUsernameError.value = "\u7528\u6237\u540D\u5DF2\u88AB\u4F7F\u7528";
+        if (taken) initUsernameError.value = "用户名已被使用";
       }
     }
     function onInitEmailBlur() {
@@ -80,8 +80,8 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
       initPasswordError.value = validatePassword(registerForm.value.password) || "";
       if (registerForm.value.confirmPassword) {
         if (registerForm.value.password !== registerForm.value.confirmPassword) {
-          initPasswordError.value = "\u4E24\u6B21\u8F93\u5165\u7684\u5BC6\u7801\u4E0D\u4E00\u81F4";
-          initConfirmError.value = "\u4E24\u6B21\u8F93\u5165\u7684\u5BC6\u7801\u4E0D\u4E00\u81F4";
+          initPasswordError.value = "两次输入的密码不一致";
+          initConfirmError.value = "两次输入的密码不一致";
         } else {
           initConfirmError.value = "";
         }
@@ -89,8 +89,8 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
     }
     function onInitConfirmBlur() {
       if (registerForm.value.confirmPassword && registerForm.value.password !== registerForm.value.confirmPassword) {
-        initConfirmError.value = "\u4E24\u6B21\u8F93\u5165\u7684\u5BC6\u7801\u4E0D\u4E00\u81F4";
-        initPasswordError.value = "\u4E24\u6B21\u8F93\u5165\u7684\u5BC6\u7801\u4E0D\u4E00\u81F4";
+        initConfirmError.value = "两次输入的密码不一致";
+        initPasswordError.value = "两次输入的密码不一致";
       } else {
         initConfirmError.value = "";
         initPasswordError.value = registerForm.value.password ? validatePassword(registerForm.value.password) || "" : "";
@@ -101,7 +101,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
       regUsernameError.value = err || "";
       if (!err && registerForm.value.username) {
         const taken = await checkUsername(registerForm.value.username);
-        if (taken) regUsernameError.value = "\u7528\u6237\u540D\u5DF2\u88AB\u4F7F\u7528";
+        if (taken) regUsernameError.value = "用户名已被使用";
       }
     }
     function onRegEmailBlur() {
@@ -111,8 +111,8 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
       regPasswordError.value = validatePassword(registerForm.value.password) || "";
       if (registerForm.value.confirmPassword) {
         if (registerForm.value.password !== registerForm.value.confirmPassword) {
-          regPasswordError.value = "\u4E24\u6B21\u8F93\u5165\u7684\u5BC6\u7801\u4E0D\u4E00\u81F4";
-          regConfirmError.value = "\u4E24\u6B21\u8F93\u5165\u7684\u5BC6\u7801\u4E0D\u4E00\u81F4";
+          regPasswordError.value = "两次输入的密码不一致";
+          regConfirmError.value = "两次输入的密码不一致";
         } else {
           regConfirmError.value = "";
         }
@@ -120,8 +120,8 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
     }
     function onRegConfirmBlur() {
       if (registerForm.value.confirmPassword && registerForm.value.password !== registerForm.value.confirmPassword) {
-        regConfirmError.value = "\u4E24\u6B21\u8F93\u5165\u7684\u5BC6\u7801\u4E0D\u4E00\u81F4";
-        regPasswordError.value = "\u4E24\u6B21\u8F93\u5165\u7684\u5BC6\u7801\u4E0D\u4E00\u81F4";
+        regConfirmError.value = "两次输入的密码不一致";
+        regPasswordError.value = "两次输入的密码不一致";
       } else {
         regConfirmError.value = "";
         regPasswordError.value = registerForm.value.password ? validatePassword(registerForm.value.password) || "" : "";
@@ -129,7 +129,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
     }
     async function handleLogin() {
       if (!loginForm.value.username || !loginForm.value.password) {
-        ElMessage.warning("\u8BF7\u8F93\u5165\u7528\u6237\u540D\u548C\u5BC6\u7801");
+        ElMessage.warning("请输入用户名和密码");
         return;
       }
       loginLoading.value = true;
@@ -140,7 +140,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
           localStorage.removeItem("remembered_username");
         }
         await login2(loginForm.value);
-        ElMessage.success("\u767B\u5F55\u6210\u529F");
+        ElMessage.success("登录成功");
         const redirectPath = route.query.redirect;
         router.push(redirectPath || "/home");
       } catch {
@@ -159,17 +159,17 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
       if (ue || ee || pe) return;
       const taken = await checkUsername(registerForm.value.username);
       if (taken) {
-        regUsernameError.value = "\u7528\u6237\u540D\u5DF2\u88AB\u4F7F\u7528";
+        regUsernameError.value = "用户名已被使用";
         return;
       }
       if (registerForm.value.password !== registerForm.value.confirmPassword) {
-        ElMessage.warning("\u4E24\u6B21\u8F93\u5165\u7684\u5BC6\u7801\u4E0D\u4E00\u81F4");
+        ElMessage.warning("两次输入的密码不一致");
         return;
       }
       registerLoading.value = true;
       try {
         await registerGuest(registerForm.value);
-        ElMessage.success("\u6CE8\u518C\u6210\u529F");
+        ElMessage.success("注册成功");
         showRegister.value = false;
       } catch {
         loginLoading.value = false;
@@ -187,17 +187,17 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
       if (ue || ee || pe) return;
       const taken = await checkUsername(registerForm.value.username);
       if (taken) {
-        initUsernameError.value = "\u7528\u6237\u540D\u5DF2\u88AB\u4F7F\u7528";
+        initUsernameError.value = "用户名已被使用";
         return;
       }
       if (registerForm.value.password !== registerForm.value.confirmPassword) {
-        ElMessage.warning("\u4E24\u6B21\u8F93\u5165\u7684\u5BC6\u7801\u4E0D\u4E00\u81F4");
+        ElMessage.warning("两次输入的密码不一致");
         return;
       }
       initLoading.value = true;
       try {
         await initSuperAdmin(registerForm.value);
-        ElMessage.success("\u8D85\u7EA7\u7BA1\u7406\u5458\u521B\u5EFA\u6210\u529F\uFF0C\u8BF7\u767B\u5F55");
+        ElMessage.success("超级管理员创建成功，请登录");
         mode.value = "login";
       } catch {
         loginLoading.value = false;
@@ -214,7 +214,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
       const _component_el_checkbox = ElCheckbox;
       _push(`<div${ssrRenderAttrs(mergeProps({ class: "login-wrapper" }, _attrs))} data-v-c14e9b2b>`);
       if (mode.value === "checking") {
-        _push(`<div class="login-card" data-v-c14e9b2b><div class="card-brand" data-v-c14e9b2b><span class="brand-icon" data-v-c14e9b2b>\u{1F4DD}</span><h1 class="brand-title" data-v-c14e9b2b>CodeBlog</h1></div><div class="checking-area" data-v-c14e9b2b>`);
+        _push(`<div class="login-card" data-v-c14e9b2b><div class="card-brand" data-v-c14e9b2b><span class="brand-icon" data-v-c14e9b2b>📝</span><h1 class="brand-title" data-v-c14e9b2b>CodeBlog</h1></div><div class="checking-area" data-v-c14e9b2b>`);
         _push(ssrRenderComponent(_component_el_icon, {
           class: "is-loading",
           size: 32
@@ -230,9 +230,9 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
           }),
           _: 1
         }, _parent));
-        _push(`<p data-v-c14e9b2b>\u6B63\u5728\u68C0\u67E5\u7CFB\u7EDF\u72B6\u6001...</p></div></div>`);
+        _push(`<p data-v-c14e9b2b>正在检查系统状态...</p></div></div>`);
       } else if (mode.value === "init") {
-        _push(`<div class="login-card" data-v-c14e9b2b><div class="card-brand" data-v-c14e9b2b><span class="brand-icon" data-v-c14e9b2b>\u{1F680}</span><h1 class="brand-title" data-v-c14e9b2b>\u521D\u59CB\u5316\u7CFB\u7EDF</h1><p class="brand-desc" data-v-c14e9b2b>\u9996\u6B21\u4F7F\u7528\uFF0C\u8BF7\u521B\u5EFA\u8D85\u7EA7\u7BA1\u7406\u5458\u8D26\u53F7</p></div>`);
+        _push(`<div class="login-card" data-v-c14e9b2b><div class="card-brand" data-v-c14e9b2b><span class="brand-icon" data-v-c14e9b2b>🚀</span><h1 class="brand-title" data-v-c14e9b2b>初始化系统</h1><p class="brand-desc" data-v-c14e9b2b>首次使用，请创建超级管理员账号</p></div>`);
         _push(ssrRenderComponent(_component_el_form, {
           "label-position": "top",
           onSubmit: handleInit
@@ -240,7 +240,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
           default: withCtx((_, _push2, _parent2, _scopeId) => {
             if (_push2) {
               _push2(ssrRenderComponent(_component_el_form_item, {
-                label: "\u7528\u6237\u540D",
+                label: "用户名",
                 error: initUsernameError.value
               }, {
                 default: withCtx((_2, _push3, _parent3, _scopeId2) => {
@@ -248,7 +248,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                     _push3(ssrRenderComponent(_component_el_input, {
                       modelValue: registerForm.value.username,
                       "onUpdate:modelValue": ($event) => registerForm.value.username = $event,
-                      placeholder: "\u8BF7\u8F93\u5165\u7528\u6237\u540D",
+                      placeholder: "请输入用户名",
                       "prefix-icon": unref(user_default),
                       onBlur: onInitUsernameBlur
                     }, null, _parent3, _scopeId2));
@@ -257,7 +257,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                       createVNode(_component_el_input, {
                         modelValue: registerForm.value.username,
                         "onUpdate:modelValue": ($event) => registerForm.value.username = $event,
-                        placeholder: "\u8BF7\u8F93\u5165\u7528\u6237\u540D",
+                        placeholder: "请输入用户名",
                         "prefix-icon": unref(user_default),
                         onBlur: onInitUsernameBlur
                       }, null, 8, ["modelValue", "onUpdate:modelValue", "prefix-icon"])
@@ -267,7 +267,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                 _: 1
               }, _parent2, _scopeId));
               _push2(ssrRenderComponent(_component_el_form_item, {
-                label: "\u90AE\u7BB1",
+                label: "邮箱",
                 error: initEmailError.value
               }, {
                 default: withCtx((_2, _push3, _parent3, _scopeId2) => {
@@ -275,7 +275,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                     _push3(ssrRenderComponent(_component_el_input, {
                       modelValue: registerForm.value.email,
                       "onUpdate:modelValue": ($event) => registerForm.value.email = $event,
-                      placeholder: "\u8BF7\u8F93\u5165\u90AE\u7BB1",
+                      placeholder: "请输入邮箱",
                       "prefix-icon": unref(message_default$1),
                       onBlur: onInitEmailBlur
                     }, null, _parent3, _scopeId2));
@@ -284,7 +284,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                       createVNode(_component_el_input, {
                         modelValue: registerForm.value.email,
                         "onUpdate:modelValue": ($event) => registerForm.value.email = $event,
-                        placeholder: "\u8BF7\u8F93\u5165\u90AE\u7BB1",
+                        placeholder: "请输入邮箱",
                         "prefix-icon": unref(message_default$1),
                         onBlur: onInitEmailBlur
                       }, null, 8, ["modelValue", "onUpdate:modelValue", "prefix-icon"])
@@ -294,7 +294,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                 _: 1
               }, _parent2, _scopeId));
               _push2(ssrRenderComponent(_component_el_form_item, {
-                label: "\u5BC6\u7801",
+                label: "密码",
                 error: initPasswordError.value
               }, {
                 default: withCtx((_2, _push3, _parent3, _scopeId2) => {
@@ -303,7 +303,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                       modelValue: registerForm.value.password,
                       "onUpdate:modelValue": ($event) => registerForm.value.password = $event,
                       type: "password",
-                      placeholder: "\u8BF7\u8F93\u5165\u5BC6\u7801",
+                      placeholder: "请输入密码",
                       "prefix-icon": unref(lock_default),
                       "show-password": "",
                       onBlur: onInitPasswordBlur
@@ -314,7 +314,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                         modelValue: registerForm.value.password,
                         "onUpdate:modelValue": ($event) => registerForm.value.password = $event,
                         type: "password",
-                        placeholder: "\u8BF7\u8F93\u5165\u5BC6\u7801",
+                        placeholder: "请输入密码",
                         "prefix-icon": unref(lock_default),
                         "show-password": "",
                         onBlur: onInitPasswordBlur
@@ -325,7 +325,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                 _: 1
               }, _parent2, _scopeId));
               _push2(ssrRenderComponent(_component_el_form_item, {
-                label: "\u786E\u8BA4\u5BC6\u7801",
+                label: "确认密码",
                 error: initConfirmError.value
               }, {
                 default: withCtx((_2, _push3, _parent3, _scopeId2) => {
@@ -334,7 +334,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                       modelValue: registerForm.value.confirmPassword,
                       "onUpdate:modelValue": ($event) => registerForm.value.confirmPassword = $event,
                       type: "password",
-                      placeholder: "\u8BF7\u518D\u6B21\u8F93\u5165\u5BC6\u7801",
+                      placeholder: "请再次输入密码",
                       "prefix-icon": unref(lock_default),
                       "show-password": "",
                       onBlur: onInitConfirmBlur
@@ -345,7 +345,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                         modelValue: registerForm.value.confirmPassword,
                         "onUpdate:modelValue": ($event) => registerForm.value.confirmPassword = $event,
                         type: "password",
-                        placeholder: "\u8BF7\u518D\u6B21\u8F93\u5165\u5BC6\u7801",
+                        placeholder: "请再次输入密码",
                         "prefix-icon": unref(lock_default),
                         "show-password": "",
                         onBlur: onInitConfirmBlur
@@ -365,10 +365,10 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
               }, {
                 default: withCtx((_2, _push3, _parent3, _scopeId2) => {
                   if (_push3) {
-                    _push3(` \u521B\u5EFA\u8D85\u7EA7\u7BA1\u7406\u5458 `);
+                    _push3(` 创建超级管理员 `);
                   } else {
                     return [
-                      createTextVNode(" \u521B\u5EFA\u8D85\u7EA7\u7BA1\u7406\u5458 ")
+                      createTextVNode(" 创建超级管理员 ")
                     ];
                   }
                 }),
@@ -377,14 +377,14 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
             } else {
               return [
                 createVNode(_component_el_form_item, {
-                  label: "\u7528\u6237\u540D",
+                  label: "用户名",
                   error: initUsernameError.value
                 }, {
                   default: withCtx(() => [
                     createVNode(_component_el_input, {
                       modelValue: registerForm.value.username,
                       "onUpdate:modelValue": ($event) => registerForm.value.username = $event,
-                      placeholder: "\u8BF7\u8F93\u5165\u7528\u6237\u540D",
+                      placeholder: "请输入用户名",
                       "prefix-icon": unref(user_default),
                       onBlur: onInitUsernameBlur
                     }, null, 8, ["modelValue", "onUpdate:modelValue", "prefix-icon"])
@@ -392,14 +392,14 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                   _: 1
                 }, 8, ["error"]),
                 createVNode(_component_el_form_item, {
-                  label: "\u90AE\u7BB1",
+                  label: "邮箱",
                   error: initEmailError.value
                 }, {
                   default: withCtx(() => [
                     createVNode(_component_el_input, {
                       modelValue: registerForm.value.email,
                       "onUpdate:modelValue": ($event) => registerForm.value.email = $event,
-                      placeholder: "\u8BF7\u8F93\u5165\u90AE\u7BB1",
+                      placeholder: "请输入邮箱",
                       "prefix-icon": unref(message_default$1),
                       onBlur: onInitEmailBlur
                     }, null, 8, ["modelValue", "onUpdate:modelValue", "prefix-icon"])
@@ -407,7 +407,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                   _: 1
                 }, 8, ["error"]),
                 createVNode(_component_el_form_item, {
-                  label: "\u5BC6\u7801",
+                  label: "密码",
                   error: initPasswordError.value
                 }, {
                   default: withCtx(() => [
@@ -415,7 +415,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                       modelValue: registerForm.value.password,
                       "onUpdate:modelValue": ($event) => registerForm.value.password = $event,
                       type: "password",
-                      placeholder: "\u8BF7\u8F93\u5165\u5BC6\u7801",
+                      placeholder: "请输入密码",
                       "prefix-icon": unref(lock_default),
                       "show-password": "",
                       onBlur: onInitPasswordBlur
@@ -424,7 +424,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                   _: 1
                 }, 8, ["error"]),
                 createVNode(_component_el_form_item, {
-                  label: "\u786E\u8BA4\u5BC6\u7801",
+                  label: "确认密码",
                   error: initConfirmError.value
                 }, {
                   default: withCtx(() => [
@@ -432,7 +432,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                       modelValue: registerForm.value.confirmPassword,
                       "onUpdate:modelValue": ($event) => registerForm.value.confirmPassword = $event,
                       type: "password",
-                      placeholder: "\u8BF7\u518D\u6B21\u8F93\u5165\u5BC6\u7801",
+                      placeholder: "请再次输入密码",
                       "prefix-icon": unref(lock_default),
                       "show-password": "",
                       onBlur: onInitConfirmBlur
@@ -449,7 +449,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                   block: ""
                 }, {
                   default: withCtx(() => [
-                    createTextVNode(" \u521B\u5EFA\u8D85\u7EA7\u7BA1\u7406\u5458 ")
+                    createTextVNode(" 创建超级管理员 ")
                   ]),
                   _: 1
                 }, 8, ["loading"])
@@ -460,7 +460,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
         }, _parent));
         _push(`</div>`);
       } else {
-        _push(`<div class="login-card" data-v-c14e9b2b><div class="card-brand" data-v-c14e9b2b><span class="brand-icon" data-v-c14e9b2b>\u{1F4DD}</span><h1 class="brand-title" data-v-c14e9b2b>CodeBlog</h1><p class="brand-desc" data-v-c14e9b2b>\u6B22\u8FCE\u56DE\u6765\uFF0C\u8BF7\u767B\u5F55\u60A8\u7684\u8D26\u53F7</p></div>`);
+        _push(`<div class="login-card" data-v-c14e9b2b><div class="card-brand" data-v-c14e9b2b><span class="brand-icon" data-v-c14e9b2b>📝</span><h1 class="brand-title" data-v-c14e9b2b>CodeBlog</h1><p class="brand-desc" data-v-c14e9b2b>欢迎回来，请登录您的账号</p></div>`);
         if (!showRegister.value) {
           _push(`<div data-v-c14e9b2b>`);
           _push(ssrRenderComponent(_component_el_form, {
@@ -469,13 +469,13 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
           }, {
             default: withCtx((_, _push2, _parent2, _scopeId) => {
               if (_push2) {
-                _push2(ssrRenderComponent(_component_el_form_item, { label: "\u7528\u6237\u540D" }, {
+                _push2(ssrRenderComponent(_component_el_form_item, { label: "用户名" }, {
                   default: withCtx((_2, _push3, _parent3, _scopeId2) => {
                     if (_push3) {
                       _push3(ssrRenderComponent(_component_el_input, {
                         modelValue: loginForm.value.username,
                         "onUpdate:modelValue": ($event) => loginForm.value.username = $event,
-                        placeholder: "\u8BF7\u8F93\u5165\u7528\u6237\u540D",
+                        placeholder: "请输入用户名",
                         "prefix-icon": unref(user_default)
                       }, null, _parent3, _scopeId2));
                     } else {
@@ -483,7 +483,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                         createVNode(_component_el_input, {
                           modelValue: loginForm.value.username,
                           "onUpdate:modelValue": ($event) => loginForm.value.username = $event,
-                          placeholder: "\u8BF7\u8F93\u5165\u7528\u6237\u540D",
+                          placeholder: "请输入用户名",
                           "prefix-icon": unref(user_default)
                         }, null, 8, ["modelValue", "onUpdate:modelValue", "prefix-icon"])
                       ];
@@ -491,14 +491,14 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                   }),
                   _: 1
                 }, _parent2, _scopeId));
-                _push2(ssrRenderComponent(_component_el_form_item, { label: "\u5BC6\u7801" }, {
+                _push2(ssrRenderComponent(_component_el_form_item, { label: "密码" }, {
                   default: withCtx((_2, _push3, _parent3, _scopeId2) => {
                     if (_push3) {
                       _push3(ssrRenderComponent(_component_el_input, {
                         modelValue: loginForm.value.password,
                         "onUpdate:modelValue": ($event) => loginForm.value.password = $event,
                         type: "password",
-                        placeholder: "\u8BF7\u8F93\u5165\u5BC6\u7801",
+                        placeholder: "请输入密码",
                         "prefix-icon": unref(lock_default),
                         "show-password": ""
                       }, null, _parent3, _scopeId2));
@@ -508,7 +508,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                           modelValue: loginForm.value.password,
                           "onUpdate:modelValue": ($event) => loginForm.value.password = $event,
                           type: "password",
-                          placeholder: "\u8BF7\u8F93\u5165\u5BC6\u7801",
+                          placeholder: "请输入密码",
                           "prefix-icon": unref(lock_default),
                           "show-password": ""
                         }, null, 8, ["modelValue", "onUpdate:modelValue", "prefix-icon"])
@@ -527,10 +527,10 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                       }, {
                         default: withCtx((_3, _push4, _parent4, _scopeId3) => {
                           if (_push4) {
-                            _push4(`\u8BB0\u4F4F\u8D26\u53F7`);
+                            _push4(`记住账号`);
                           } else {
                             return [
-                              createTextVNode("\u8BB0\u4F4F\u8D26\u53F7")
+                              createTextVNode("记住账号")
                             ];
                           }
                         }),
@@ -544,7 +544,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                           class: "remember-checkbox"
                         }, {
                           default: withCtx(() => [
-                            createTextVNode("\u8BB0\u4F4F\u8D26\u53F7")
+                            createTextVNode("记住账号")
                           ]),
                           _: 1
                         }, 8, ["modelValue", "onUpdate:modelValue"])
@@ -563,10 +563,10 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                 }, {
                   default: withCtx((_2, _push3, _parent3, _scopeId2) => {
                     if (_push3) {
-                      _push3(` \u767B\u5F55 `);
+                      _push3(` 登录 `);
                     } else {
                       return [
-                        createTextVNode(" \u767B\u5F55 ")
+                        createTextVNode(" 登录 ")
                       ];
                     }
                   }),
@@ -574,24 +574,24 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                 }, _parent2, _scopeId));
               } else {
                 return [
-                  createVNode(_component_el_form_item, { label: "\u7528\u6237\u540D" }, {
+                  createVNode(_component_el_form_item, { label: "用户名" }, {
                     default: withCtx(() => [
                       createVNode(_component_el_input, {
                         modelValue: loginForm.value.username,
                         "onUpdate:modelValue": ($event) => loginForm.value.username = $event,
-                        placeholder: "\u8BF7\u8F93\u5165\u7528\u6237\u540D",
+                        placeholder: "请输入用户名",
                         "prefix-icon": unref(user_default)
                       }, null, 8, ["modelValue", "onUpdate:modelValue", "prefix-icon"])
                     ]),
                     _: 1
                   }),
-                  createVNode(_component_el_form_item, { label: "\u5BC6\u7801" }, {
+                  createVNode(_component_el_form_item, { label: "密码" }, {
                     default: withCtx(() => [
                       createVNode(_component_el_input, {
                         modelValue: loginForm.value.password,
                         "onUpdate:modelValue": ($event) => loginForm.value.password = $event,
                         type: "password",
-                        placeholder: "\u8BF7\u8F93\u5165\u5BC6\u7801",
+                        placeholder: "请输入密码",
                         "prefix-icon": unref(lock_default),
                         "show-password": ""
                       }, null, 8, ["modelValue", "onUpdate:modelValue", "prefix-icon"])
@@ -606,7 +606,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                         class: "remember-checkbox"
                       }, {
                         default: withCtx(() => [
-                          createTextVNode("\u8BB0\u4F4F\u8D26\u53F7")
+                          createTextVNode("记住账号")
                         ]),
                         _: 1
                       }, 8, ["modelValue", "onUpdate:modelValue"])
@@ -622,7 +622,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                     block: ""
                   }, {
                     default: withCtx(() => [
-                      createTextVNode(" \u767B\u5F55 ")
+                      createTextVNode(" 登录 ")
                     ]),
                     _: 1
                   }, 8, ["loading"])
@@ -639,10 +639,10 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
           }, {
             default: withCtx((_, _push2, _parent2, _scopeId) => {
               if (_push2) {
-                _push2(`\u6E38\u5BA2\u6CE8\u518C`);
+                _push2(`游客注册`);
               } else {
                 return [
-                  createTextVNode("\u6E38\u5BA2\u6CE8\u518C")
+                  createTextVNode("游客注册")
                 ];
               }
             }),
@@ -658,7 +658,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
             default: withCtx((_, _push2, _parent2, _scopeId) => {
               if (_push2) {
                 _push2(ssrRenderComponent(_component_el_form_item, {
-                  label: "\u7528\u6237\u540D",
+                  label: "用户名",
                   error: regUsernameError.value
                 }, {
                   default: withCtx((_2, _push3, _parent3, _scopeId2) => {
@@ -666,7 +666,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                       _push3(ssrRenderComponent(_component_el_input, {
                         modelValue: registerForm.value.username,
                         "onUpdate:modelValue": ($event) => registerForm.value.username = $event,
-                        placeholder: "\u8BF7\u8F93\u5165\u7528\u6237\u540D",
+                        placeholder: "请输入用户名",
                         "prefix-icon": unref(user_default),
                         onBlur: onRegUsernameBlur
                       }, null, _parent3, _scopeId2));
@@ -675,7 +675,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                         createVNode(_component_el_input, {
                           modelValue: registerForm.value.username,
                           "onUpdate:modelValue": ($event) => registerForm.value.username = $event,
-                          placeholder: "\u8BF7\u8F93\u5165\u7528\u6237\u540D",
+                          placeholder: "请输入用户名",
                           "prefix-icon": unref(user_default),
                           onBlur: onRegUsernameBlur
                         }, null, 8, ["modelValue", "onUpdate:modelValue", "prefix-icon"])
@@ -685,7 +685,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                   _: 1
                 }, _parent2, _scopeId));
                 _push2(ssrRenderComponent(_component_el_form_item, {
-                  label: "\u90AE\u7BB1",
+                  label: "邮箱",
                   error: regEmailError.value
                 }, {
                   default: withCtx((_2, _push3, _parent3, _scopeId2) => {
@@ -693,7 +693,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                       _push3(ssrRenderComponent(_component_el_input, {
                         modelValue: registerForm.value.email,
                         "onUpdate:modelValue": ($event) => registerForm.value.email = $event,
-                        placeholder: "\u8BF7\u8F93\u5165\u90AE\u7BB1",
+                        placeholder: "请输入邮箱",
                         "prefix-icon": unref(message_default$1),
                         onBlur: onRegEmailBlur
                       }, null, _parent3, _scopeId2));
@@ -702,7 +702,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                         createVNode(_component_el_input, {
                           modelValue: registerForm.value.email,
                           "onUpdate:modelValue": ($event) => registerForm.value.email = $event,
-                          placeholder: "\u8BF7\u8F93\u5165\u90AE\u7BB1",
+                          placeholder: "请输入邮箱",
                           "prefix-icon": unref(message_default$1),
                           onBlur: onRegEmailBlur
                         }, null, 8, ["modelValue", "onUpdate:modelValue", "prefix-icon"])
@@ -712,7 +712,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                   _: 1
                 }, _parent2, _scopeId));
                 _push2(ssrRenderComponent(_component_el_form_item, {
-                  label: "\u5BC6\u7801",
+                  label: "密码",
                   error: regPasswordError.value
                 }, {
                   default: withCtx((_2, _push3, _parent3, _scopeId2) => {
@@ -721,7 +721,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                         modelValue: registerForm.value.password,
                         "onUpdate:modelValue": ($event) => registerForm.value.password = $event,
                         type: "password",
-                        placeholder: "\u8BF7\u8F93\u5165\u5BC6\u7801",
+                        placeholder: "请输入密码",
                         "prefix-icon": unref(lock_default),
                         "show-password": "",
                         onBlur: onRegPasswordBlur
@@ -732,7 +732,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                           modelValue: registerForm.value.password,
                           "onUpdate:modelValue": ($event) => registerForm.value.password = $event,
                           type: "password",
-                          placeholder: "\u8BF7\u8F93\u5165\u5BC6\u7801",
+                          placeholder: "请输入密码",
                           "prefix-icon": unref(lock_default),
                           "show-password": "",
                           onBlur: onRegPasswordBlur
@@ -743,7 +743,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                   _: 1
                 }, _parent2, _scopeId));
                 _push2(ssrRenderComponent(_component_el_form_item, {
-                  label: "\u786E\u8BA4\u5BC6\u7801",
+                  label: "确认密码",
                   error: regConfirmError.value
                 }, {
                   default: withCtx((_2, _push3, _parent3, _scopeId2) => {
@@ -752,7 +752,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                         modelValue: registerForm.value.confirmPassword,
                         "onUpdate:modelValue": ($event) => registerForm.value.confirmPassword = $event,
                         type: "password",
-                        placeholder: "\u8BF7\u518D\u6B21\u8F93\u5165\u5BC6\u7801",
+                        placeholder: "请再次输入密码",
                         "prefix-icon": unref(lock_default),
                         "show-password": "",
                         onBlur: onRegConfirmBlur
@@ -763,7 +763,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                           modelValue: registerForm.value.confirmPassword,
                           "onUpdate:modelValue": ($event) => registerForm.value.confirmPassword = $event,
                           type: "password",
-                          placeholder: "\u8BF7\u518D\u6B21\u8F93\u5165\u5BC6\u7801",
+                          placeholder: "请再次输入密码",
                           "prefix-icon": unref(lock_default),
                           "show-password": "",
                           onBlur: onRegConfirmBlur
@@ -783,10 +783,10 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                 }, {
                   default: withCtx((_2, _push3, _parent3, _scopeId2) => {
                     if (_push3) {
-                      _push3(` \u6CE8\u518C `);
+                      _push3(` 注册 `);
                     } else {
                       return [
-                        createTextVNode(" \u6CE8\u518C ")
+                        createTextVNode(" 注册 ")
                       ];
                     }
                   }),
@@ -795,14 +795,14 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
               } else {
                 return [
                   createVNode(_component_el_form_item, {
-                    label: "\u7528\u6237\u540D",
+                    label: "用户名",
                     error: regUsernameError.value
                   }, {
                     default: withCtx(() => [
                       createVNode(_component_el_input, {
                         modelValue: registerForm.value.username,
                         "onUpdate:modelValue": ($event) => registerForm.value.username = $event,
-                        placeholder: "\u8BF7\u8F93\u5165\u7528\u6237\u540D",
+                        placeholder: "请输入用户名",
                         "prefix-icon": unref(user_default),
                         onBlur: onRegUsernameBlur
                       }, null, 8, ["modelValue", "onUpdate:modelValue", "prefix-icon"])
@@ -810,14 +810,14 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                     _: 1
                   }, 8, ["error"]),
                   createVNode(_component_el_form_item, {
-                    label: "\u90AE\u7BB1",
+                    label: "邮箱",
                     error: regEmailError.value
                   }, {
                     default: withCtx(() => [
                       createVNode(_component_el_input, {
                         modelValue: registerForm.value.email,
                         "onUpdate:modelValue": ($event) => registerForm.value.email = $event,
-                        placeholder: "\u8BF7\u8F93\u5165\u90AE\u7BB1",
+                        placeholder: "请输入邮箱",
                         "prefix-icon": unref(message_default$1),
                         onBlur: onRegEmailBlur
                       }, null, 8, ["modelValue", "onUpdate:modelValue", "prefix-icon"])
@@ -825,7 +825,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                     _: 1
                   }, 8, ["error"]),
                   createVNode(_component_el_form_item, {
-                    label: "\u5BC6\u7801",
+                    label: "密码",
                     error: regPasswordError.value
                   }, {
                     default: withCtx(() => [
@@ -833,7 +833,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                         modelValue: registerForm.value.password,
                         "onUpdate:modelValue": ($event) => registerForm.value.password = $event,
                         type: "password",
-                        placeholder: "\u8BF7\u8F93\u5165\u5BC6\u7801",
+                        placeholder: "请输入密码",
                         "prefix-icon": unref(lock_default),
                         "show-password": "",
                         onBlur: onRegPasswordBlur
@@ -842,7 +842,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                     _: 1
                   }, 8, ["error"]),
                   createVNode(_component_el_form_item, {
-                    label: "\u786E\u8BA4\u5BC6\u7801",
+                    label: "确认密码",
                     error: regConfirmError.value
                   }, {
                     default: withCtx(() => [
@@ -850,7 +850,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                         modelValue: registerForm.value.confirmPassword,
                         "onUpdate:modelValue": ($event) => registerForm.value.confirmPassword = $event,
                         type: "password",
-                        placeholder: "\u8BF7\u518D\u6B21\u8F93\u5165\u5BC6\u7801",
+                        placeholder: "请再次输入密码",
                         "prefix-icon": unref(lock_default),
                         "show-password": "",
                         onBlur: onRegConfirmBlur
@@ -867,7 +867,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                     block: ""
                   }, {
                     default: withCtx(() => [
-                      createTextVNode(" \u6CE8\u518C ")
+                      createTextVNode(" 注册 ")
                     ]),
                     _: 1
                   }, 8, ["loading"])
@@ -884,10 +884,10 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
           }, {
             default: withCtx((_, _push2, _parent2, _scopeId) => {
               if (_push2) {
-                _push2(`\u8FD4\u56DE\u767B\u5F55`);
+                _push2(`返回登录`);
               } else {
                 return [
-                  createTextVNode("\u8FD4\u56DE\u767B\u5F55")
+                  createTextVNode("返回登录")
                 ];
               }
             }),
