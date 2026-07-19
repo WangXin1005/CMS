@@ -638,31 +638,31 @@ const _routes = [
     name: "article-slug",
     path: "/article/:slug()",
     meta: __nuxt_page_meta$2 || {},
-    component: () => import('./_slug_-BgE0HnmS.mjs')
+    component: () => import('./_slug_-C69zjq6N.mjs')
   },
   {
     name: "articles",
     path: "/articles",
     meta: { "middleware": "auth" },
-    component: () => import('./index-CB54O6y2.mjs')
+    component: () => import('./index-Bh_GA00o.mjs')
   },
   {
     name: "categories",
     path: "/categories",
     meta: { "middleware": "auth" },
-    component: () => import('./categories-DmwaRewf.mjs')
+    component: () => import('./categories-WRXIMm-1.mjs')
   },
   {
     name: "comments",
     path: "/comments",
     meta: { "middleware": "auth" },
-    component: () => import('./comments-DHnzvMu_.mjs')
+    component: () => import('./comments-BNud14ht.mjs')
   },
   {
     name: "Home",
     path: "/Home",
     meta: { "middleware": "auth" },
-    component: () => import('./Home-C3xCQWcG.mjs')
+    component: () => import('./Home-DJetav1N.mjs')
   },
   {
     name: "login",
@@ -692,7 +692,7 @@ const _routes = [
     name: "tags",
     path: "/tags",
     meta: { "middleware": "auth" },
-    component: () => import('./tags-ByUA_jPf.mjs')
+    component: () => import('./tags-Bj2kZlAv.mjs')
   },
   {
     name: "user",

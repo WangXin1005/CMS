@@ -199,6 +199,7 @@ public class ArticleService {
     @Transactional
     public boolean delete(Long id) {
         if (!articleRepository.existsById(id)) return false;
+        commentRepository.deleteByArticleId(id);
         articleRepository.deleteById(id);
         return true;
     }
@@ -209,6 +210,7 @@ public class ArticleService {
         Article article = articleRepository.findById(id).orElse(null);
         if (article == null) return false;
         if (article.getAuthor() == null || !article.getAuthor().getId().equals(authorId)) return false;
+        commentRepository.deleteByArticleId(id);
         articleRepository.deleteById(id);
         return true;
     }

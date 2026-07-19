@@ -16,4 +16,5 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     Page<Comment> findByStatusOrderByCreatedAtDesc(CommentStatus status, Pageable pageable);
     long countByStatus(CommentStatus status);
     long countByArticleId(Long articleId);
+    void deleteByArticleId(Long articleId);
 }

@@ -1,4 +1,4 @@
-import { w as withInstall, h as useSizeProp, d as buildProps, u as useAriaProps, e as definePropType, a3 as formContextKey, g as withNoopInstall } from './request-D_zzMMA3.mjs';
+import { w as withInstall, j as useSizeProp, d as buildProps, u as useAriaProps, e as definePropType, a3 as formContextKey, g as withNoopInstall } from './request-D_zzMMA3.mjs';
 import { g as useNamespace, j as isNumber, i as isBoolean, C as isPropAbsent, l as isUndefined } from './server.mjs';
 import { d as useFormDisabled, u as useFormItem, c as useFormItemInputId, U as UPDATE_MODEL_EVENT, C as CHANGE_EVENT, e as useDeprecated, b as useFormSize } from './el-button-Ci-hQSxb.mjs';
 import { NOOP, isArray, isString, isObject } from '@vue/shared';

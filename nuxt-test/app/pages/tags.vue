@@ -1,6 +1,6 @@
 <!-- tags - 标签管理页（拖拽排序） -->
 <script lang="ts" setup>
-import { ref, computed, onMounted, nextTick, watch } from "vue";
+import { ref, computed, onMounted, onActivated, nextTick, watch } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { Plus, Rank } from "@element-plus/icons-vue";
 import Sortable from "sortablejs";
@@ -114,8 +114,9 @@ function handleScroll() {
   }
 }
 
-onMounted(async () => { await nextTick(); await loadData(); initSortable(); });
-watch(tableKey, () => { nextTick(() => initSortable()) });
+onMounted(async () => { await nextTick(); await loadData(); if (isAdmin.value) initSortable(); });
+onActivated(async () => { await loadData(); tableKey.value++; });
+watch(tableKey, () => { if (isAdmin.value) nextTick(() => initSortable()) });
 </script>
 
 <template>
@@ -124,9 +125,12 @@ watch(tableKey, () => { nextTick(() => initSortable()) });
     <div ref="wrapperRef" class="page-card" style="flex:1; min-height:0">
       <el-table ref="tableRef" :data="displayTags" :key="tableKey" v-loading="loading" :span-method="tableSpanMethod" :row-class-name="tableRowClassName" style="width: 100%" :max-height="tableHeight" @scroll="handleScroll" stripe>
         <el-table-column label="排序" width="55" class-name="drag-handle-col" align="center">
-          <template #default="{ row }">
+          <template #default="{ row, $index }">
             <div v-if="row._isEndMarker" style="text-align:center;color:#999;font-size:13px;padding:2px 0;line-height:1.2;width:100%">已加载全部</div>
-            <el-icon v-else class="drag-handle" style="cursor: grab; color: #bbb; font-size: 16px"><Rank /></el-icon>
+            <template v-else-if="isAdmin">
+              <el-icon class="drag-handle" style="cursor: grab; color: #bbb; font-size: 16px"><Rank /></el-icon>
+            </template>
+            <span v-else style="color:#999;font-size:13px">{{ $index + 1 }}</span>
           </template>
         </el-table-column>
         <el-table-column prop="name" label="名称" min-width="280" />

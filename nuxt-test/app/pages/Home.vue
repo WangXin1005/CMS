@@ -1,11 +1,19 @@
-<!-- Home — 仪表盘页：统计概览、近期文章、快捷操作入口 -->
+<!
+
+// 从其他页面返回时刷新数据
+onActivated(async () => {
+  try {
+    const res = await getStats()
+    stats.value = res
+  } catch { /* ignore */ }
+});-- Home — 仪表盘页：统计概览、近期文章、快捷操作入口 -->
 
 <script lang="ts" setup>
 /**
  * Home - 仪表盘页面（管理后台首页）
  * 展示统计概览、快捷操作入口、近期文章列表。需 auth 中间件保护。
  */
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, onActivated, computed } from 'vue'
 import { sanitizeHtml } from '~/utils/sanitize'
 definePageMeta({ middleware: 'auth' })
 

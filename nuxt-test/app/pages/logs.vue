@@ -1,6 +1,6 @@
 <!-- logs - 操作日志页（分页 pageSize=10） -->
 <script lang="ts" setup>
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted, onActivated, computed } from "vue";
 definePageMeta({ middleware: "auth" });
 
 const { getLogs } = useLog();
@@ -344,6 +344,7 @@ const resultStyle = { SUCCESS: "color: #67c23a; font-weight: bold;", FAIL: "colo
 const resultIcon = { SUCCESS: "\u2713", FAIL: "\u2717" };
 
 onMounted(() => { loadData(); loadMaps(); });
+onActivated(() => { loadData(); });
 </script>
 
 <template>

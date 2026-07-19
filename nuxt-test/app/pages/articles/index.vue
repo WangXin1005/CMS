@@ -1,6 +1,6 @@
 <!-- articles/index - 文章管理页（懒加载） -->
 <script lang="ts" setup>
-import { ref, onMounted, computed, nextTick } from "vue";
+import { ref, onMounted, onActivated, computed, nextTick } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { sanitizeHtml } from "~/utils/sanitize";
 import { Plus } from "@element-plus/icons-vue";
@@ -167,6 +167,8 @@ function handleDialogEdit() { dialogVisible.value = false; goEdit(dialogArticle.
 function goEdit(id) { navigateTo("/articles/edit/" + id); }
 
 onMounted(async () => { await loadFilters(); await loadData(); });
+
+onActivated(async () => { await loadFilters(); await loadData(); });
 </script>
 
 <template>

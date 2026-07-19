@@ -5,7 +5,7 @@ import { u as useTableHeight, E as ElTable, a as ElTableColumn } from './useTabl
 import { E as ElTag } from './index-Dn6mtLLY.mjs';
 import { E as ElPagination } from './el-pagination-BNfONsi_.mjs';
 import { E as ElDialog } from './el-dialog-BYYfQCZn.mjs';
-import { w as withInstall, g as withNoopInstall, d as buildProps, h as useSizeProp, q as flattedChildren, f as request, e as definePropType, s as getNormalizedProps, c as addUnit } from './request-D_zzMMA3.mjs';
+import { w as withInstall, g as withNoopInstall, d as buildProps, j as useSizeProp, q as flattedChildren, f as request, e as definePropType, s as getNormalizedProps, c as addUnit } from './request-D_zzMMA3.mjs';
 import { g as useNamespace } from './server.mjs';
 import { isNil } from 'lodash-unified';
 import { defineComponent, ref, computed, mergeProps, withCtx, createTextVNode, createVNode, unref, openBlock, createBlock, Fragment, renderList, toDisplayString, createCommentVNode, useSlots, provide, createElementBlock, normalizeClass, createElementVNode, renderSlot, inject, withDirectives, h, useSSRContext } from 'vue';

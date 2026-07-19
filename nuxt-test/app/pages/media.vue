@@ -1,6 +1,6 @@
 <!-- media - 媒体管理页（分页 pageSize=7） -->
 <script lang="ts" setup>
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, onActivated } from "vue";
 const { role } = useAuth();
 const isAdmin = computed(() => role.value === "ADMIN" || role.value === "SUPERADMIN");
 import { ElMessage, ElMessageBox } from "element-plus";
@@ -59,6 +59,7 @@ async function handleDelete(id) {
 }
 
 onMounted(loadData);
+onActivated(loadData);
 </script>
 
 <template>
