@@ -255,6 +255,26 @@ onMounted(async () => {
   color: #667eea;
   text-decoration: underline;
 }
+.article-content :deep(table) {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0;
+  font-size: 14px;
+}
+.article-content :deep(th),
+.article-content :deep(td) {
+  border: 1px solid #e8e8e8;
+  padding: 10px 14px;
+  text-align: left;
+}
+.article-content :deep(th) {
+  background: #f7f8fa;
+  font-weight: 600;
+  color: #333;
+}
+.article-content :deep(tr:nth-child(even)) {
+  background: #fafbfc;
+}
 
 // ===== 标签 =====
 .article-tags {

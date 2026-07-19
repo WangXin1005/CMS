@@ -8,6 +8,10 @@
 import { useEditor, EditorContent } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
 import Image from '@tiptap/extension-image'
+import { Table } from '@tiptap/extension-table'
+import TableRow from '@tiptap/extension-table-row'
+import TableCell from '@tiptap/extension-table-cell'
+import TableHeader from '@tiptap/extension-table-header'
 import Link from '@tiptap/extension-link'
 import { ref, watch, computed, onBeforeUnmount } from 'vue'
 import TextStyle from '~/extensions/TextStyle'
@@ -45,6 +49,38 @@ turndownService.addRule('image', {
     return '![' + alt + '](' + src + ')'
   },
 })
+// GFM ??????
+turndownService.addRule('tableCell', {
+  filter: ['th', 'td'],
+  replacement: function (content) {
+    return content
+  },
+})
+
+turndownService.addRule('tableRow', {
+  filter: 'tr',
+  replacement: function (content, node) {
+    const cells = []
+    const children = Array.from(node.children)
+    for (let i = 0; i < children.length; i++) {
+      cells.push(children[i].textContent?.trim() || '')
+    }
+    return '| ' + cells.join(' | ') + ' |\n'
+  },
+})
+
+turndownService.addRule('table', {
+  filter: 'table',
+  replacement: function (content) {
+    const rows = content.split('\n').filter(r => r.trim())
+    if (rows.length < 2) return '\n\n' + content + '\n'
+    const colCount = (rows[0].match(/\|/g) || []).length - 1
+    const sep = '| ' + Array(colCount).fill('---').join(' | ') + ' |'
+    rows.splice(1, 0, sep)
+    return '\n\n' + rows.join('\n') + '\n\n'
+  },
+})
+
 
 const editor = useEditor({
   editorProps: {
@@ -66,6 +102,10 @@ const editor = useEditor({
     Link.configure({ openOnClick: false }),
     TextStyle,
     FontSize,
+    Table.configure({ resizable: true }),
+    TableRow,
+    TableCell,
+    TableHeader,
   ],
   onUpdate: () => {
     if (mode.value === 'rich') {
@@ -400,6 +440,9 @@ const previewHtml = computed(() => {
         </el-tooltip>
         <el-tooltip content="分隔线" placement="top">
           <el-button @click="editor.chain().focus().setHorizontalRule().run()">—</el-button>
+        </el-tooltip>
+        <el-tooltip content="插入表格" placement="top">
+          <el-button @click="editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()">表格</el-button>
         </el-tooltip>
       </el-button-group>
 
