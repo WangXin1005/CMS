@@ -108,8 +108,8 @@ function navigateToArticle(slug: string) {
 
 
 function checkOverflow() {
-  if (categoryItemsRef.value) categoryOverflow.value = categoryItemsRef.value.scrollHeight > 27
-  if (tagItemsRef.value) tagOverflow.value = tagItemsRef.value.scrollHeight > 28
+  if (categoryItemsRef.value) categoryOverflow.value = categoryItemsRef.value.scrollHeight > categoryItemsRef.value.clientHeight
+  if (tagItemsRef.value) tagOverflow.value = tagItemsRef.value.scrollHeight > tagItemsRef.value.clientHeight
 }
 
 onMounted(async () => {
