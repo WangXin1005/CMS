@@ -1,13 +1,13 @@
 # CodeBlog — 博客内容管理系统
 
-基于 **Nuxt 4** + **Spring Boot 3** + **MySQL** 的全栈博客 CMS 系统，支持多角色权限管理、文章/分类/标签/评论/媒体管理。
+基于 **Nuxt 4** + **Spring Boot 3** + **MySQL** 的全栈博客 CMS 系统，支持多角色权限管理、文章/分类/标签/媒体管理。
 
 ## 技术栈
 
 ### 前端 (nuxt-test/)
 - Nuxt 4 + Vue 3（Composition API）
 - Element Plus 组件库
-- Tiptap 富文本编辑器
+- Tiptap 富文本编辑器（支持 Markdown、表格、图片插入）
 - SortableJS 拖拽排序
 - Axios HTTP 请求
 
@@ -16,6 +16,10 @@
 - Spring Data JPA + MySQL 8
 - Spring Security + JWT 无状态认证
 - Maven 构建
+
+### DevOps
+- Docker Compose 容器化部署
+- Webhook 自动部署（Gitee 推送触发）
 
 ## 快速启动（开发环境）
 
@@ -26,16 +30,16 @@
 - Maven 3.9+
 
 ### 1. 启动后端
-`bash
+```bash
 cd java-backend
 mvn.cmd spring-boot:run
-`
+```
 
 ### 2. 启动前端
-`bash
+```bash
 cd nuxt-test
 npm run dev
-`
+```
 
 ### 3. 访问
 - 前端：http://localhost:3000
@@ -54,7 +58,6 @@ npm run dev
 | 分类/标签拖拽排序 | ✅ | ✅ | ❌ | ❌ |
 | 分类/标签查看 | ✅ | ✅ | ✅ | ✅ |
 | 用户管理 | ✅ | ✅ | ❌ | ❌ |
-| 评论管理 | ✅ | ✅ | ❌ | ❌ |
 | 媒体上传 | ✅ | ✅ | ✅ | ❌ |
 | 媒体删除 | ✅ | ✅ | ❌ | ❌ |
 | 站点设置 | ✅ | ❌ | ❌ | ❌ |
@@ -77,33 +80,27 @@ npm run dev
 ### 文章详情
 - 返回栏 + 文章标题区固定定位（毛玻璃背景）
 - 与文章内容区分割线
-- 文章内容 Markdown 渲染 + 代码高亮
-- 评论区组件
+- Markdown 渲染 + 代码高亮 + 表格支持
+- back-bar 和 article-header 与文章区域背景色区分
 
 ![alt text](docs/article_details.png)
 
 ### 文章管理
-- Tiptap 富文本编辑器
+- Tiptap 富文本编辑器（支持表格、图片插入）
 - 懒加载 + 虚拟滚动列表
-- 删除文章时自动级联删除关联评论
+- 文章列表含作者列
 - 页面切换回列表时自动刷新数据
 
 ![alt text](docs/article_management.png)
 
 ### 分类 / 标签管理
 - SortableJS 拖拽排序（仅管理员可见拖拽手柄），sortOrder 持久化
+- USER/GUEST 角色显示数字序号，ADMIN+ 显示拖拽手柄
 - 懒加载滚动，排序后表格自动刷新
 
 ![alt text](docs/classification_management.png)
 
 ![alt text](docs/tag_management.png)
-
-### 评论管理
-- 待审/已批准/已驳回三态审核流程
-- 评论预览弹窗（查看详情 + 跳转关联文章）
-- 表格行高紧凑优化，批量操作支持
-
-![alt text](docs/comment_management.png)
 
 ### 操作日志
 - 自动记录用户增删改查、登录退出、审批等操作
@@ -113,9 +110,14 @@ npm run dev
 
 ![alt text](docs/operation_log.png)
 
+### 部署
+- Docker Compose 一键部署（MySQL + 后端 + 前端）
+- Webhook 自动部署：Gitee 推送 → 自动拉取 → 构建 → 重启
+- 容器时区已统一为 Asia/Shanghai
+
 ## 表单校验规则
 - 用户名：4~15 位字母数字组合，实时查重
-- 密码：12~16 位，需包含大小写字母、数字和特殊字符
+- 密码：4~16 位，需包含大小写字母、数字和特殊字符
 - 邮箱：标准格式校验
 
 ## 项目结构
@@ -124,10 +126,11 @@ npm run dev
 
 | 目录 | 说明 |
 |------|------|
-| app/pages/ | 首页/登录/仪表盘/用户/文章/分类/标签/评论/媒体/日志/设置 |
-| app/pages/article/[slug].vue | 文章详情（固定头部 + 内容渲染 + 评论） |
-| app/components/ | Header, Menu, ArticleCard, CommentSection, Dialog, RichTextEditor |
-| app/composables/ | useAuth, useArticle, useCategory, useTag, useComment, useMedia, useLog |
+| app/pages/ | 首页/登录/仪表盘/用户/文章/分类/标签/媒体/日志/设置 |
+| app/pages/index.vue | 博客首页（三列网格 + 搜索 + 筛选） |
+| app/pages/article/[slug].vue | 文章详情（固定头部 + 内容渲染） |
+| app/components/ | Header, Menu, ArticleCard, Dialog, RichTextEditor |
+| app/composables/ | useAuth, useArticle, useCategory, useTag, useMedia, useLog |
 | app/layouts/ | default, blank, public |
 | app/middleware/ | auth.ts, init.global.ts |
 | app/plugins/ | scroll-to-top.client.ts（路由滚动控制） |
@@ -137,16 +140,25 @@ npm run dev
 
 | 目录 | 说明 |
 |------|------|
-| controller/ | Auth, Article, Category, Tag, Comment, User, Media, OperationLog, SiteSetting |
+| controller/ | Auth, Article, Category, Tag, User, Media, OperationLog, SiteSetting |
 | service/ | 业务逻辑层（分类/标签支持拖拽排序） |
 | repository/ | JPA 数据访问层 |
-| entity/ | Article, Category, Tag, Comment, User, Media, OperationLog, SiteSetting |
+| entity/ | Article, Category, Tag, User, Media, OperationLog, SiteSetting |
 | config/ | SecurityConfig, JwtAuthFilter, LoggingAspect |
 | util/ | JwtUtil |
 
+### 部署文件
+
+| 文件 | 说明 |
+|------|------|
+| docker-compose.yml | Docker 编排（MySQL + 后端 + 前端 + Webhook） |
+| deploy.sh | 自动部署脚本（拉取代码 → 构建 → 重启） |
+| webhook-server.js | Gitee Webhook 接收服务（端口 9000） |
+| DEPLOY.md | 部署说明文档 |
 
 ## 注意事项
 - 开发环境：前端 3000，后端 8080，MySQL 13306
 - 媒体文件上传大小限制 10MB（后端）
 - 日志记录已自动过滤密码等敏感字段
 - 前端修改需重启 dev server 才能使 nuxt.config.ts 改动生效
+- 后端 Java 文件编码必须为 UTF-8 无 BOM

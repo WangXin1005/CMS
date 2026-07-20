@@ -1,6 +1,9 @@
 #!/bin/sh
 set -e
 
+# 设置时区为北京时间，确保 date 时间戳显示正确
+export TZ="Asia/Shanghai"
+
 log() { echo "[$(date +%H:%M:%S)] $1"; }
 
 echo "=============================="

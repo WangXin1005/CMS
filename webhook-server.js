@@ -5,9 +5,12 @@ const { exec } = require('child_process');
 const PORT = process.env.WEBHOOK_PORT || 9000;
 const SECRET = process.env.WEBHOOK_SECRET || '';
 
-/** 带时间戳的日志输出 */
+/** 带时间戳的日志输出（北京时间） */
 function log(msg) {
-  const ts = new Date().toISOString().slice(11, 19);
+  const ts = new Date().toLocaleTimeString("zh-CN", {
+    hour12: false,
+    timeZone: "Asia/Shanghai",
+  });
   console.log(`[${ts}] ${msg}`);
 }
 
