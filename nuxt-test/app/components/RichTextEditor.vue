@@ -14,6 +14,7 @@ import TableCell from '@tiptap/extension-table-cell'
 import TableHeader from '@tiptap/extension-table-header'
 import Link from '@tiptap/extension-link'
 import { ref, watch, computed, onBeforeUnmount } from 'vue'
+const { getList: getMediaList } = useMedia()
 import TextStyle from '~/extensions/TextStyle'
 import FontSize from '~/extensions/FontSize'
 import { sanitizeHtml } from '~/utils/sanitize'
@@ -29,6 +30,10 @@ const emit = defineEmits<{
 }>()
 
 const currentSize = ref('16')
+// 媒体库图片选择
+const mediaPickerVisible = ref(false)
+const mediaList = ref([])
+const mediaLoading = ref(false)
 const savedRange = ref(null)
 const mode = ref('rich')
 const markdownContent = ref('')
@@ -307,6 +312,46 @@ function mdImage() {
   mdWrap('![图片描述](', ')')
 }
 
+// 打开媒体库选择图片
+async function openMediaPicker() {
+  mediaPickerVisible.value = true;
+  mediaLoading.value = true;
+  try {
+    const res = await getMediaList();
+    mediaList.value = (res || []).filter(function(m) { return m.mimeType && m.mimeType.startsWith("image/"); });
+  } catch {
+    mediaList.value = [];
+  } finally {
+    mediaLoading.value = false;
+  }
+}
+
+// 从媒体库插入图片
+function insertMediaImage(media) {
+  if (!media || !media.url) return;
+  if (mode.value === "markdown") {
+    mdInsertAtCursor("![" + (media.originalName || "图片") + "](" + media.url + ")");
+  } else if (editor.value) {
+    // 插入可调整大小的图片
+    editor.value.chain().focus().setImage({ src: media.url, alt: media.originalName || "" }).run();
+  }
+  mediaPickerVisible.value = false;
+}
+
+// Markdown 模式下在光标处插入文本
+function mdInsertAtCursor(text) {
+  var el = document.querySelector(".markdown-textarea");
+  if (!el) return;
+  var start = el.selectionStart;
+  var end = el.selectionEnd;
+  var val = markdownContent.value || "";
+  markdownContent.value = val.substring(0, start) + text + val.substring(end);
+  setTimeout(function() {
+    el.focus();
+    el.setSelectionRange(start + text.length, start + text.length);
+  }, 50);
+}
+
 onBeforeUnmount(() => {
   editor.value?.destroy()
 })
@@ -444,6 +489,9 @@ const previewHtml = computed(() => {
         <el-tooltip content="插入表格" placement="top">
           <el-button @click="editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()">表格</el-button>
         </el-tooltip>
+        <el-tooltip content="插入图片" placement="top">
+          <el-button @click="openMediaPicker()">图片</el-button>
+        </el-tooltip>
       </el-button-group>
 
       <el-button-group size="small">
@@ -520,8 +568,8 @@ const previewHtml = computed(() => {
         <el-tooltip content="链接" placement="top">
           <el-button @click="mdLink()">链接</el-button>
         </el-tooltip>
-        <el-tooltip content="图片" placement="top">
-          <el-button @click="mdImage()">图片</el-button>
+        <el-tooltip content="从媒体库选择图片" placement="top">
+          <el-button @click="openMediaPicker()">图片</el-button>
         </el-tooltip>
       </el-button-group>
 
@@ -547,6 +595,22 @@ const previewHtml = computed(() => {
       </div>
     </div>
   </div>
+  <el-dialog v-model="mediaPickerVisible" title="选择图片" width="700px" destroy-on-close>
+      <div v-loading="mediaLoading" style="min-height: 200px">
+        <div v-if="mediaList.length === 0 && !mediaLoading" style="text-align:center;padding:60px 0;color:#999">暂无图片，请先在媒体管理中上传</div>
+        <div v-else style="display:flex;flex-wrap:wrap;gap:12px">
+          <div
+            v-for="m in mediaList"
+            :key="m.id"
+            class="media-picker-item"
+            @click="insertMediaImage(m)"
+          >
+            <img :src="m.url" :alt="m.originalName" />
+            <div class="media-picker-name">{{ m.originalName }}</div>
+          </div>
+        </div>
+      </div>
+    </el-dialog>
 </template>
 
 <style lang="less" scoped>
@@ -650,6 +714,7 @@ const previewHtml = computed(() => {
       border-radius: 4px;
       margin: 8px 0;
     }
+
 
     a {
       color: var(--el-color-primary);
@@ -828,5 +893,39 @@ const previewHtml = computed(() => {
     background: #f5f7fa;
     font-weight: 600;
   }
+}
+
+.media-item:hover {
+  border-color: #409eff !important;
+}
+</style>
+
+<style>
+/* 媒体选择弹窗样式（dialog 被 teleport 到 body，无法使用 scoped） */
+.media-picker-item {
+  width: 150px;
+  cursor: pointer;
+  border: 2px solid transparent;
+  border-radius: 6px;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+.media-picker-item:hover {
+  border-color: #409eff;
+}
+.media-picker-item img {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  display: block;
+}
+.media-picker-item .media-picker-name {
+  padding: 4px 8px;
+  font-size: 12px;
+  color: #666;
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 </style>

@@ -1,0 +1,1 @@
+import{t as e}from"./C2Kojo2T.js";const i=()=>({upload:async a=>{const t=new FormData;return t.append("file",a),(await e.post("/admin/media/upload",t,{headers:{"Content-Type":"multipart/form-data"}})).data},getList:async()=>(await e.get("/admin/media")).data,remove:async a=>(await e.delete(`/admin/media/${a}`)).data});export{i as u};

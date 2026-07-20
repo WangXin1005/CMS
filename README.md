@@ -7,7 +7,7 @@
 ### 前端 (nuxt-test/)
 - Nuxt 4 + Vue 3（Composition API）
 - Element Plus 组件库
-- Tiptap 富文本编辑器（支持 Markdown、表格、图片插入）
+- Tiptap 富文本编辑器（Markdown/富文本双模式、表格、图片、媒体库插入）
 - SortableJS 拖拽排序
 - Axios HTTP 请求
 
@@ -86,7 +86,8 @@ npm run dev
 ![alt text](docs/article_details.png)
 
 ### 文章管理
-- Tiptap 富文本编辑器（支持表格、图片插入）
+- Tiptap 富文本编辑器：富文本/Markdown 双模式，支持表格、图片插入
+- 工具栏「图片」按钮可从媒体库选择已上传图片
 - 懒加载 + 虚拟滚动列表
 - 文章列表含作者列
 - 页面切换回列表时自动刷新数据
@@ -131,6 +132,7 @@ npm run dev
 | app/pages/article/[slug].vue | 文章详情（固定头部 + 内容渲染） |
 | app/components/ | Header, Menu, ArticleCard, Dialog, RichTextEditor |
 | app/composables/ | useAuth, useArticle, useCategory, useTag, useMedia, useLog |
+| app/extensions/ | Tiptap 自定义扩展（FontSize, TextStyle） |
 | app/layouts/ | default, blank, public |
 | app/middleware/ | auth.ts, init.global.ts |
 | app/plugins/ | scroll-to-top.client.ts（路由滚动控制） |
@@ -162,3 +164,4 @@ npm run dev
 - 日志记录已自动过滤密码等敏感字段
 - 前端修改需重启 dev server 才能使 nuxt.config.ts 改动生效
 - 后端 Java 文件编码必须为 UTF-8 无 BOM
+- Webhook 日志时间已统一为 Asia/Shanghai 时区
