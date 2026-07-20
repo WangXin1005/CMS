@@ -32,7 +32,6 @@ public class RateLimitFilter extends OncePerRequestFilter {
 
     private static final String LOGIN_PATH = "/api/auth/login";
     private static final String CHECK_USERNAME_PATH = "/api/users/check-username";
-    private static final String COMMENT_PATH = "/api/comments";
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
@@ -40,8 +39,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
         String method = request.getMethod();
         boolean isLogin = path.equals(LOGIN_PATH);
         boolean isCheckUsername = path.equals(CHECK_USERNAME_PATH);
-        boolean isCommentSubmit = path.equals(COMMENT_PATH) && "POST".equalsIgnoreCase(method);
-        return !isLogin && !isCheckUsername && !isCommentSubmit;
+        return !isLogin && !isCheckUsername;
     }
 
     @Override

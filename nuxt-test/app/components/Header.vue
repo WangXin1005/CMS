@@ -9,7 +9,7 @@ const route = useRoute()
 // 面包屑路径→名称映射
 const breadcrumbMap: Record<string, string> = {
   '/home': '仪表盘', '/articles': '文章管理', '/categories': '分类管理',
-  '/tags': '标签管理', '/comments': '评论管理', '/media': '媒体管理',
+  '/tags': '标签管理', '/media': '媒体管理',
   '/users': '用户管理', '/settings': '站点设置', '/logs': '操作日志',
 }
 const breadcrumbs = computed(() => {

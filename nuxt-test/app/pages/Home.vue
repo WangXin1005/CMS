@@ -39,7 +39,7 @@ const canClick = computed(() => true)
 const dialogVisible = ref(false)
 const dialogArticle = ref<Record<string, unknown> | null>(null)
 
-const stats = ref({ totalArticles: 0, totalCategories: 0, totalTags: 0, totalComments: 0 })
+const stats = ref({ totalArticles: 0, totalCategories: 0, totalTags: 0,  })
 const recentArticles = ref([])
 const statsLoading = ref(true)
 const articlesLoading = ref(true)
@@ -126,7 +126,7 @@ onMounted(async () => {
           <div class="stat-label">标签总数</div>
         </el-card>
         <el-card class="stat-card" shadow="never">
-          <div class="stat-value" style="color: #f56c6c">{{ stats.totalComments }}</div>
+          <div class="stat-value" style="color: #f56c6c">0</div>
           <div class="stat-label">评论总数</div>
         </el-card>
       </div>

@@ -29,11 +29,7 @@
         <el-icon><PriceTag /></el-icon>
         <span>标签管理</span>
       </el-menu-item>
-      <el-menu-item v-if="isAdmin" index="/comments">
-        <el-icon><ChatDotRound /></el-icon>
-        <span>评论管理</span>
-      </el-menu-item>
-      <el-menu-item v-if="isNotGuest" index="/media">
+            <el-menu-item v-if="isNotGuest" index="/media">
         <el-icon><Picture /></el-icon>
         <span>媒体管理</span>
       </el-menu-item>
@@ -60,7 +56,6 @@ import {
   Document,
   Folder,
   PriceTag,
-  ChatDotRound,
   Picture,
   User,
   Setting,

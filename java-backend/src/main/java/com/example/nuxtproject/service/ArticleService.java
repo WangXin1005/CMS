@@ -12,7 +12,6 @@ import com.example.nuxtproject.entity.Role;
 import com.example.nuxtproject.repository.ArticleRepository;
 import com.example.nuxtproject.repository.CategoryRepository;
 import com.example.nuxtproject.repository.TagRepository;
-import com.example.nuxtproject.repository.CommentRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -28,15 +27,12 @@ public class ArticleService {
     private final ArticleRepository articleRepository;
     private final CategoryRepository categoryRepository;
     private final TagRepository tagRepository;
-    private final CommentRepository commentRepository;
-
     public ArticleService(ArticleRepository articleRepository,
                           CategoryRepository categoryRepository,
-                          TagRepository tagRepository, CommentRepository commentRepository) {
+                          TagRepository tagRepository) {
         this.articleRepository = articleRepository;
         this.categoryRepository = categoryRepository;
         this.tagRepository = tagRepository;
-        this.commentRepository = commentRepository;
     }
 
     /** 获取已发布的公开文章列表 */
@@ -199,7 +195,6 @@ public class ArticleService {
     @Transactional
     public boolean delete(Long id) {
         if (!articleRepository.existsById(id)) return false;
-        commentRepository.deleteByArticleId(id);
         articleRepository.deleteById(id);
         return true;
     }
@@ -210,7 +205,6 @@ public class ArticleService {
         Article article = articleRepository.findById(id).orElse(null);
         if (article == null) return false;
         if (article.getAuthor() == null || !article.getAuthor().getId().equals(authorId)) return false;
-        commentRepository.deleteByArticleId(id);
         articleRepository.deleteById(id);
         return true;
     }
@@ -220,14 +214,12 @@ public class ArticleService {
         long draft = articleRepository.countByStatus(ArticleStatus.DRAFT);
         long totalCategories = categoryRepository.count();
         long totalTags = tagRepository.count();
-        long totalComments = commentRepository.count();
         return Map.of(
             "totalArticles", published + draft,
             "publishedArticles", published,
             "draftArticles", draft,
             "totalCategories", totalCategories,
-            "totalTags", totalTags,
-            "totalComments", totalComments
+            "totalTags", totalTags
         );
     }
 }

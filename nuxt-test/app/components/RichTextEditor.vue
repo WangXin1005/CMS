@@ -662,6 +662,28 @@ const previewHtml = computed(() => {
       border-top: 1px solid #dcdfe6;
     }
 
+    table {
+      border-collapse: collapse;
+      margin: 12px 0;
+      width: 100%;
+      table-layout: auto;
+    }
+    th,
+    td {
+      border: 1px solid #ccc;
+      padding: 8px 12px;
+      text-align: left;
+      min-width: 60px;
+      position: relative;
+    }
+    th {
+      background: #f5f7fa;
+      font-weight: 600;
+    }
+    td p {
+      margin: 0;
+    }
+
     p.is-editor-empty:first-child::before {
       color: #adb5bd;
       content: attr(data-placeholder);
@@ -788,6 +810,23 @@ const previewHtml = computed(() => {
     margin: 16px 0;
     border: none;
     border-top: 1px solid #dcdfe6;
+  }
+
+  :deep(table) {
+    border-collapse: collapse;
+    margin: 12px 0;
+    width: 100%;
+    border: 1px solid #e8e8e8;
+  }
+  :deep(th),
+  :deep(td) {
+    border: 1px solid #e8e8e8;
+    padding: 8px 12px;
+    text-align: left;
+  }
+  :deep(th) {
+    background: #f5f7fa;
+    font-weight: 600;
   }
 }
 </style>

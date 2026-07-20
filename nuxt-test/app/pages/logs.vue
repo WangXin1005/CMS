@@ -46,7 +46,7 @@ const actionMap = { CREATE: "创建", UPDATE: "修改", DELETE: "删除", UPLOAD
 const roleMap = { SUPERADMIN: "超级管理员", ADMIN: "管理员", USER: "用户", GUEST: "访客" };
 // 站点设置 key 到中文标签映射
 const settingLabelMap = { site_name: "网站名称", site_description: "网站描述", site_logo: "Logo URL", icp_number: "备案号" };
-const entityMap = { Article: "文章", Category: "分类", Tag: "标签", User: "用户", Comment: "评论", Media: "媒体", SiteSetting: "站点设置", Auth: "认证" };
+const entityMap = { Article: "文章", Category: "分类", Tag: "标签", User: "用户", Media: "媒体", SiteSetting: "站点设置", Auth: "认证" };
 const entityOptions = Object.entries(entityMap).map(([value, label]) => ({ value, label }));
 
 const detailDialogVisible = ref(false);
@@ -93,8 +93,7 @@ function formatLogDesc(row) {
     if (row.entity === "Article") return obj.title || "";
     if (row.entity === "User") { const rl = roleMap[obj.role] || "用户"; return rl + " " + (obj.username || ""); }
     if (row.entity === "Media") return obj.originalName || obj.filename || "";
-    if (row.entity === "Comment") return (obj.content || "").substring(0, 30) + (obj.content && obj.content.length > 30 ? "..." : "");
-    if (row.entity === "Auth") return obj.username || "";
+        if (row.entity === "Auth") return obj.username || "";
     return obj.name || obj.title || "";
   }
 

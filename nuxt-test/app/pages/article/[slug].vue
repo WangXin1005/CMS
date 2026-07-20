@@ -85,10 +85,6 @@ onMounted(async () => {
       <div class="article-content" v-html="sanitizeHtml(article.content)"></div>
 
 
-      <el-divider />
-
-      <!-- 评论区 -->
-      <CommentSection :article-id="article.id" />
 
     </div>
 
@@ -260,20 +256,25 @@ onMounted(async () => {
   border-collapse: collapse;
   margin: 16px 0;
   font-size: 14px;
+  border: 1px solid #e0e0e0;
 }
 .article-content :deep(th),
 .article-content :deep(td) {
-  border: 1px solid #e8e8e8;
+  border: 1px solid #e0e0e0 !important;
   padding: 10px 14px;
   text-align: left;
+  min-width: 60px;
 }
 .article-content :deep(th) {
-  background: #f7f8fa;
+  background: #f7f8fa !important;
   font-weight: 600;
   color: #333;
 }
 .article-content :deep(tr:nth-child(even)) {
   background: #fafbfc;
+}
+.article-content :deep(td p) {
+  margin: 0;
 }
 
 // ===== 标签 =====
@@ -346,3 +347,29 @@ onMounted(async () => {
   }
 }
 </style>
+
+<!-- 表格全局样式（非 scoped，确保 v-html 中的表格线正常渲染） -->
+<style lang="less">
+.article-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0;
+  font-size: 14px;
+  border: 1px solid #e8e8e8;
+}
+.article-content th,
+.article-content td {
+  border: 1px solid #e8e8e8;
+  padding: 10px 14px;
+  text-align: left;
+}
+.article-content th {
+  background: #f7f8fa;
+  font-weight: 600;
+  color: #333;
+}
+.article-content tr:nth-child(even) {
+  background: #fafbfc;
+}
+</style>
+

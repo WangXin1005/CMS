@@ -55,7 +55,6 @@ public class LoggingAspect implements ApplicationContextAware {
         ENTITY_MAP.put("Category", com.example.nuxtproject.entity.Category.class);
         ENTITY_MAP.put("Tag", com.example.nuxtproject.entity.Tag.class);
         ENTITY_MAP.put("User", com.example.nuxtproject.entity.User.class);
-        ENTITY_MAP.put("Comment", com.example.nuxtproject.entity.Comment.class);
         ENTITY_MAP.put("Media", com.example.nuxtproject.entity.Media.class);
         ENTITY_MAP.put("SiteSetting", com.example.nuxtproject.entity.SiteSetting.class);
     }
@@ -66,7 +65,6 @@ public class LoggingAspect implements ApplicationContextAware {
         ENTITY_NAME_MAP.put("Category", "分类");
         ENTITY_NAME_MAP.put("Tag", "标签");
         ENTITY_NAME_MAP.put("User", "用户");
-        ENTITY_NAME_MAP.put("Comment", "评论");
         ENTITY_NAME_MAP.put("Media", "文件");
         ENTITY_NAME_MAP.put("SiteSetting", "站点设置");
     }
