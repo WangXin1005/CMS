@@ -222,7 +222,7 @@ onActivated(async () => { await loadFilters(); await loadData(); });
             <template #default="{ row }">
               <div v-if="!row._isEndMarker" class="cover-thumb-cell">
                 <img v-if="row.coverImage" :src="row.coverImage" class="cover-thumb-img" />
-                <div v-else class="cover-thumb-placeholder"><span>无</span></div>
+                <div v-else class="cover-thumb-placeholder" :style="{ background: `linear-gradient(135deg, hsl(${(row.id * 137) % 360}, 70%, 60%), hsl(${(row.id * 137 + 60) % 360}, 70%, 40%))` }"><span class="cover-thumb-char">{{ (row.title || "")[0] }}</span></div>
               </div>
             </template>
           </el-table-column>
@@ -346,12 +346,15 @@ onActivated(async () => { await loadFilters(); await loadData(); });
 .cover-thumb-placeholder {
   width: 56px;
   height: 40px;
+  display: flex;
   align-items: center;
   justify-content: center;
-  background: #f5f7fa;
   border-radius: 4px;
-  border: 1px solid #e8e8e8;
-  color: #c0c4cc;
-  font-size: 12px;
+}
+.cover-thumb-char {
+  font-size: 18px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.85);
+  text-transform: uppercase;
 }
 </style>
