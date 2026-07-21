@@ -76,10 +76,6 @@ onMounted(async () => {
 
       </div>
 
-      <!-- 封面图 -->
-      <div v-if="article.coverImage" class="article-cover">
-        <img :src="article.coverImage" :alt="article.title" />
-      </div>
 
       <!-- 文章内容 -->
       <div class="article-content" v-html="sanitizeHtml(article.content)"></div>

@@ -10,11 +10,16 @@ const { role } = useAuth()
 const isAdmin = computed(() => role.value === 'ADMIN' || role.value === 'SUPERADMIN')
 
 const { getList: getCategories } = useCategory()
+const { getList: getMediaList } = useMedia()
 const { getList: getTags } = useTag()
 
 const categories = ref([])
 const tags = ref([])
 const submitting = ref(false)
+// 封面媒体选择
+const coverPickerVisible = ref(false)
+const mediaList = ref([])
+const mediaLoading = ref(false)
 const form = ref({
   title: '',
   summary: '',
@@ -34,6 +39,28 @@ onMounted(async () => {
     /* ignore */
   }
 })
+
+// 打开封面媒体选择器
+async function openCoverPicker() {
+  coverPickerVisible.value = true;
+  mediaLoading.value = true;
+  try {
+    const res = await getMediaList();
+    mediaList.value = (res || []).filter(function(m) { return m.mimeType && m.mimeType.startsWith("image/"); });
+  } catch {
+    mediaList.value = [];
+  } finally {
+    mediaLoading.value = false;
+  }
+}
+
+// 选择封面图片
+function selectCoverImage(media) {
+  if (media && media.url) {
+    form.value.coverImage = media.url;
+  }
+  coverPickerVisible.value = false;
+}
 
 function genSlug(title) {
     const base = title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9\u4e00-\u9fa5-]/g, '').substring(0, 60) || 'article';
@@ -93,7 +120,11 @@ function insertTabInTextarea(e, field) {
           <el-input v-model="form.title" placeholder="文章标题" maxlength="200" />
         </el-form-item>
         <el-form-item label="封面图">
-          <el-input v-model="form.coverImage" placeholder="图片 URL（可选）" />
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            <el-button size="small" @click="openCoverPicker">从媒体库选择</el-button>
+            <el-button v-if="form.coverImage" size="small" type="danger" plain @click="form.coverImage = ''">清除</el-button>
+          </div>
+          <img v-if="form.coverImage" :src="form.coverImage" style="margin-top:8px;max-width:300px;max-height:200px;border-radius:6px;border:1px solid #e8e8e8;display:block" />
         </el-form-item>
         <el-row :gutter="16">
           <el-col :span="12">
@@ -142,10 +173,56 @@ function insertTabInTextarea(e, field) {
       </el-form>
     </div>
   </div>
+  <!-- 封面媒体选择弹窗 -->
+    <el-dialog v-model="coverPickerVisible" title="选择封面图" width="700px" destroy-on-close>
+      <div v-loading="mediaLoading" style="min-height: 200px">
+        <div v-if="mediaList.length === 0 && !mediaLoading" style="text-align:center;padding:60px 0;color:#999">暂无图片，请先在媒体管理中上传</div>
+        <div v-else style="display:flex;flex-wrap:wrap;gap:12px">
+          <div
+            v-for="m in mediaList"
+            :key="m.id"
+            class="cover-picker-item"
+            @click="selectCoverImage(m)"
+          >
+            <img :src="m.url" :alt="m.originalName" />
+            <div class="cover-picker-name">{{ m.originalName }}</div>
+          </div>
+        </div>
+      </div>
+    </el-dialog>
 </template>
 
 <style scoped>
 .el-form-item:has(.rich-editor) {
   width: 100% !important;
+}
+</style>
+
+<style>
+.cover-picker-item {
+  width: 150px;
+  cursor: pointer;
+  border: 2px solid transparent;
+  border-radius: 6px;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+.cover-picker-item:hover {
+  border-color: #409eff;
+}
+.cover-picker-item img {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  display: block;
+}
+.cover-picker-item .cover-picker-name {
+  padding: 4px 8px;
+  font-size: 12px;
+  color: #666;
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 </style>

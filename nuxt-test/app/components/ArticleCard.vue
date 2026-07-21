@@ -101,6 +101,7 @@ const coverUrl = computed(() => props.article.coverImage ?? '')
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center;
   transition: transform 0.4s ease;
 
   .article-card:hover & {

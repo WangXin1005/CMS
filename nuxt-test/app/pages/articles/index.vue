@@ -67,7 +67,7 @@ const displayArticles = computed(() => {
   return articles.value;
 });
 
-const columnCount = computed(() => (isAdmin.value ? 10 : 9));
+const columnCount = computed(() => (isAdmin.value ? 11 : 10));
 
 function tableSpanMethod({ row, columnIndex }) {
   if (row._isEndMarker) {
@@ -218,6 +218,15 @@ onActivated(async () => { await loadFilters(); await loadData(); });
             </template>
           </el-table-column>
 
+          <el-table-column label="封面" width="80" align="center">
+            <template #default="{ row }">
+              <div v-if="!row._isEndMarker" class="cover-thumb-cell">
+                <img v-if="row.coverImage" :src="row.coverImage" class="cover-thumb-img" />
+                <div v-else class="cover-thumb-placeholder"><span>无</span></div>
+              </div>
+            </template>
+          </el-table-column>
+
           <el-table-column label="标题" min-width="300">
             <template #default="{ row }">
               <div v-if="!row._isEndMarker" style="display:flex;align-items:center;gap:6px;cursor:pointer" @click="viewArticle(row)" :type="isGuest ? 'default' : 'primary'" :underline="!isGuest">
@@ -319,4 +328,30 @@ onActivated(async () => { await loadFilters(); await loadData(); });
 .article-preview-content :deep(th), .article-preview-content :deep(td) { border: 1px solid #e4e7ed; padding: 8px 12px; text-align: left; }
 .article-preview-content :deep(th) { background: #f5f7fa; font-weight: 600; }
 .article-preview-content :deep(hr) { border: none; border-top: 1px solid #e4e7ed; margin: 18px 0; }
+
+/* 封面缩略图 */
+.cover-thumb-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 10px;
+}
+.cover-thumb-img {
+  width: 56px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 4px;
+  border: 1px solid #e8e8e8;
+}
+.cover-thumb-placeholder {
+  width: 56px;
+  height: 40px;
+  align-items: center;
+  justify-content: center;
+  background: #f5f7fa;
+  border-radius: 4px;
+  border: 1px solid #e8e8e8;
+  color: #c0c4cc;
+  font-size: 12px;
+}
 </style>
