@@ -28,7 +28,6 @@ public class RateLimitFilter extends OncePerRequestFilter {
     /** 每个窗口最大请求数 */
     private static final int LOGIN_MAX = 5;         // 登录：5次/分钟
     private static final int CHECK_MAX = 10;         // 用户名检查：10次/分钟
-    private static final int COMMENT_MAX = 6;        // 评论提交：6次/分钟
 
     private static final String LOGIN_PATH = "/api/auth/login";
     private static final String CHECK_USERNAME_PATH = "/api/users/check-username";
@@ -56,7 +55,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
         } else if (path.equals(CHECK_USERNAME_PATH)) {
             maxRequests = CHECK_MAX;
         } else {
-            maxRequests = COMMENT_MAX;
+            maxRequests = CHECK_MAX;
         }
 
         long now = System.currentTimeMillis();

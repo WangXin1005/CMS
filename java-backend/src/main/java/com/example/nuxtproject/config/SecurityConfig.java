@@ -81,8 +81,6 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/categories/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/tags").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/tags/**").permitAll()
-                // 公开查询文章评论（仅 GET）
-                .requestMatchers(HttpMethod.GET, "/api/comments/article/**").permitAll()
                 // 上传的静态图片文件
                 .requestMatchers("/api/media/files/**").permitAll()
                 // 系统初始化与登录注册
@@ -91,8 +89,6 @@ public class SecurityConfig {
                 .requestMatchers("/api/users/check-username").permitAll()
                 .requestMatchers("/api/auth/login").permitAll()
                 .requestMatchers("/api/auth/register").permitAll()
-                // 提交评论需要认证
-                .requestMatchers(HttpMethod.POST, "/api/comments").authenticated()
                 // Swagger 文档路径：仅当 springdoc.api-docs.enabled=true 时开放
                 .requestMatchers(
                         "/swagger-ui.html",

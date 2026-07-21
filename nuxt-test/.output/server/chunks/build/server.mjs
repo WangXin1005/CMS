@@ -659,10 +659,10 @@ const _routes = [
     component: () => import('./Home-Cr3BXcFS.mjs')
   },
   {
-    name: "login",
-    path: "/login",
+    name: "Login",
+    path: "/Login",
     meta: __nuxt_page_meta$1 || {},
-    component: () => import('./login-Bek-i_fs.mjs')
+    component: () => import('./Login-Bex64VM7.mjs')
   },
   {
     name: "logs",

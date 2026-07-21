@@ -256,6 +256,8 @@ public class UserService {
             return Map.of("message", "原密码不正确");
         }
         user.setPassword(passwordEncoder.encode(newPassword));
+        // 修改密码后递增 tokenVersion，使所有已签发旧 Token 立即失效
+        user.setTokenVersion(user.getTokenVersion() + 1);
         userRepository.save(user);
         return Map.of("message", "密码修改成功");
     }
