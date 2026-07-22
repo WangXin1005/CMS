@@ -36,19 +36,19 @@ public class ArticleService {
     }
 
     /** 获取已发布的公开文章列表 */
+        /** 分页查询已发布文章，支持分类+标签同时筛选 */
     public Page<Article> listPublished(Pageable pageable, Long categoryId, Long tagId, Long currentUserId) {
+        if (categoryId != null && tagId != null) {
+            return articleRepository.findPublicArticlesByTag(ArticleStatus.PUBLISHED, null, categoryId, tagId, pageable);
+        }
         if (categoryId != null) {
             return articleRepository.findByCategoryIdAndStatusAndVisibility(categoryId, ArticleStatus.PUBLISHED, pageable);
         }
         if (tagId != null) {
-            Page<Article> tagResults = articleRepository.findByTagId(tagId, ArticleStatus.PUBLISHED, pageable);
-            return tagResults;
+            return articleRepository.findByTagId(tagId, ArticleStatus.PUBLISHED, pageable);
         }
-        Page<Article> all = articleRepository.findByStatusAndVisibilityOrderByCreatedAtDesc(ArticleStatus.PUBLISHED, pageable);
-        return all;
+        return articleRepository.findByStatusAndVisibilityOrderByCreatedAtDesc(ArticleStatus.PUBLISHED, pageable);
     }
-
-    /** 鍏紑鎼滅储宸插彂甯冩枃绔?*/
     public Page<Article> searchPublished(String keyword, Pageable pageable) {
         return articleRepository.search(ArticleStatus.PUBLISHED, keyword, pageable);
     }
