@@ -60,8 +60,26 @@ async function loadData(append = false) {
 
 function initSortable() {
   nextTick(() => {
+    requestAnimationFrame(() => {
+      tryInitSortable();
+    });
+  });
+}
+
+// 带重试机制的 Sortable 初始化，避免生产环境 DOM 渲染延迟导致初始化失败
+function tryInitSortable(retryCount = 10) {
     const el = document.querySelector(".el-table__body-wrapper tbody");
-    if (!el || sortableInstance) return;
+    if (!el || !el.children.length) {
+      if (retryCount > 0) {
+        setTimeout(() => tryInitSortable(retryCount - 1), 100);
+      }
+      return;
+    }
+    // 销毁旧实例
+    if (sortableInstance) {
+      sortableInstance.destroy();
+      sortableInstance = null;
+    }
     sortableInstance = Sortable.create(el, {
       handle: ".drag-handle", animation: 200,
       onEnd: async (evt: any) => {
@@ -79,7 +97,6 @@ function initSortable() {
         tableKey.value++
       },
     });
-  });
 }
 
 function openCreate() { editingId.value = null; form.value = { name: "" }; dialogVisible.value = true; }

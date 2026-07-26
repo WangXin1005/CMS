@@ -644,13 +644,13 @@ const _routes = [
     name: "articles",
     path: "/articles",
     meta: { "middleware": "auth" },
-    component: () => import('./index-Jk5-Xl-Y.mjs')
+    component: () => import('./index-GQ8HyP9T.mjs')
   },
   {
     name: "categories",
     path: "/categories",
     meta: { "middleware": "auth" },
-    component: () => import('./categories-Cqbe1HeW.mjs')
+    component: () => import('./categories-BSB1t6QJ.mjs')
   },
   {
     name: "Home",
@@ -686,7 +686,7 @@ const _routes = [
     name: "tags",
     path: "/tags",
     meta: { "middleware": "auth" },
-    component: () => import('./tags-BGOlAYJd.mjs')
+    component: () => import('./tags-HCMbGK2d.mjs')
   },
   {
     name: "user",

@@ -105,29 +105,45 @@ const statusType = { PUBLISHED: "success", DRAFT: "warning" };
 
 function initSortable() {
     nextTick(() => {
-      setTimeout(() => {
-        const el = document.querySelector(".el-table__body-wrapper tbody");
-        if (!el || sortableInstance || !el.children.length) return;
-        sortableInstance = Sortable.create(el, {
-          handle: ".drag-handle", animation: 200,
-          onEnd: async (evt: any) => {
-            if (sortableInstance) { sortableInstance.destroy(); sortableInstance = null; }
-            const list = [...articles.value];
-            const [moved] = list.splice(evt.oldIndex, 1);
-            list.splice(evt.newIndex, 0, moved);
-            articles.value = list;
-            const orders = list.map((item: any, idx: number) => ({ id: (item as any).id, sortOrder: 10000000 - idx }));
-            try {
-              await reorder(orders);
-              ElMessage.success("排序已保存");
-            } catch {
-              ElMessage.error("排序保存失败");
-            }
-            await loadData();
-            tableKey.value++;
-          },
-        });
-      }, 50);
+      // 使用 requestAnimationFrame 确保 DOM 已完成布局绘制，替代固定 setTimeout(50ms)
+      requestAnimationFrame(() => {
+        tryInitSortable();
+      });
+    });
+}
+
+// 带重试机制的 Sortable 初始化，避免生产环境 DOM 渲染延迟导致初始化失败
+function tryInitSortable(retryCount = 10) {
+    const el = document.querySelector(".el-table__body-wrapper tbody");
+    if (!el || !el.children.length) {
+      if (retryCount > 0) {
+        setTimeout(() => tryInitSortable(retryCount - 1), 100);
+      }
+      return;
+    }
+    // 销毁旧实例（懒加载追加行后需重建以识别新 DOM 元素）
+    if (sortableInstance) {
+      sortableInstance.destroy();
+      sortableInstance = null;
+    }
+    sortableInstance = Sortable.create(el, {
+      handle: ".drag-handle", animation: 200,
+      onEnd: async (evt: any) => {
+        if (sortableInstance) { sortableInstance.destroy(); sortableInstance = null; }
+        const list = [...articles.value];
+        const [moved] = list.splice(evt.oldIndex, 1);
+        list.splice(evt.newIndex, 0, moved);
+        articles.value = list;
+        const orders = list.map((item: any, idx: number) => ({ id: (item as any).id, sortOrder: 10000000 - idx }));
+        try {
+          await reorder(orders);
+          ElMessage.success("排序已保存");
+        } catch {
+          ElMessage.error("排序保存失败");
+        }
+        await loadData();
+        tableKey.value++;
+      },
     });
 }
 
@@ -173,7 +189,7 @@ async function loadData(append = false) {
       allLoaded.value = true;
     }
   } catch { if (!append) { articles.value = []; total.value = 0; } }
-  finally { loading.value = false; loadingMore.value = false; nextTick(() => { loadLocked.value = false; }); }
+  finally { loading.value = false; loadingMore.value = false; nextTick(() => { loadLocked.value = false; if (append && isAdmin.value) initSortable(); }); }
 }
 
 function onStatusChange(val) { statusFilter.value = val; loadData(); }
