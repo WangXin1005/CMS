@@ -36,12 +36,14 @@ const settings = ref<Record<string, string>>({
   site_description: '',
   site_logo: '',
   icp_number: '',
+  gongan_number: '',
 })
 const settingKeys = [
   { key: 'site_name', label: '网站名称', type: 'text' },
   { key: 'site_description', label: '网站描述', type: 'textarea' },
   { key: 'site_logo', label: 'Logo', type: 'image' },
-  { key: 'icp_number', label: '备案号', type: 'text' },
+  { key: 'icp_number', label: 'ICP备案号', type: 'text' },
+  { key: 'gongan_number', label: '公安备案号', type: 'text' },
 ]
 
 async function loadSettings() {

@@ -219,7 +219,15 @@ public class ArticleController {
         return ResponseEntity.ok(Map.of("message", "文章更新成功"));
     }
 
-    @DeleteMapping("/api/admin/articles/{id}")
+    @PutMapping("/api/admin/articles/reorder")
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN')")
+    @Operation(summary = "批量更新文章排序", description = "接收 [{id, sortOrder}] 数组")
+    public ResponseEntity<?> reorder(@RequestBody java.util.List<java.util.Map<String, Object>> orders) {
+        articleService.reorder(orders);
+        return ResponseEntity.ok(Map.of("message", "排序已保存"));
+    }
+
+        @DeleteMapping("/api/admin/articles/{id}")
     @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN')")
     @Operation(summary = "删除文章", description = "删除指定文章")
     public ResponseEntity<?> delete(

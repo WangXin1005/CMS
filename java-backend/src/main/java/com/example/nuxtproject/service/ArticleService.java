@@ -208,6 +208,19 @@ public class ArticleService {
         articleRepository.deleteById(id);
         return true;
     }
+        /** 批量更新文章排序 */
+    @Transactional
+    public void reorder(java.util.List<java.util.Map<String, Object>> orders) {
+        for (java.util.Map<String, Object> item : orders) {
+            Long id = ((Number) item.get("id")).longValue();
+            Integer sortOrder = ((Number) item.get("sortOrder")).intValue();
+            articleRepository.findById(id).ifPresent(article -> {
+                article.setSortOrder(sortOrder);
+                articleRepository.save(article);
+            });
+        }
+    }
+
     /** 统计各状态文章数 */
     public Map<String, Long> countByStatus() {
         long published = articleRepository.countByStatus(ArticleStatus.PUBLISHED);

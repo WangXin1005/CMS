@@ -1,1 +1,0 @@
-import{_ as a,o as t,c as o,M as s}from"./DW5nIMO3.js";const n={},c={class:"blank-layout"};function r(e,_){return t(),o("div",c,[s(e.$slots,"default",{},void 0,!0)])}const l=a(n,[["render",r],["__scopeId","data-v-e14a6fa7"]]);export{l as default};

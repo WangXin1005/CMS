@@ -3,7 +3,8 @@
     <header class="public-header">
       <div class="header-inner">
         <NuxtLink to="/" class="logo">
-          <span class="logo-icon"><img v-if="siteLogo" :src="siteLogo" class="logo-img" alt="logo" /><span v-else class="logo-emoji">&#x1F4DD;</span></span>
+          <span class="logo-icon"><img v-if="siteLogo" :src="siteLogo" class="logo-img" alt="logo" /><span v-else
+              class="logo-emoji">&#x1F4DD;</span></span>
           <span class="logo-text">{{ siteName }}</span>
         </NuxtLink>
         <nav class="nav-links">
@@ -19,10 +20,16 @@
         </nav>
       </div>
     </header>
-    <main class="main-area"><slot /></main>
+    <main class="main-area">
+      <slot />
+    </main>
     <footer class="blog-footer">
       <p>&copy; 2026 {{ siteName }}. Powered by Nuxt &amp; Spring Boot.</p>
-      <p v-if="icpNumber" class="icp-text">{{ icpNumber }}</p>
+      <p v-if="icpNumber || gonganNumber" class="filing-line">
+        <span v-if="icpNumber">{{ icpNumber }}</span>
+        <img v-if="gonganNumber" src="/filings.png" class="filings-icon" alt="公安备案" />
+        <span v-if="gonganNumber">{{ gonganNumber }}</span>
+      </p>
     </footer>
   </div>
 </template>
@@ -34,7 +41,8 @@ const { username, isLoggedIn } = useAuth()
 const siteLogo = ref('')
 const siteName = ref('CodeBlog')
 const siteDesc = ref('基于 Nuxt + Spring Boot 构建的博客 CMS 系统')
-const icpNumber = ref('蒙ICP备2026006795号-1')
+const icpNumber = ref('')
+const gonganNumber = ref('')
 
 // 向子页面提供站点设置（供页脚使用）
 const siteSettings = computed(() => ({
@@ -54,6 +62,7 @@ onMounted(async () => {
         if (item.settingKey === 'site_name') siteName.value = item.settingValue || 'CodeBlog'
         if (item.settingKey === 'site_description') siteDesc.value = item.settingValue || ''
         if (item.settingKey === 'icp_number') icpNumber.value = item.settingValue || ''
+        if (item.settingKey === 'gongan_number') gonganNumber.value = item.settingValue || ''
       })
     }
   } catch { /* keep defaults */ }
@@ -72,6 +81,7 @@ useHead({
   flex-direction: column;
   background: #f0f2f5;
 }
+
 .public-header {
   background: #fff;
   border-bottom: 1px solid #e8e8e8;
@@ -79,6 +89,7 @@ useHead({
   top: 0;
   z-index: 100;
 }
+
 .header-inner {
   max-width: 1200px;
   margin: 0 auto;
@@ -88,25 +99,30 @@ useHead({
   align-items: center;
   justify-content: space-between;
 }
+
 .logo {
   display: flex;
   align-items: center;
   gap: 8px;
   text-decoration: none;
 }
+
 .logo-icon {
   font-size: 24px;
   display: flex;
   align-items: center;
 }
+
 .logo-img {
   height: 28px;
   width: auto;
   object-fit: contain;
 }
+
 .logo-emoji {
   line-height: 1;
 }
+
 .logo-text {
   font-size: 22px;
   font-weight: 700;
@@ -115,11 +131,13 @@ useHead({
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
+
 .nav-links {
   display: flex;
   align-items: center;
   gap: 6px;
 }
+
 .nav-item {
   text-decoration: none;
   color: #555;
@@ -128,28 +146,34 @@ useHead({
   border-radius: 6px;
   transition: all 0.2s;
   font-weight: 500;
+
   &:hover {
     color: #667eea;
     background: #f5f5f5;
   }
 }
+
 .logged-in-hint {
   color: #999;
   font-size: 13px;
   cursor: default;
 }
+
 .logged-in-hint:hover {
   color: #999;
   background: transparent;
 }
+
 .admin-btn {
   background: #52c41a;
   color: #fff !important;
 }
+
 .admin-btn:hover {
   opacity: 0.9;
   background: #52c41a;
 }
+
 .login-btn-placeholder {
   text-decoration: none;
   color: #fff;
@@ -161,14 +185,17 @@ useHead({
   opacity: 0.7;
   cursor: default;
 }
+
 .login-btn {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: #fff !important;
+
   &:hover {
     opacity: 0.9;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   }
 }
+
 .main-area {
   flex: 1;
 }
@@ -186,10 +213,22 @@ useHead({
   margin: 0;
 }
 
-.icp-text {
-  margin-top: 4px;
+.filing-line {
+  margin-top: 6px;
   font-size: 12px;
   color: #bbb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
+.filings-icon {
+  height: 16px;
+  width: auto;
+  vertical-align: middle;
+  flex-shrink: 0;
+  margin: 1px -9px 0 0;
+}
 </style>

@@ -45,7 +45,7 @@ function actionStyle(action) {
 const actionMap = { CREATE: "创建", UPDATE: "修改", DELETE: "删除", UPLOAD: "上传", APPROVE: "通过", REJECT: "驳回", LOGIN: "登录", LOGOUT: "退出", OTHER: "其他" };
 const roleMap = { SUPERADMIN: "超级管理员", ADMIN: "管理员", USER: "用户", GUEST: "访客" };
 // 站点设置 key 到中文标签映射
-const settingLabelMap = { site_name: "网站名称", site_description: "网站描述", site_logo: "Logo URL", icp_number: "备案号" };
+const settingLabelMap = { site_name: "网站名称", site_description: "网站描述", site_logo: "Logo URL", icp_number: "ICP备案号", gongan_number: "公安备案号" };
 const entityMap = { Article: "文章", Category: "分类", Tag: "标签", User: "用户", Media: "媒体", SiteSetting: "站点设置", Auth: "认证" };
 const entityOptions = Object.entries(entityMap).map(([value, label]) => ({ value, label }));
 

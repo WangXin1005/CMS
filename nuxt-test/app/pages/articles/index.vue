@@ -1,16 +1,19 @@
 <!-- articles/index - 文章管理页（懒加载） -->
 <script lang="ts" setup>
-import { ref, onMounted, onActivated, computed, nextTick } from "vue";
+import { ref, onMounted, onActivated, onDeactivated, computed, nextTick, watch } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { sanitizeHtml } from "~/utils/sanitize";
-import { Plus } from "@element-plus/icons-vue";
+import { Plus, Rank } from "@element-plus/icons-vue";
+import Sortable from "sortablejs";
 definePageMeta({ middleware: "auth" });
 
-const { getAdminList, getMyArticles, update, updateMyArticle, remove, removeMyArticle } = useArticle();
+const { getAdminList, getMyArticles, update, updateMyArticle, remove, removeMyArticle, reorder } = useArticle();
 const { role, username: currentUsername } = useAuth();
 
 const isAdmin = computed(() => role.value === "ADMIN" || role.value === "SUPERADMIN");
 const isGuest = computed(() => role.value === "GUEST");
+let sortableInstance: any = null;
+const tableKey = ref(0);
 const roleLevel: Record<string, number> = { SUPERADMIN: 3, ADMIN: 2, USER: 1, GUEST: 0 };
 function canEdit(row: Record<string, unknown>) {
   if (isGuest.value) return false;
@@ -67,13 +70,18 @@ const displayArticles = computed(() => {
   return articles.value;
 });
 
-const columnCount = computed(() => (isAdmin.value ? 11 : 10));
+const columnCount = computed(() => (isAdmin.value ? 13 : 11));
 
 function tableSpanMethod({ row, columnIndex }) {
   if (row._isEndMarker) {
     if (columnIndex === 0) return [1, columnCount.value];
     return [0, 0];
   }
+}
+
+function tableRowClassName({ row }: { row: any }) {
+  if ((row as any)._isEndMarker) return "end-marker-row";
+  return "";
 }
 
 function viewArticle(row) { dialogArticle.value = row; dialogVisible.value = true; }
@@ -94,6 +102,36 @@ function handleTableScroll() {
 
 const statusLabel = { PUBLISHED: "已发布", DRAFT: "草稿" };
 const statusType = { PUBLISHED: "success", DRAFT: "warning" };
+
+function initSortable() {
+    nextTick(() => {
+      setTimeout(() => {
+        const el = document.querySelector(".el-table__body-wrapper tbody");
+        if (!el || sortableInstance || !el.children.length) return;
+        sortableInstance = Sortable.create(el, {
+          handle: ".drag-handle", animation: 200,
+          onEnd: async (evt: any) => {
+            if (sortableInstance) { sortableInstance.destroy(); sortableInstance = null; }
+            const list = [...articles.value];
+            const [moved] = list.splice(evt.oldIndex, 1);
+            list.splice(evt.newIndex, 0, moved);
+            articles.value = list;
+            const orders = list.map((item: any, idx: number) => ({ id: (item as any).id, sortOrder: 10000000 - idx }));
+            try {
+              await reorder(orders);
+              ElMessage.success("排序已保存");
+            } catch {
+              ElMessage.error("排序保存失败");
+            }
+            await loadData();
+            tableKey.value++;
+          },
+        });
+      }, 50);
+    });
+}
+
+watch(tableKey, () => { if (isAdmin.value) nextTick(() => initSortable()); });
 
 async function loadFilters() {
   try {
@@ -166,11 +204,11 @@ function goCreate() { navigateTo("/articles/create"); }
 function handleDialogEdit() { dialogVisible.value = false; goEdit(dialogArticle.value.id); }
 function goEdit(id) { navigateTo("/articles/edit/" + id); }
 
-onMounted(async () => { await loadFilters(); await loadData(); });
+onMounted(async () => { await loadFilters(); await nextTick(); await loadData(); if (isAdmin.value) initSortable(); });
 
-onActivated(async () => { await loadFilters(); await loadData(); });
+onActivated(async () => { if (sortableInstance) { sortableInstance.destroy(); sortableInstance = null; } await loadFilters(); await loadData(); tableKey.value++; });
+onDeactivated(() => { if (sortableInstance) { sortableInstance.destroy(); sortableInstance = null; } });
 </script>
-
 <template>
   <!-- 根容器：flex 填充 content-inner 剩余空间 -->
   <div style="flex:1; min-height:0; display:flex; flex-direction:column">
@@ -210,7 +248,7 @@ onActivated(async () => { await loadFilters(); await loadData(); });
       </div>
 
       <!-- 懒加载表格：max-height 由 useTableHeight 动态计算 -->
-      <el-table ref="tableRef" :data="displayArticles" v-loading="loading" :span-method="tableSpanMethod" style="width: 100%" :max-height="tableHeight" @scroll="handleTableScroll" stripe>
+      <el-table ref="tableRef" :data="displayArticles" :key="tableKey" :row-class-name="tableRowClassName" v-loading="loading" :span-method="tableSpanMethod" style="width: 100%" :max-height="tableHeight" @scroll="handleTableScroll" stripe>
           <el-table-column label="序号" width="55">
             <template #default="{ row, $index }">
               <div v-if="row._isEndMarker" style="text-align:center;color:#999;font-size:13px;padding:2px 0;line-height:1.2;width:100%">已加载全部</div>
@@ -218,7 +256,17 @@ onActivated(async () => { await loadFilters(); await loadData(); });
             </template>
           </el-table-column>
 
-          <el-table-column label="封面" width="80" align="center">
+          <el-table-column label="排序" width="55" class-name="drag-handle-col" align="center">
+            <template #default="{ row, $index }">
+              <div v-if="row._isEndMarker" style="text-align:center;color:#999;font-size:13px;padding:2px 0;line-height:1.2;width:100%">已加载全部</div>
+              <template v-else-if="isAdmin">
+                <el-icon class="drag-handle" style="cursor: grab; color: #bbb; font-size: 16px"><Rank /></el-icon>
+              </template>
+              <span v-else style="color:#999;font-size:13px">{{ $index + 1 }}</span>
+            </template>
+          </el-table-column>
+
+                    <el-table-column label="封面" width="80" align="center">
             <template #default="{ row }">
               <div v-if="!row._isEndMarker" class="cover-thumb-cell">
                 <img v-if="row.coverImage" :src="row.coverImage" class="cover-thumb-img" />
@@ -266,7 +314,7 @@ onActivated(async () => { await loadFilters(); await loadData(); });
             <template #default="{ row }">{{ (row.createdAt || "").replace("T", " ").slice(0, 16) }}</template>
           </el-table-column>
 
-          <el-table-column v-if="!isGuest" label="操作" width="130" fixed="right">
+          <el-table-column v-if="!isGuest" label="操作" width="130" >
             <template #default="{ row }">
               <div v-if="!row._isEndMarker" style="display:flex;gap:4px">
                 <el-button :disabled="!canEdit(row)" link type="primary" size="small" @click="goEdit(row.id)">编辑</el-button>
@@ -357,4 +405,9 @@ onActivated(async () => { await loadFilters(); await loadData(); });
   color: rgba(255, 255, 255, 0.85);
   text-transform: uppercase;
 }
+
+/* 拖拽排序样式 */
+:deep(.drag-handle-col) { cursor: grab; }
+:deep(.end-marker-row) { pointer-events: none; }
 </style>
+

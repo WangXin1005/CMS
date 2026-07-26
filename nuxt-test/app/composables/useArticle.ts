@@ -184,6 +184,12 @@ export const useArticle = () => {
     return res.data
   }
 
+  /** 批量更新文章排序 */
+  const reorder = async (orders: { id: number; sortOrder: number }[]) => {
+    const res = await request.put('/admin/articles/reorder', orders)
+    return res.data
+  }
+
   return {
     getPublished,
     getBySlug,
@@ -199,5 +205,6 @@ export const useArticle = () => {
     create,
     update,
     remove,
+    reorder,
   }
 }

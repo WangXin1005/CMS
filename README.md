@@ -60,7 +60,7 @@ npm run dev
 | 用户管理 | ✅ | ✅ | ❌ | ❌ |
 | 媒体上传 | ✅ | ✅ | ✅ | ❌ |
 | 媒体删除 | ✅ | ✅ | ❌ | ❌ |
-| 站点设置 | ✅ | ❌ | ❌ | ❌ |
+| 站点设置（名称/描述/Logo/ICP/公安备案） | ✅ | ❌ | ❌ | ❌ |
 | 操作日志 | ✅ | ✅ | ❌ | ❌ |
 | 仪表盘 | ✅ | ✅ | ✅(只读) | ✅(只读) |
 
@@ -111,6 +111,11 @@ npm run dev
 
 ![alt text](docs/operation_log.png)
 
+### 站点页脚
+- 公开页面底部显示 ICP 备案号和公安备案号（同一行排列）
+- 公安备案号前附带公安备案图标（/filings.png）
+- 支持后台动态配置（站点设置）
+
 ### 部署
 - Docker Compose 一键部署（MySQL + 后端 + 前端）
 - Webhook 自动部署：Gitee 推送 → 自动拉取 → 构建 → 重启
@@ -137,6 +142,7 @@ npm run dev
 | app/middleware/ | auth.ts, init.global.ts |
 | app/plugins/ | scroll-to-top.client.ts（路由滚动控制） |
 | app/utils/ | 校验规则, 请求封装, HTML过滤 |
+| public/ | 静态资源（favicon、公安备案图标 filings.png 等） |
 
 ### 后端 (java-backend/)
 
@@ -146,7 +152,7 @@ npm run dev
 | service/ | 业务逻辑层（分类/标签支持拖拽排序） |
 | repository/ | JPA 数据访问层 |
 | entity/ | Article, Category, Tag, User, Media, OperationLog, SiteSetting |
-| config/ | SecurityConfig, JwtAuthFilter, LoggingAspect |
+| config/ | SecurityConfig, JwtAuthFilter, LoggingAspect, SiteSettingInitializer, RateLimitFilter, WebConfig, CacheConfig |
 | util/ | JwtUtil |
 
 ### 部署文件

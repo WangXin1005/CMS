@@ -14,25 +14,25 @@ import java.util.Optional;
 
 public interface ArticleRepository extends JpaRepository<Article, Long> {
     Optional<Article> findBySlug(String slug);
-    @Query("SELECT a FROM Article a WHERE a.status = :status AND a.visibility = 'PUBLIC' ORDER BY a.createdAt DESC")
+    @Query("SELECT a FROM Article a WHERE a.status = :status AND a.visibility = 'PUBLIC' ORDER BY a.sortOrder DESC, a.createdAt DESC")
     Page<Article> findByStatusAndVisibilityOrderByCreatedAtDesc(@Param("status") ArticleStatus status, Pageable pageable);
-    @Query("SELECT a FROM Article a WHERE a.category.id = :categoryId AND a.status = :status AND a.visibility = 'PUBLIC' ORDER BY a.createdAt DESC")
+    @Query("SELECT a FROM Article a WHERE a.category.id = :categoryId AND a.status = :status AND a.visibility = 'PUBLIC' ORDER BY a.sortOrder DESC, a.createdAt DESC")
     Page<Article> findByCategoryIdAndStatusAndVisibility(@Param("categoryId") Long categoryId, @Param("status") ArticleStatus status, Pageable pageable);
     long countByStatus(ArticleStatus status);
 
     Page<Article> findByAuthorIdOrderByCreatedAtDesc(Long authorId, Pageable pageable);
     Page<Article> findByAuthorIdAndStatusOrderByCreatedAtDesc(Long authorId, ArticleStatus status, Pageable pageable);
 
-    @Query("SELECT a FROM Article a WHERE (:status IS NULL OR a.status = :status) AND (:keyword IS NULL OR a.title LIKE %:keyword%) AND (:categoryId IS NULL OR a.category.id = :categoryId) AND (:authorId IS NULL OR a.author.id = :authorId) ORDER BY a.createdAt DESC")
+    @Query("SELECT a FROM Article a WHERE (:status IS NULL OR a.status = :status) AND (:keyword IS NULL OR a.title LIKE %:keyword%) AND (:categoryId IS NULL OR a.category.id = :categoryId) AND (:authorId IS NULL OR a.author.id = :authorId) ORDER BY a.sortOrder DESC, a.createdAt DESC")
     Page<Article> searchAll(@Param("status") ArticleStatus status, @Param("keyword") String keyword, @Param("categoryId") Long categoryId, @Param("authorId") Long authorId, Pageable pageable);
 
-    @Query("SELECT a FROM Article a JOIN a.tags t WHERE (:status IS NULL OR a.status = :status) AND (:keyword IS NULL OR a.title LIKE %:keyword%) AND (:tagId IS NULL OR t.id = :tagId) AND (:authorId IS NULL OR a.author.id = :authorId) ORDER BY a.createdAt DESC")
+    @Query("SELECT a FROM Article a JOIN a.tags t WHERE (:status IS NULL OR a.status = :status) AND (:keyword IS NULL OR a.title LIKE %:keyword%) AND (:tagId IS NULL OR t.id = :tagId) AND (:authorId IS NULL OR a.author.id = :authorId) ORDER BY a.sortOrder DESC, a.createdAt DESC")
     Page<Article> searchAllByTag(@Param("status") ArticleStatus status, @Param("keyword") String keyword, @Param("tagId") Long tagId, @Param("authorId") Long authorId, Pageable pageable);
 
-    @Query("SELECT a FROM Article a WHERE a.author.id = :authorId AND (:status IS NULL OR a.status = :status) AND (:keyword IS NULL OR a.title LIKE %:keyword%) AND (:categoryId IS NULL OR a.category.id = :categoryId) ORDER BY a.createdAt DESC")
+    @Query("SELECT a FROM Article a WHERE a.author.id = :authorId AND (:status IS NULL OR a.status = :status) AND (:keyword IS NULL OR a.title LIKE %:keyword%) AND (:categoryId IS NULL OR a.category.id = :categoryId) ORDER BY a.sortOrder DESC, a.createdAt DESC")
     Page<Article> searchByAuthor(@Param("authorId") Long authorId, @Param("status") ArticleStatus status, @Param("keyword") String keyword, @Param("categoryId") Long categoryId, Pageable pageable);
 
-    @Query("SELECT a FROM Article a JOIN a.tags t WHERE a.author.id = :authorId AND (:status IS NULL OR a.status = :status) AND (:keyword IS NULL OR a.title LIKE %:keyword%) AND (:tagId IS NULL OR t.id = :tagId) ORDER BY a.createdAt DESC")
+    @Query("SELECT a FROM Article a JOIN a.tags t WHERE a.author.id = :authorId AND (:status IS NULL OR a.status = :status) AND (:keyword IS NULL OR a.title LIKE %:keyword%) AND (:tagId IS NULL OR t.id = :tagId) ORDER BY a.sortOrder DESC, a.createdAt DESC")
     Page<Article> searchByAuthorAndTag(@Param("authorId") Long authorId, @Param("status") ArticleStatus status, @Param("keyword") String keyword, @Param("tagId") Long tagId, Pageable pageable);
 
     @Query("SELECT a FROM Article a WHERE a.status = :status AND a.visibility = 'PUBLIC' AND (:keyword IS NULL OR a.title LIKE %:keyword% OR a.summary LIKE %:keyword%)")
@@ -41,15 +41,15 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
     @Query("SELECT a FROM Article a JOIN a.tags t WHERE t.id = :tagId AND a.status = :status AND a.visibility = 'PUBLIC'")
     Page<Article> findByTagId(@Param("tagId") Long tagId, @Param("status") ArticleStatus status, Pageable pageable);
 
-    @Query("SELECT DISTINCT a FROM Article a LEFT JOIN a.tags t WHERE (:status IS NULL OR a.status = :status) AND (:keyword IS NULL OR a.title LIKE %:keyword%) AND (:categoryId IS NULL OR a.category.id = :categoryId) AND (:tagId IS NULL OR t.id = :tagId) AND (:authorId IS NULL OR a.author.id = :authorId) ORDER BY a.createdAt DESC")
+    @Query("SELECT DISTINCT a FROM Article a LEFT JOIN a.tags t WHERE (:status IS NULL OR a.status = :status) AND (:keyword IS NULL OR a.title LIKE %:keyword%) AND (:categoryId IS NULL OR a.category.id = :categoryId) AND (:tagId IS NULL OR t.id = :tagId) AND (:authorId IS NULL OR a.author.id = :authorId) ORDER BY a.sortOrder DESC, a.createdAt DESC")
     Page<Article> searchAllFilters(@Param("status") ArticleStatus status, @Param("keyword") String keyword, @Param("categoryId") Long categoryId, @Param("tagId") Long tagId, @Param("authorId") Long authorId, Pageable pageable);
 
     /** 公开文章查询（无标签筛选） */
-    @Query("SELECT a FROM Article a WHERE a.visibility = 'PUBLIC' AND (:status IS NULL OR a.status = :status) AND (:keyword IS NULL OR a.title LIKE %:keyword%) AND (:categoryId IS NULL OR a.category.id = :categoryId) ORDER BY a.createdAt DESC")
+    @Query("SELECT a FROM Article a WHERE a.visibility = 'PUBLIC' AND (:status IS NULL OR a.status = :status) AND (:keyword IS NULL OR a.title LIKE %:keyword%) AND (:categoryId IS NULL OR a.category.id = :categoryId) ORDER BY a.sortOrder DESC, a.createdAt DESC")
     Page<Article> findPublicArticles(@Param("status") ArticleStatus status, @Param("keyword") String keyword, @Param("categoryId") Long categoryId, Pageable pageable);
 
     /** 公开文章查询（含标签筛选） */
-    @Query("SELECT DISTINCT a FROM Article a JOIN a.tags t WHERE a.visibility = 'PUBLIC' AND (:status IS NULL OR a.status = :status) AND (:keyword IS NULL OR a.title LIKE %:keyword%) AND (:categoryId IS NULL OR a.category.id = :categoryId) AND t.id = :tagId ORDER BY a.createdAt DESC")
+    @Query("SELECT DISTINCT a FROM Article a JOIN a.tags t WHERE a.visibility = 'PUBLIC' AND (:status IS NULL OR a.status = :status) AND (:keyword IS NULL OR a.title LIKE %:keyword%) AND (:categoryId IS NULL OR a.category.id = :categoryId) AND t.id = :tagId ORDER BY a.sortOrder DESC, a.createdAt DESC")
     Page<Article> findPublicArticlesByTag(@Param("status") ArticleStatus status, @Param("keyword") String keyword, @Param("categoryId") Long categoryId, @Param("tagId") Long tagId, Pageable pageable);
 
 }

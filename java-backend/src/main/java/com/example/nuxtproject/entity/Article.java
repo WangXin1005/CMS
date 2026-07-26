@@ -59,6 +59,10 @@ public class Article {
     @Column(nullable = false)
     private Long viewCount = 0L;
 
+    @Schema(description = "排序权重，越小越靠前")
+    @Column(nullable = false)
+    private Integer sortOrder = 0;
+
     @Schema(description = "作者")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id", nullable = false)
@@ -125,6 +129,8 @@ public class Article {
     public void setVisibility(ArticleVisibility visibility) { this.visibility = visibility; }
     public Long getViewCount() { return viewCount; }
     public void setViewCount(Long viewCount) { this.viewCount = viewCount; }
+    public Integer getSortOrder() { return sortOrder; }
+    public void setSortOrder(Integer sortOrder) { this.sortOrder = sortOrder; }
     public User getAuthor() { return author; }
     public void setAuthor(User author) { this.author = author; }
     public Category getCategory() { return category; }
